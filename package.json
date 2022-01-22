@@ -1,0 +1,54 @@
+{
+  "name": "@jbx-protocol/jbx-staking",
+  "bugs": {
+    "url": "https://github.com/jbx-protocol/jbx-staking/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/jbx-protocol/jbx-staking/"
+  },
+  "version": "0.0.2",
+  "license": "MIT",
+  "devDependencies": {
+    "@nomiclabs/hardhat-ethers": "^2.0.2",
+    "@nomiclabs/hardhat-waffle": "^2.0.1",
+    "chai": "^4.3.4",
+    "ethereum-waffle": "^3.4.0",
+    "ethers": "^5.4.6",
+    "hardhat": "^2.6.7",
+    "hardhat-deploy": "^0.9.1",
+    "hardhat-gas-reporter": "^1.0.4",
+    "solidity-coverage": "https://github.com/jbx-protocol/solidity-coverage.git#0fcd2f608c0e3e00bf66ab62c7610f5ea553fba8"
+  },
+  "dependencies": {
+    "@chainlink/contracts": "^0.1.6",
+    "@nomiclabs/hardhat-etherscan": "^2.1.4",
+    "@openzeppelin/contracts": "^4.3.0",
+    "@paulrberg/contracts": "^3.4.0",
+    "dotenv": "^10.0.0",
+    "esm": "^3.2.25",
+    "glob": "^7.2.0",
+    "hardhat-deploy-ethers": "^0.3.0-beta.10",
+    "prettier": "^2.4.0"
+  },
+  "homepage": "https://github.com/jbx-protocol/juicehouse",
+  "keywords": [
+    "blockchain",
+    "erc20",
+    "erc721",
+    "dao",
+    "nft",
+    "ethereum",
+    "library",
+    "smart-contracts",
+    "solidity"
+  ],
+  "scripts": {
+    "chain": "hardhat node",
+    "account": "hardhat account",
+    "test": "mocha './test/**/*.test.js' -r esm --bail",
+    "clean": "rimraf ./cache && rimraf ./artifacts",
+    "compile": "yarn clean && hardhat compile",
+    "pretty": "prettier --write \"./**/*.{js,jsx,json}\""
+  }
+}
