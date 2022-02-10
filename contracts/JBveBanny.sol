@@ -133,12 +133,10 @@ contract JBveBanny is ERC721Votes, Ownable, ReentrancyGuard {
   function unlock(uint256 _tokenId, address _beneficiary) external nonReentrant {
     // Unpack the position specs for the probided tokenId.
     uint256 packedValue = _packedSpecs[_tokenId];
-    uint256 _amount;
-    uint256 _lockedUntil;
     // _amount in the bits 0-159.
-    _amount |= uint256(uint160(packedValue));
+    uint256 _amount = uint256(uint160(packedValue));
     // _lockedUntil in the bits 208-255.
-    _lockedUntil |= uint256(uint48(packedValue >> 208));
+    uint256 _lockedUntil = uint256(uint48(packedValue >> 208));
 
     // The lock must have expired.
     if (block.timestamp <= _lockedUntil) {
@@ -165,12 +163,12 @@ contract JBveBanny is ERC721Votes, Ownable, ReentrancyGuard {
   function tokenURI(uint256 _tokenId) public view override returns (string memory) {
     // svg logic where based on user stake we render the nft
     uint256 packedValue = _packedSpecs[_tokenId];
-    uint256 _amount;
-    uint48 _duration;
-    uint48 _lockedUntil;
-    _amount |= packedValue >> 8;
-    _duration |= uint48(packedValue >> 24);
-    _lockedUntil |= uint48(packedValue >> 40);
+    // _amount in the bits 0-159.
+    uint256 _amount = uint256(uint160(packedValue));
+    // _duration in the bits 160-207.
+    uint256 _duration = uint256(uint48(packedValue));
+    // _lockedUntil in the bits 208-255.
+    uint256 _lockedUntil = uint256(uint48(packedValue >> 208));
     // tokenURI logic not added since those details haven't been finalized
     return '';
   }
