@@ -6,6 +6,8 @@ import '@openzeppelin/contracts/token/ERC721/extensions/draft-ERC721Votes.sol';
 import '@openzeppelin/contracts/access/Ownable.sol';
 import '@openzeppelin/contracts/security/ReentrancyGuard.sol';
 
+import './utils/ITokenUriResolver.sol';
+
 //*********************************************************************//
 // --------------------------- custom errors ------------------------- //
 //*********************************************************************//
@@ -16,7 +18,7 @@ error LOCK_PERIOD_NOT_OVER();
 
 /**
   @notice
-  Allows JBX Holders to stake their tokens and receive Jbx Banny based on their stake and lock in period.
+  Allows any ERC20 Token Holders to stake their tokens and receive a Banny based on their stake and lock in period.
   @dev 
   Bannies are transferrable, will be burnt when the stake is claimed before or after the lock-in period ends.
   The Token URI will be determined by SVG for each banny category.
@@ -47,9 +49,15 @@ contract JBveBanny is ERC721Votes, Ownable, ReentrancyGuard {
 
   /** 
     @notice 
-    JBX Token Instance
+    ERC20 Token Instance
   */
-  IERC20 public immutable jbx;
+  IERC20 public immutable token;
+
+  /** 
+    @notice 
+    Token URI Resolver Instance
+  */
+  ITokenUriResolver public uriResolver;
 
   /** 
     @notice 
@@ -61,18 +69,22 @@ contract JBveBanny is ERC721Votes, Ownable, ReentrancyGuard {
   // ---------------------------- constructor -------------------------- //
   //*********************************************************************//
   /**
-    @param _jbx jbx address.
+    @param _token Erc20 token address.
+    @param _name Nft name.
+    @param _symbol Nft symbol.
+    @param _uriResolver Token uri resolver instance.
     @dev uri is empty since we will have svg support
   */
-  constructor(IERC20 _jbx) ERC721('JBveBanny', 'JBveBanny') EIP712('JBveBanny', '1') {
-    jbx = _jbx;
+  constructor(IERC20 _token, string memory _name, string memory _symbol, ITokenUriResolver _uriResolver) ERC721(_name, _symbol) EIP712('JBveBanny', '1') {
+    token = _token;
+    uriResolver = _uriResolver;
   }
 
   /**
     @notice
-    Allows jbx holder to lock in their tokens in exchange for a banny.
+    Allows token holder to lock in their tokens in exchange for a banny.
     
-    @param _account Jbx Token Holder.
+    @param _account ERC20 Token Token Holder.
     @param _amount Lock Amount.
     @param _duration Lock time in seconds.
     @param _beneficiary Address to mint the banny.
@@ -89,12 +101,12 @@ contract JBveBanny is ERC721Votes, Ownable, ReentrancyGuard {
     }
 
     // Make sure the token balance of the account is enough to lock the specified _amount of tokens.
-    if (jbx.balanceOf(_account) < _amount) {
+    if (token.balanceOf(_account) < _amount) {
       revert INSUFFICIENT_BALANCE();
     }
 
     // Make sure the sender has set enough allowance for this contract to transfer its tokens.
-    if (jbx.allowance(msg.sender, address(this)) < _amount) {
+    if (token.allowance(msg.sender, address(this)) < _amount) {
       revert INSUFFICIENT_ALLOWANCE();
     }
 
@@ -117,7 +129,7 @@ contract JBveBanny is ERC721Votes, Ownable, ReentrancyGuard {
     _mint(_beneficiary, count);
 
     // Transfer the token to this contract where they'll be locked.
-    jbx.transferFrom(msg.sender, address(this), _amount);
+    token.transferFrom(msg.sender, address(this), _amount);
 
     // Emit event.
     emit Lock(_account, _amount, _duration, _beneficiary, _lockedUntil);
@@ -147,7 +159,7 @@ contract JBveBanny is ERC721Votes, Ownable, ReentrancyGuard {
     _burn(_tokenId);
 
     // Transfer the amount of locked tokens to beneficiary.
-    jbx.transfer(_beneficiary, _amount);
+    token.transfer(_beneficiary, _amount);
 
     // Emit event.
     emit Unlock(_tokenId, _beneficiary, _amount);
@@ -169,16 +181,15 @@ contract JBveBanny is ERC721Votes, Ownable, ReentrancyGuard {
     uint256 _duration = uint256(uint48(packedValue));
     // _lockedUntil in the bits 208-255.
     uint256 _lockedUntil = uint256(uint48(packedValue >> 208));
-    // tokenURI logic not added since those details haven't been finalized
-    return '';
+
+    return uriResolver.tokenURI(_tokenId, _amount, _duration, _lockedUntil);
   }
 
-  /**
+ /**
     @notice
     Unpacks the packed specs of each banny based on token id.
-
     @param _tokenId Banny Id.
-    @return  Locked in amount, lock-in duration and total lock-in period.
+    Returns Locked in amount, lock-in duration and total lock-in period.
   */
   function getSpecs(uint256 _tokenId)
     external
