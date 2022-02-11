@@ -38,6 +38,8 @@ contract JBveBanny is ERC721Votes, Ownable, ReentrancyGuard {
 
   event Unlock(uint256 tokenId, address beneficiary, uint256 amount);
 
+  event ExtendLock(uint256 tokenId, uint48 updatedDuration);
+
   //*********************************************************************//
   // --------------------- private stored properties ------------------- //
   //*********************************************************************//
@@ -137,7 +139,7 @@ contract JBveBanny is ERC721Votes, Ownable, ReentrancyGuard {
 
   /**
     @notice
-    Allows banny holder to burn their banny and get back the locked in amount.
+    Allows banny holders to burn their banny and get back the locked in amount.
 
     @param _tokenId Banny Id.
     @param _beneficiary Address to transfer the locked amount to.
@@ -163,6 +165,37 @@ contract JBveBanny is ERC721Votes, Ownable, ReentrancyGuard {
 
     // Emit event.
     emit Unlock(_tokenId, _beneficiary, _amount);
+  }
+
+  /**
+    @notice
+    Allows banny holders to extend their token lock-in duration
+    @param _tokenId Banny Id.
+    @param _tokenId New lock-in duration.
+  */
+  function extendLock(uint256 _tokenId, uint48 _updatedDuration) external {
+    // check is the msg.sender is the owner of the banny or not
+    if (ownerOf(_tokenId) != msg.sender) {
+       revert INVALID_ACCOUNT();
+    }
+
+    // fetch the stored packed value.
+    uint256 packedValue = _packedSpecs[_tokenId]; 
+    // get prev. duration value
+    uint48 _duration = uint48(packedValue >> 160);
+    // get prev. lockedUntil Value
+    uint48 _lockedUntil = uint48(packedValue >> 208);
+    // Calculate the updated time when this lock will end (in seconds).
+    uint48 _updatedLockedUntil = (_lockedUntil + _updatedDuration) - _duration;
+    // _duration in the bits 160-207.
+    // update the value in these bits.
+    packedValue |= _updatedDuration << 160;
+    // _lockedUntil in the bits 208-255.
+    // update the value in these bits.
+    packedValue |= _updatedLockedUntil << 208;
+    // update the mapping with new packed values
+    _packedSpecs[_tokenId] = packedValue;
+    emit ExtendLock(_tokenId, _updatedDuration);
   }
 
   /**
@@ -201,8 +234,11 @@ contract JBveBanny is ERC721Votes, Ownable, ReentrancyGuard {
     )
   {
     uint256 packedValue = _packedSpecs[_tokenId];
-    amount |= packedValue >> 8;
-    duration |= uint48(packedValue >> 24);
-    lockedUntil |= uint48(packedValue >> 40);
+    // _amount in the bits 0-159.
+    amount = uint256(uint160(packedValue));
+    // _duration in the bits 160-207.
+    duration = uint256(uint48(packedValue));
+    // _lockedUntil in the bits 208-255.
+    lockedUntil = uint256(uint48(packedValue >> 208));
   }
 }
