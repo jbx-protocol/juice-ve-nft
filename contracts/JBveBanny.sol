@@ -77,7 +77,12 @@ contract JBveBanny is ERC721Votes, Ownable, ReentrancyGuard {
     @param _uriResolver Token uri resolver instance.
     @dev uri is empty since we will have svg support
   */
-  constructor(IERC20 _token, string memory _name, string memory _symbol, ITokenUriResolver _uriResolver) ERC721(_name, _symbol) EIP712('JBveBanny', '1') {
+  constructor(
+    IERC20 _token,
+    string memory _name,
+    string memory _symbol,
+    ITokenUriResolver _uriResolver
+  ) ERC721(_name, _symbol) EIP712('JBveBanny', '1') {
     token = _token;
     uriResolver = _uriResolver;
   }
@@ -176,11 +181,11 @@ contract JBveBanny is ERC721Votes, Ownable, ReentrancyGuard {
   function extendLock(uint256 _tokenId, uint48 _updatedDuration) external {
     // check is the msg.sender is the owner of the banny or not
     if (ownerOf(_tokenId) != msg.sender) {
-       revert INVALID_ACCOUNT();
+      revert INVALID_ACCOUNT();
     }
 
     // fetch the stored packed value.
-    uint256 packedValue = _packedSpecs[_tokenId]; 
+    uint256 packedValue = _packedSpecs[_tokenId];
     // get prev. duration value
     uint48 _duration = uint48(packedValue >> 160);
     // get prev. lockedUntil Value
@@ -218,7 +223,7 @@ contract JBveBanny is ERC721Votes, Ownable, ReentrancyGuard {
     return uriResolver.tokenURI(_tokenId, _amount, _duration, _lockedUntil);
   }
 
- /**
+  /**
     @notice
     Unpacks the packed specs of each banny based on token id.
     @param _tokenId Banny Id.
