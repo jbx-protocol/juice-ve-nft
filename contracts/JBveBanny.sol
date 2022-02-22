@@ -31,15 +31,17 @@ contract JBveBanny is ERC721Votes, Ownable, ReentrancyGuard {
   event Lock(
     address account,
     uint256 amount,
-    uint48 duration,
+    uint256 duration,
     address beneficiary,
-    uint48 lockedUntil
+    uint256 lockedUntil,
+    address caller
   );
 
-  event Unlock(uint256 tokenId, address beneficiary, uint256 amount);
+  event Unlock(uint256 tokenId, address beneficiary, uint256 amount, address caller);
 
-  event ExtendLock(uint256 tokenId, uint48 updatedDuration);
+  event ExtendLock(uint256 tokenId, uint256 updatedDuration, address caller);
 
+  event SetUriResolver(ITokenUriResolver resolver, address caller);
   //*********************************************************************//
   // --------------------- private stored properties ------------------- //
   //*********************************************************************//
@@ -70,12 +72,12 @@ contract JBveBanny is ERC721Votes, Ownable, ReentrancyGuard {
   //*********************************************************************//
   // ---------------------------- constructor -------------------------- //
   //*********************************************************************//
+
   /**
     @param _token Erc20 token address.
     @param _name Nft name.
     @param _symbol Nft symbol.
     @param _uriResolver Token uri resolver instance.
-    @dev uri is empty since we will have svg support
   */
   constructor(
     IERC20 _token,
@@ -139,7 +141,7 @@ contract JBveBanny is ERC721Votes, Ownable, ReentrancyGuard {
     token.transferFrom(msg.sender, address(this), _amount);
 
     // Emit event.
-    emit Lock(_account, _amount, _duration, _beneficiary, _lockedUntil);
+    emit Lock(_account, _amount, _duration, _beneficiary, _lockedUntil, msg.sender);
   }
 
   /**
@@ -169,14 +171,15 @@ contract JBveBanny is ERC721Votes, Ownable, ReentrancyGuard {
     token.transfer(_beneficiary, _amount);
 
     // Emit event.
-    emit Unlock(_tokenId, _beneficiary, _amount);
+    emit Unlock(_tokenId, _beneficiary, _amount, msg.sender);
   }
 
   /**
     @notice
     Allows banny holders to extend their token lock-in duration
+
     @param _tokenId Banny Id.
-    @param _tokenId New lock-in duration.
+    @param _updatedDuration New lock-in duration.
   */
   function extendLock(uint256 _tokenId, uint48 _updatedDuration) external {
     // check is the msg.sender is the owner of the banny or not
@@ -200,7 +203,18 @@ contract JBveBanny is ERC721Votes, Ownable, ReentrancyGuard {
     packedValue |= _updatedLockedUntil << 208;
     // update the mapping with new packed values
     _packedSpecs[_tokenId] = packedValue;
-    emit ExtendLock(_tokenId, _updatedDuration);
+    emit ExtendLock(_tokenId, _updatedDuration, msg.sender);
+  }
+
+  /**
+     @notice 
+     Allows the owner to set the uri resolver.
+
+     @param _resolver The new URI resolver.
+  */
+  function setUriResolver(ITokenUriResolver _resolver) external onlyOwner {
+    uriResolver = _resolver;
+    emit SetUriResolver(_resolver, msg.sender);
   }
 
   /**
@@ -208,6 +222,7 @@ contract JBveBanny is ERC721Votes, Ownable, ReentrancyGuard {
      Computes the metadata url based on the id.
 
      @param _tokenId TokenId of the Banny
+
      @return dynamic uri based on the svg logic for that particular banny
   */
   function tokenURI(uint256 _tokenId) public view override returns (string memory) {
@@ -226,8 +241,12 @@ contract JBveBanny is ERC721Votes, Ownable, ReentrancyGuard {
   /**
     @notice
     Unpacks the packed specs of each banny based on token id.
+
     @param _tokenId Banny Id.
-    Returns Locked in amount, lock-in duration and total lock-in period.
+
+    @return amount locked amount
+    @return duration locked duration
+    @return lockedUntil locked until this timestamp.
   */
   function getSpecs(uint256 _tokenId)
     external
