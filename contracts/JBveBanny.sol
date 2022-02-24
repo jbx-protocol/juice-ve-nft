@@ -3,8 +3,11 @@ pragma solidity 0.8.6;
 
 import '@openzeppelin/contracts/token/ERC20/IERC20.sol';
 import '@openzeppelin/contracts/token/ERC721/extensions/draft-ERC721Votes.sol';
+import '@openzeppelin/contracts/token/ERC721/extensions/ERC721Enumerable.sol';
 import '@openzeppelin/contracts/access/Ownable.sol';
 import '@openzeppelin/contracts/security/ReentrancyGuard.sol';
+import '@paulrberg/contracts/math/PRBMath.sol';
+import '@jbx-protocol/contracts-v2';
 
 import './utils/ITokenUriResolver.sol';
 
@@ -27,7 +30,7 @@ error LOCK_PERIOD_NOT_OVER();
   Ownable - for access control.
   ReentrancyGuard - for protection against external calls.
 */
-contract JBveBanny is ERC721Votes, Ownable, ReentrancyGuard {
+contract JBveBanny is ERC721Votes, ERC721Enumerable, Ownable, ReentrancyGuard {
   event Lock(
     address account,
     uint256 amount,
@@ -42,6 +45,11 @@ contract JBveBanny is ERC721Votes, Ownable, ReentrancyGuard {
   event ExtendLock(uint256 tokenId, uint256 updatedDuration, address caller);
 
   event SetUriResolver(ITokenUriResolver resolver, address caller);
+  //*********************************************************************//
+  // ----------------------------- constants --------------------------- //
+  //*********************************************************************//
+  uint256 public constant _MAX_LOCK_DURATION = 3600000;
+
   //*********************************************************************//
   // --------------------- private stored properties ------------------- //
   //*********************************************************************//
@@ -65,6 +73,12 @@ contract JBveBanny is ERC721Votes, Ownable, ReentrancyGuard {
 
   /** 
     @notice 
+    The JBTokenStore where unclaimed tokens are accounted for.
+  */
+  IJBTokenStore public tokenStore;
+
+  /** 
+    @notice 
     Banny id counter
   */
   uint256 public count;
@@ -75,18 +89,24 @@ contract JBveBanny is ERC721Votes, Ownable, ReentrancyGuard {
 
   /**
     @param _token Erc20 token address.
+    @param _projectId The ID of the project.
     @param _name Nft name.
     @param _symbol Nft symbol.
     @param _uriResolver Token uri resolver instance.
+    @param _tokenStore The JBTokenStore where unclaimed tokens are accounted for.
   */
   constructor(
     IERC20 _token,
+    uint256 _projectId,
     string memory _name,
     string memory _symbol,
-    ITokenUriResolver _uriResolver
+    ITokenUriResolver _uriResolver,
+    IJBTokenStore _tokenStore
   ) ERC721(_name, _symbol) EIP712('JBveBanny', '1') {
+    require(address(_tokenStore.tokenOf(_projectId)) == address(_token), 'mismatch');
     token = _token;
     uriResolver = _uriResolver;
+    tokenStore = _tokenStore;
   }
 
   /**
@@ -126,12 +146,15 @@ contract JBveBanny is ERC721Votes, Ownable, ReentrancyGuard {
     uint48 _lockedUntil = uint48(block.timestamp) + _duration;
 
     // Store packed specification values for the ve position.
-    // _amount in the bits 0-159.
+    // _amount in the bits 0-151.
     uint256 packedValue = _amount;
-    // _duration in the bits 160-207.
-    packedValue |= _duration << 160;
-    // _lockedUntil in the bits 208-255.
-    packedValue |= _lockedUntil << 208;
+    // _duration in the bits 152-199.
+    packedValue |= _duration << 152;
+    // _lockedUntil in the bits 200-247.
+    packedValue |= _lockedUntil << 200;
+    // _isErc20 in bit 248.
+    packedValue |= 1 << 248;
+
     _packedSpecs[count] = packedValue;
 
     // Mint the position for the beneficiary.
@@ -139,6 +162,59 @@ contract JBveBanny is ERC721Votes, Ownable, ReentrancyGuard {
 
     // Transfer the token to this contract where they'll be locked.
     token.transferFrom(msg.sender, address(this), _amount);
+
+    // Emit event.
+    emit Lock(_account, _amount, _duration, _beneficiary, _lockedUntil, msg.sender);
+  }
+
+  /**
+    @notice
+    Allows token holder to lock in their tokens in exchange for a banny.
+
+    @param _account ERC20 Token Token Holder.
+    @param _amount Lock Amount.
+    @param _duration Lock time in seconds.
+    @param _beneficiary Address to mint the banny.
+  */
+  function lockUnclaimed(
+    address _account,
+    uint256 _amount,
+    uint48 _duration,
+    address _beneficiary
+  ) external nonReentrant {
+    // Make sure the msg.sender is locking its own tokens.
+    if (msg.sender != _account) {
+      revert INVALID_ACCOUNT();
+    }
+
+    // Make sure the token balance of the account is enough to lock the specified _amount of tokens.
+    if (token.balanceOf(_account) < _amount) {
+      revert INSUFFICIENT_BALANCE();
+    }
+
+    // Increment the number of ve positions that have been minted.
+    count += 1;
+
+    // Calculate the time when this lock will end (in seconds).
+    uint48 _lockedUntil = uint48(block.timestamp) + _duration;
+
+    // Store packed specification values for the ve position.
+    // _amount in the bits 0-151.
+    uint256 packedValue = _amount;
+    // _duration in the bits 152-199.
+    packedValue |= _duration << 152;
+    // _lockedUntil in the bits 200-247.
+    packedValue |= _lockedUntil << 200;
+    // _isErc20 in bit 248.
+    packedValue |= _isErc20 << 248;
+
+    _packedSpecs[count] = packedValue;
+
+    // Mint the position for the beneficiary.
+    _mint(_beneficiary, count);
+
+    // Transfer the token to this contract where they'll be locked.
+    tokenStore.transferTo(address(this), msg.sender, projectId);
 
     // Emit event.
     emit Lock(_account, _amount, _duration, _beneficiary, _lockedUntil, msg.sender);
@@ -154,10 +230,12 @@ contract JBveBanny is ERC721Votes, Ownable, ReentrancyGuard {
   function unlock(uint256 _tokenId, address _beneficiary) external nonReentrant {
     // Unpack the position specs for the probided tokenId.
     uint256 packedValue = _packedSpecs[_tokenId];
-    // _amount in the bits 0-159.
-    uint256 _amount = uint256(uint160(packedValue));
-    // _lockedUntil in the bits 208-255.
-    uint256 _lockedUntil = uint256(uint48(packedValue >> 208));
+    // _amount in the bits 0-151.
+    uint256 _amount = uint256(uint152(packedValue));
+    // _lockedUntil in the bits 200-247.
+    uint256 _lockedUntil = uint256(uint48(packedValue >> 200));
+    // _isErc20 in the bit 248.
+    uint256 _isErc20 = (packedValue >> 248) & 1 == 1;
 
     // The lock must have expired.
     if (block.timestamp <= _lockedUntil) {
@@ -167,8 +245,13 @@ contract JBveBanny is ERC721Votes, Ownable, ReentrancyGuard {
     // Burn the token.
     _burn(_tokenId);
 
-    // Transfer the amount of locked tokens to beneficiary.
-    token.transfer(_beneficiary, _amount);
+    if (_isErc20) {
+      // Transfer the amount of locked tokens to beneficiary.
+      token.transfer(_beneficiary, _amount);
+    } else {
+      // Transfer the tokens from this contract.
+      tokenStore.transferTo(_beneficiary, address(this), projectId);
+    }
 
     // Emit event.
     emit Unlock(_tokenId, _beneficiary, _amount, msg.sender);
@@ -190,17 +273,17 @@ contract JBveBanny is ERC721Votes, Ownable, ReentrancyGuard {
     // fetch the stored packed value.
     uint256 packedValue = _packedSpecs[_tokenId];
     // get prev. duration value
-    uint48 _duration = uint48(packedValue >> 160);
+    uint256 _duration = uint48(packedValue >> 152);
     // get prev. lockedUntil Value
-    uint48 _lockedUntil = uint48(packedValue >> 208);
+    uint256 _lockedUntil = uint48(packedValue >> 200);
     // Calculate the updated time when this lock will end (in seconds).
-    uint48 _updatedLockedUntil = (_lockedUntil + _updatedDuration) - _duration;
-    // _duration in the bits 160-207.
+    uint256 _updatedLockedUntil = (_lockedUntil + _updatedDuration) - _duration;
+    // _duration in the bits 152-199.
     // update the value in these bits.
-    packedValue |= _updatedDuration << 160;
-    // _lockedUntil in the bits 208-255.
+    packedValue |= uint48(_updatedDuration << 152);
+    // _lockedUntil in the bits 200-247.
     // update the value in these bits.
-    packedValue |= _updatedLockedUntil << 208;
+    packedValue |= uint48(_updatedLockedUntil << 200);
     // update the mapping with new packed values
     _packedSpecs[_tokenId] = packedValue;
     emit ExtendLock(_tokenId, _updatedDuration, msg.sender);
@@ -228,12 +311,12 @@ contract JBveBanny is ERC721Votes, Ownable, ReentrancyGuard {
   function tokenURI(uint256 _tokenId) public view override returns (string memory) {
     // svg logic where based on user stake we render the nft
     uint256 packedValue = _packedSpecs[_tokenId];
-    // _amount in the bits 0-159.
-    uint256 _amount = uint256(uint160(packedValue));
-    // _duration in the bits 160-207.
-    uint256 _duration = uint256(uint48(packedValue));
-    // _lockedUntil in the bits 208-255.
-    uint256 _lockedUntil = uint256(uint48(packedValue >> 208));
+    // _amount in the bits 0-151.
+    uint256 _amount = uint256(uint152(packedValue));
+    // _duration in the bits 152-199.
+    uint256 _duration = uint256(uint48(packedValue >> 152));
+    // _lockedUntil in the bits 200-247.
+    uint256 _lockedUntil = uint256(uint48(packedValue >> 200));
 
     return uriResolver.tokenURI(_tokenId, _amount, _duration, _lockedUntil);
   }
@@ -244,9 +327,10 @@ contract JBveBanny is ERC721Votes, Ownable, ReentrancyGuard {
 
     @param _tokenId Banny Id.
 
-    @return amount locked amount
-    @return duration locked duration
-    @return lockedUntil locked until this timestamp.
+    @return amount Locked amount
+    @return duration Locked duration
+    @return lockedUntil Locked until this timestamp.
+    @return isErc20 If the locked tokens are erc20. 
   */
   function getSpecs(uint256 _tokenId)
     external
@@ -254,15 +338,77 @@ contract JBveBanny is ERC721Votes, Ownable, ReentrancyGuard {
     returns (
       uint256 amount,
       uint256 duration,
-      uint256 lockedUntil
+      uint256 lockedUntil,
+      bool isErc20
     )
   {
-    uint256 packedValue = _packedSpecs[_tokenId];
-    // _amount in the bits 0-159.
-    amount = uint256(uint160(packedValue));
-    // _duration in the bits 160-207.
-    duration = uint256(uint48(packedValue));
-    // _lockedUntil in the bits 208-255.
-    lockedUntil = uint256(uint48(packedValue >> 208));
+    uint256 _packedValue = _packedSpecs[_tokenId];
+    // _amount in the bits 0-151.
+    amount = uint256(uint152(_packedValue));
+    // _duration in the bits 152-199.
+    duration = uint256(uint48(_packedValue));
+    // _lockedUntil in the bits 200-247.
+    lockedUntil = uint256(uint48(_packedValue >> 200));
+    // _lockedUntil in the bits 248.
+    isErc20 = (packedValue >> 248) & 1 == 1;
+  }
+
+  /**
+    @notice
+    Gets the amount of voting units an account has given its locked positions.
+
+    @param _account The account to get voting units of.
+
+    @return units The amoutn of voting units the account has.
+   */
+  function _getVotingUnits(address _account) internal view override returns (uint256 units) {
+    // Loop through all positions owned by the _account.
+    for (uint256 _i; _i < balanceOf(_account); _i++) {
+      // Get the token represented a positioned owned by the account.
+      uint256 _tokenId = tokenOfOwnerByIndex(_account, _i);
+      // Unpack specs for the position.
+      uint256 _packedValue = _packedSpecs[_tokenId];
+      // _amount in the bits 0-151.
+      uint256 _amount = uint256(uint152(_packedValue));
+      // _lockedUntil in the bits 200-247.
+      uint256 _lockedUntil = uint256(uint48(_packedValue >> 200));
+      // Voting balance for each token is a function of how much time is left on the lock.
+      units += PRBMath.mulDiv(_amount, (_lockedUntil - block.timestamp), _MAX_LOCK_DURATION);
+    }
+  }
+
+  /**
+    @dev Requires override. Calls super.
+  */
+  function supportsInterface(bytes4 _interfaceId)
+    public
+    view
+    virtual
+    override(ERC721, ERC721Enumerable)
+    returns (bool)
+  {
+    return super.supportsInterface(_interfaceId);
+  }
+
+  /**
+    @dev Requires override. Calls super.
+  */
+  function _afterTokenTransfer(
+    address _from,
+    address _to,
+    uint256 _tokenId
+  ) internal virtual override(ERC721Votes, ERC721) {
+    return super._afterTokenTransfer(_from, _to, _tokenId);
+  }
+
+  /**
+    @dev Requires override. Calls super.
+  */
+  function _beforeTokenTransfer(
+    address _from,
+    address _to,
+    uint256 _tokenId
+  ) internal virtual override(ERC721, ERC721Enumerable) {
+    return super._beforeTokenTransfer(_from, _to, _tokenId);
   }
 }
