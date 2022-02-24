@@ -7,7 +7,7 @@ import '@openzeppelin/contracts/token/ERC721/extensions/ERC721Enumerable.sol';
 import '@openzeppelin/contracts/access/Ownable.sol';
 import '@openzeppelin/contracts/security/ReentrancyGuard.sol';
 import '@paulrberg/contracts/math/PRBMath.sol';
-import '@jbx-protocol/contracts-v2';
+import '@jbx-protocol/contracts-v2/contracts/interfaces/IJBTokenStore.sol';
 
 import './utils/ITokenUriResolver.sol';
 
@@ -18,6 +18,7 @@ error INVALID_ACCOUNT();
 error INSUFFICIENT_BALANCE();
 error INSUFFICIENT_ALLOWANCE();
 error LOCK_PERIOD_NOT_OVER();
+error INVALID_DURATION();
 
 /**
   @notice
@@ -48,7 +49,11 @@ contract JBveBanny is ERC721Votes, ERC721Enumerable, Ownable, ReentrancyGuard {
   //*********************************************************************//
   // ----------------------------- constants --------------------------- //
   //*********************************************************************//
-  uint256 public constant _MAX_LOCK_DURATION = 3600000;
+  uint256 public constant _ONE_THOUSAND_DAYS = 8640000;
+  uint256 public constant _TWO_HUNDRED_FIFTY_DAYS = 21600000;
+  uint256 public constant _ONE_HUNDRED_DAYS = 8640000;
+  uint256 public constant _TWENTY_FIVE_DAYS = 2160000;
+  uint256 public constant _TEN_DAYS = 864000;
 
   //*********************************************************************//
   // --------------------- private stored properties ------------------- //
@@ -64,6 +69,12 @@ contract JBveBanny is ERC721Votes, ERC721Enumerable, Ownable, ReentrancyGuard {
     ERC20 Token Instance
   */
   IERC20 public immutable token;
+
+  /** 
+    @notice 
+    JBProject id.
+  */
+  uint256 public immutable projectId;
 
   /** 
     @notice 
@@ -105,6 +116,7 @@ contract JBveBanny is ERC721Votes, ERC721Enumerable, Ownable, ReentrancyGuard {
   ) ERC721(_name, _symbol) EIP712('JBveBanny', '1') {
     require(address(_tokenStore.tokenOf(_projectId)) == address(_token), 'mismatch');
     token = _token;
+    projectId = _projectId;
     uriResolver = _uriResolver;
     tokenStore = _tokenStore;
   }
@@ -124,6 +136,17 @@ contract JBveBanny is ERC721Votes, ERC721Enumerable, Ownable, ReentrancyGuard {
     uint48 _duration,
     address _beneficiary
   ) external nonReentrant {
+    // Duration must match.
+    if (
+      _duration != _ONE_THOUSAND_DAYS &&
+      _duration != _TWO_HUNDRED_FIFTY_DAYS &&
+      _duration != _ONE_HUNDRED_DAYS &&
+      _duration != _TWENTY_FIVE_DAYS &&
+      _duration != _TEN_DAYS
+    ) {
+      revert INVALID_DURATION();
+    }
+
     // Make sure the msg.sender is locking its own tokens.
     if (msg.sender != _account) {
       revert INVALID_ACCOUNT();
@@ -182,6 +205,17 @@ contract JBveBanny is ERC721Votes, ERC721Enumerable, Ownable, ReentrancyGuard {
     uint48 _duration,
     address _beneficiary
   ) external nonReentrant {
+    // Duration must match.
+    if (
+      _duration != _ONE_THOUSAND_DAYS &&
+      _duration != _TWO_HUNDRED_FIFTY_DAYS &&
+      _duration != _ONE_HUNDRED_DAYS &&
+      _duration != _TWENTY_FIVE_DAYS &&
+      _duration != _TEN_DAYS
+    ) {
+      revert INVALID_DURATION();
+    }
+
     // Make sure the msg.sender is locking its own tokens.
     if (msg.sender != _account) {
       revert INVALID_ACCOUNT();
@@ -206,7 +240,7 @@ contract JBveBanny is ERC721Votes, ERC721Enumerable, Ownable, ReentrancyGuard {
     // _lockedUntil in the bits 200-247.
     packedValue |= _lockedUntil << 200;
     // _isErc20 in bit 248.
-    packedValue |= _isErc20 << 248;
+    packedValue |= 1 << 248;
 
     _packedSpecs[count] = packedValue;
 
@@ -214,7 +248,7 @@ contract JBveBanny is ERC721Votes, ERC721Enumerable, Ownable, ReentrancyGuard {
     _mint(_beneficiary, count);
 
     // Transfer the token to this contract where they'll be locked.
-    tokenStore.transferTo(address(this), msg.sender, projectId);
+    tokenStore.transferTo(address(this), msg.sender, projectId, _amount);
 
     // Emit event.
     emit Lock(_account, _amount, _duration, _beneficiary, _lockedUntil, msg.sender);
@@ -235,7 +269,7 @@ contract JBveBanny is ERC721Votes, ERC721Enumerable, Ownable, ReentrancyGuard {
     // _lockedUntil in the bits 200-247.
     uint256 _lockedUntil = uint256(uint48(packedValue >> 200));
     // _isErc20 in the bit 248.
-    uint256 _isErc20 = (packedValue >> 248) & 1 == 1;
+    bool _isErc20 = (packedValue >> 248) & 1 == 1;
 
     // The lock must have expired.
     if (block.timestamp <= _lockedUntil) {
@@ -250,7 +284,7 @@ contract JBveBanny is ERC721Votes, ERC721Enumerable, Ownable, ReentrancyGuard {
       token.transfer(_beneficiary, _amount);
     } else {
       // Transfer the tokens from this contract.
-      tokenStore.transferTo(_beneficiary, address(this), projectId);
+      tokenStore.transferTo(_beneficiary, address(this), projectId, _amount);
     }
 
     // Emit event.
@@ -265,6 +299,17 @@ contract JBveBanny is ERC721Votes, ERC721Enumerable, Ownable, ReentrancyGuard {
     @param _updatedDuration New lock-in duration.
   */
   function extendLock(uint256 _tokenId, uint48 _updatedDuration) external {
+    // Duration must match.
+    if (
+      _updatedDuration != _ONE_THOUSAND_DAYS &&
+      _updatedDuration != _TWO_HUNDRED_FIFTY_DAYS &&
+      _updatedDuration != _ONE_HUNDRED_DAYS &&
+      _updatedDuration != _TWENTY_FIVE_DAYS &&
+      _updatedDuration != _TEN_DAYS
+    ) {
+      revert INVALID_DURATION();
+    }
+
     // check is the msg.sender is the owner of the banny or not
     if (ownerOf(_tokenId) != msg.sender) {
       revert INVALID_ACCOUNT();
@@ -284,6 +329,7 @@ contract JBveBanny is ERC721Votes, ERC721Enumerable, Ownable, ReentrancyGuard {
     // _lockedUntil in the bits 200-247.
     // update the value in these bits.
     packedValue |= uint48(_updatedLockedUntil << 200);
+
     // update the mapping with new packed values
     _packedSpecs[_tokenId] = packedValue;
     emit ExtendLock(_tokenId, _updatedDuration, msg.sender);
@@ -350,7 +396,7 @@ contract JBveBanny is ERC721Votes, ERC721Enumerable, Ownable, ReentrancyGuard {
     // _lockedUntil in the bits 200-247.
     lockedUntil = uint256(uint48(_packedValue >> 200));
     // _lockedUntil in the bits 248.
-    isErc20 = (packedValue >> 248) & 1 == 1;
+    isErc20 = (_packedValue >> 248) & 1 == 1;
   }
 
   /**
@@ -373,7 +419,7 @@ contract JBveBanny is ERC721Votes, ERC721Enumerable, Ownable, ReentrancyGuard {
       // _lockedUntil in the bits 200-247.
       uint256 _lockedUntil = uint256(uint48(_packedValue >> 200));
       // Voting balance for each token is a function of how much time is left on the lock.
-      units += PRBMath.mulDiv(_amount, (_lockedUntil - block.timestamp), _MAX_LOCK_DURATION);
+      units += PRBMath.mulDiv(_amount, (_lockedUntil - block.timestamp), _ONE_THOUSAND_DAYS);
     }
   }
 
