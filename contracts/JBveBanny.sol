@@ -161,11 +161,6 @@ contract JBveBanny is ERC721Votes, ERC721Enumerable, Ownable, ReentrancyGuard {
       revert INSUFFICIENT_BALANCE();
     }
 
-    // Make sure the sender has set enough allowance for this contract to transfer its tokens.
-    if (token.allowance(msg.sender, address(this)) < _amount) {
-      revert INSUFFICIENT_ALLOWANCE();
-    }
-
     // Increment the number of ve positions that have been minted.
     count += 1;
 
@@ -243,7 +238,7 @@ contract JBveBanny is ERC721Votes, ERC721Enumerable, Ownable, ReentrancyGuard {
     @param _tokenId Banny Id.
     @param _updatedDuration New lock-in duration.
   */
-  function extendLock(uint256 _tokenId, uint48 _updatedDuration) external {
+  function extendLock(uint256 _tokenId, uint48 _updatedDuration) external nonReentrant {
     // Duration must match.
     if (
       _updatedDuration != _ONE_THOUSAND_DAYS &&
@@ -350,7 +345,7 @@ contract JBveBanny is ERC721Votes, ERC721Enumerable, Ownable, ReentrancyGuard {
 
     @param _account The account to get voting units of.
 
-    @return units The amoutn of voting units the account has.
+    @return units The amount of voting units the account has.
    */
   function _getVotingUnits(address _account) internal view override returns (uint256 units) {
     // Loop through all positions owned by the _account.
