@@ -8,8 +8,10 @@ import '@openzeppelin/contracts/access/Ownable.sol';
 import '@openzeppelin/contracts/security/ReentrancyGuard.sol';
 import '@paulrberg/contracts/math/PRBMath.sol';
 import '@jbx-protocol/contracts-v2/contracts/interfaces/IJBTokenStore.sol';
+import '@jbx-protocol/contracts-v2/contracts/abstract/JBOperatable.sol';
 
-import './utils/ITokenUriResolver.sol';
+import './interfaces/IJBVeTokenUriResolver.sol';
+import './libraries/JBStakingOperations.sol';
 
 //*********************************************************************//
 // --------------------------- custom errors ------------------------- //
@@ -31,7 +33,7 @@ error INVALID_DURATION();
   Ownable - for access control.
   ReentrancyGuard - for protection against external calls.
 */
-contract JBveBanny is ERC721Votes, ERC721Enumerable, Ownable, ReentrancyGuard {
+contract JBveBanny is ERC721Votes, ERC721Enumerable, Ownable, ReentrancyGuard, JBOperatable {
   event Lock(
     address account,
     uint256 amount,
@@ -45,7 +47,7 @@ contract JBveBanny is ERC721Votes, ERC721Enumerable, Ownable, ReentrancyGuard {
 
   event ExtendLock(uint256 tokenId, uint256 updatedDuration, address caller);
 
-  event SetUriResolver(ITokenUriResolver resolver, address caller);
+  event SetUriResolver(IJBVeTokenUriResolver resolver, address caller);
   //*********************************************************************//
   // ----------------------------- constants --------------------------- //
   //*********************************************************************//
@@ -80,7 +82,7 @@ contract JBveBanny is ERC721Votes, ERC721Enumerable, Ownable, ReentrancyGuard {
     @notice 
     Token URI Resolver Instance
   */
-  ITokenUriResolver public uriResolver;
+  IJBVeTokenUriResolver public uriResolver;
 
   /** 
     @notice 
@@ -111,9 +113,10 @@ contract JBveBanny is ERC721Votes, ERC721Enumerable, Ownable, ReentrancyGuard {
     uint256 _projectId,
     string memory _name,
     string memory _symbol,
-    ITokenUriResolver _uriResolver,
-    IJBTokenStore _tokenStore
-  ) ERC721(_name, _symbol) EIP712('JBveBanny', '1') {
+    IJBVeTokenUriResolver _uriResolver,
+    IJBTokenStore _tokenStore,
+    IJBOperatorStore _operatorStore
+  ) ERC721(_name, _symbol) EIP712('JBveBanny', '1') JBOperatable(_operatorStore) {
     require(address(_tokenStore.tokenOf(_projectId)) == address(_token), 'mismatch');
     token = _token;
     projectId = _projectId;
@@ -137,7 +140,7 @@ contract JBveBanny is ERC721Votes, ERC721Enumerable, Ownable, ReentrancyGuard {
     uint48 _duration,
     address _beneficiary,
     bool _useErc20
-  ) external nonReentrant {
+  ) external nonReentrant requirePermission(_account, projectId, JBStakingOperations.LOCK) {
     // Duration must match.
     if (
       _duration != _ONE_THOUSAND_DAYS &&
@@ -203,7 +206,11 @@ contract JBveBanny is ERC721Votes, ERC721Enumerable, Ownable, ReentrancyGuard {
     @param _tokenId Banny Id.
     @param _beneficiary Address to transfer the locked amount to.
   */
-  function unlock(uint256 _tokenId, address _beneficiary) external nonReentrant {
+  function unlock(uint256 _tokenId, address _beneficiary)
+    external
+    nonReentrant
+    requirePermission(ownerOf(_tokenId), projectId, JBStakingOperations.UNLOCK)
+  {
     // Unpack the position specs for the probided tokenId.
     uint256 packedValue = _packedSpecs[_tokenId];
     // _amount in the bits 0-151.
@@ -240,7 +247,11 @@ contract JBveBanny is ERC721Votes, ERC721Enumerable, Ownable, ReentrancyGuard {
     @param _tokenId Banny Id.
     @param _updatedDuration New lock-in duration.
   */
-  function extendLock(uint256 _tokenId, uint48 _updatedDuration) external nonReentrant {
+  function extendLock(uint256 _tokenId, uint48 _updatedDuration)
+    external
+    nonReentrant
+    requirePermission(ownerOf(_tokenId), projectId, JBStakingOperations.EXTEND_LOCK)
+  {
     // Duration must match.
     if (
       _updatedDuration != _ONE_THOUSAND_DAYS &&
@@ -283,7 +294,7 @@ contract JBveBanny is ERC721Votes, ERC721Enumerable, Ownable, ReentrancyGuard {
 
      @param _resolver The new URI resolver.
   */
-  function setUriResolver(ITokenUriResolver _resolver) external onlyOwner {
+  function setUriResolver(IJBVeTokenUriResolver _resolver) external onlyOwner {
     uriResolver = _resolver;
     emit SetUriResolver(_resolver, msg.sender);
   }
