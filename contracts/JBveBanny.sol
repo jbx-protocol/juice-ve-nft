@@ -184,9 +184,11 @@ contract JBveBanny is ERC721Votes, ERC721Enumerable, Ownable, ReentrancyGuard {
 
     if (_useErc20) {
       // Transfer the token to this contract where they'll be locked.
+      // Will revert if not enough allowance.
       token.transferFrom(msg.sender, address(this), _amount);
     } else {
       // Transfer the token to this contract where they'll be locked.
+      // Will revert if this contract isn't an opperator.
       tokenStore.transferTo(address(this), msg.sender, projectId, _amount);
     }
 
