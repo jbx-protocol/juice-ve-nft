@@ -1,8 +1,8 @@
+// SPDX-License-Identifier: MIT
 pragma solidity 0.8.6;
 
-
-interface ITokenUriResolver {
-    /**
+interface IJBVeTokenUriResolver {
+  /**
      @notice 
      Computes the metadata url.
      @param _tokenId TokenId of the Banny
@@ -10,6 +10,11 @@ interface ITokenUriResolver {
      @param _duration Lock time in seconds.
      @param _lockedUntil Total lock-in period.
      Returns metadata url.
-    */ 
-    function tokenURI(uint256 _tokenId, uint256 _amount, uint256 _duration, uint256 _lockedUntil) external view returns(string memory);
+    */
+  function tokenURI(
+    uint256 _tokenId,
+    uint256 _amount,
+    uint256 _duration,
+    uint256 _lockedUntil
+  ) external view returns (string memory);
 }
