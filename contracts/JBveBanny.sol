@@ -129,12 +129,14 @@ contract JBveBanny is ERC721Votes, ERC721Enumerable, Ownable, ReentrancyGuard {
     @param _amount Lock Amount.
     @param _duration Lock time in seconds.
     @param _beneficiary Address to mint the banny.
+    @param _useErc20 A flag indicating if ERC-20 tokens are being locked. If false, unclaimed project tokens from the JBTokenStore will be locked.
   */
   function lock(
     address _account,
     uint256 _amount,
     uint48 _duration,
-    address _beneficiary
+    address _beneficiary,
+    bool _useErc20
   ) external nonReentrant {
     // Duration must match.
     if (
@@ -153,7 +155,9 @@ contract JBveBanny is ERC721Votes, ERC721Enumerable, Ownable, ReentrancyGuard {
     }
 
     // Make sure the token balance of the account is enough to lock the specified _amount of tokens.
-    if (token.balanceOf(_account) < _amount) {
+    if (_useErc20 && token.balanceOf(_account) < _amount) {
+      revert INSUFFICIENT_BALANCE();
+    } else if (!_useErc20 && tokenStore.unclaimedBalanceOf(_account, projectId) < _amount) {
       revert INSUFFICIENT_BALANCE();
     }
 
@@ -176,79 +180,20 @@ contract JBveBanny is ERC721Votes, ERC721Enumerable, Ownable, ReentrancyGuard {
     // _lockedUntil in the bits 200-247.
     packedValue |= _lockedUntil << 200;
     // _isErc20 in bit 248.
-    packedValue |= 1 << 248;
+    if (_useErc20) packedValue |= 1 << 248;
 
     _packedSpecs[count] = packedValue;
 
     // Mint the position for the beneficiary.
     _mint(_beneficiary, count);
 
-    // Transfer the token to this contract where they'll be locked.
-    token.transferFrom(msg.sender, address(this), _amount);
-
-    // Emit event.
-    emit Lock(_account, _amount, _duration, _beneficiary, _lockedUntil, msg.sender);
-  }
-
-  /**
-    @notice
-    Allows token holder to lock in their tokens in exchange for a banny.
-
-    @param _account ERC20 Token Token Holder.
-    @param _amount Lock Amount.
-    @param _duration Lock time in seconds.
-    @param _beneficiary Address to mint the banny.
-  */
-  function lockUnclaimed(
-    address _account,
-    uint256 _amount,
-    uint48 _duration,
-    address _beneficiary
-  ) external nonReentrant {
-    // Duration must match.
-    if (
-      _duration != _ONE_THOUSAND_DAYS &&
-      _duration != _TWO_HUNDRED_FIFTY_DAYS &&
-      _duration != _ONE_HUNDRED_DAYS &&
-      _duration != _TWENTY_FIVE_DAYS &&
-      _duration != _TEN_DAYS
-    ) {
-      revert INVALID_DURATION();
+    if (_useErc20) {
+      // Transfer the token to this contract where they'll be locked.
+      token.transferFrom(msg.sender, address(this), _amount);
+    } else {
+      // Transfer the token to this contract where they'll be locked.
+      tokenStore.transferTo(address(this), msg.sender, projectId, _amount);
     }
-
-    // Make sure the msg.sender is locking its own tokens.
-    if (msg.sender != _account) {
-      revert INVALID_ACCOUNT();
-    }
-
-    // Make sure the token balance of the account is enough to lock the specified _amount of tokens.
-    if (token.balanceOf(_account) < _amount) {
-      revert INSUFFICIENT_BALANCE();
-    }
-
-    // Increment the number of ve positions that have been minted.
-    count += 1;
-
-    // Calculate the time when this lock will end (in seconds).
-    uint48 _lockedUntil = uint48(block.timestamp) + _duration;
-
-    // Store packed specification values for the ve position.
-    // _amount in the bits 0-151.
-    uint256 packedValue = _amount;
-    // _duration in the bits 152-199.
-    packedValue |= _duration << 152;
-    // _lockedUntil in the bits 200-247.
-    packedValue |= _lockedUntil << 200;
-    // _isErc20 in bit 248.
-    packedValue |= 1 << 248;
-
-    _packedSpecs[count] = packedValue;
-
-    // Mint the position for the beneficiary.
-    _mint(_beneficiary, count);
-
-    // Transfer the token to this contract where they'll be locked.
-    tokenStore.transferTo(address(this), msg.sender, projectId, _amount);
 
     // Emit event.
     emit Lock(_account, _amount, _duration, _beneficiary, _lockedUntil, msg.sender);
