@@ -573,10 +573,10 @@
     "@ethersproject/properties" "^5.5.0"
     "@ethersproject/strings" "^5.5.0"
 
-"@jbx-protocol/contracts-v2@^0.0.4":
-  version "0.0.4"
-  resolved "https://registry.yarnpkg.com/@jbx-protocol/contracts-v2/-/contracts-v2-0.0.4.tgz#58359ea24bb20d6e9bf5fb50d5ce48e1499c6ef5"
-  integrity sha512-oiHrZ9QM/6GqSFZx33g/qGhvhtsbMQQa96Coxwj1TbJyM4Vh1Bl3E/DZjzixJds18NaK4SkKqUBCTfiJjs7S0A==
+"@jbx-protocol/contracts-v2@^0.0.5":
+  version "0.0.5"
+  resolved "https://registry.yarnpkg.com/@jbx-protocol/contracts-v2/-/contracts-v2-0.0.5.tgz#b58ce9db7bf85af051e8a9c034e7982fb4ad506c"
+  integrity sha512-Q3ChDbDNBgynAyDIRIdy3AGpOWJEALlQJDMt+g6zVbaqxnM0Yz6rZ6+m6lLRkz1vSv1jponNyaHIftjn/g+jnw==
   dependencies:
     "@chainlink/contracts" "^0.1.6"
     "@nomiclabs/hardhat-etherscan" "^2.1.4"
