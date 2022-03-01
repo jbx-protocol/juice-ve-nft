@@ -70,7 +70,7 @@ contract JBveBanny is ERC721Votes, ERC721Enumerable, Ownable, ReentrancyGuard, J
     @notice 
     IJBToken Instance
   */
-  IJBToken public immutable token;
+  IJBToken public token;
 
   /** 
     @notice 
@@ -141,9 +141,14 @@ contract JBveBanny is ERC721Votes, ERC721Enumerable, Ownable, ReentrancyGuard, J
     address _beneficiary,
     bool _useJbToken
   ) external nonReentrant requirePermission(_account, projectId, JBStakingOperations.LOCK) {
-    // The project's token must not have changed since this contract was deployed.
-    if (tokenStore.tokenOf(projectId) != token) {
-      revert TOKEN_MISMATCH();
+    if (_useJbToken) {
+      // If a token wasn't set when this contract was deployed but is set now, set it.
+      if (token == IJBToken(address(0)) && tokenStore.tokenOf(projectId) != IJBToken(address(0))) {
+        token = tokenStore.tokenOf(projectId);
+        // The project's token must not have changed since this token was originally set.
+      } else if (tokenStore.tokenOf(projectId) != token) {
+        revert TOKEN_MISMATCH();
+      }
     }
 
     // Duration must match.
