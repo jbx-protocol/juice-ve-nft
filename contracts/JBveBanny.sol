@@ -19,7 +19,7 @@ error INVALID_ACCOUNT();
 error INSUFFICIENT_BALANCE();
 error INSUFFICIENT_ALLOWANCE();
 error LOCK_PERIOD_NOT_OVER();
-error INVALID_DURATION();
+error INVALID_LOCK_DURATION();
 error TOKEN_MISMATCH();
 error INVALID_LOCK_EXTENSION();
 
@@ -179,7 +179,7 @@ contract JBveBanny is ERC721Votes, ERC721Enumerable, Ownable, ReentrancyGuard, J
 
     // Duration must match.
     if (!_isLockDurationAcceptable(_duration)) {
-      revert INVALID_DURATION();
+      revert INVALID_LOCK_DURATION();
     }
 
     // Make sure the token balance of the account is enough to lock the specified _amount of tokens.
@@ -278,7 +278,7 @@ contract JBveBanny is ERC721Votes, ERC721Enumerable, Ownable, ReentrancyGuard, J
   {
     // Duration must match.
     if (!_isLockDurationAcceptable(_updatedDuration)) {
-      revert INVALID_DURATION();
+      revert INVALID_LOCK_DURATION();
     }
 
     (, , uint256 _lockedUntil, ) = getSpecs(_tokenId);

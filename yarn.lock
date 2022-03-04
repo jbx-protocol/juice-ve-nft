@@ -573,10 +573,10 @@
     "@ethersproject/properties" "^5.5.0"
     "@ethersproject/strings" "^5.5.0"
 
-"@jbx-protocol/contracts-v2@^0.0.5":
-  version "0.0.5"
-  resolved "https://registry.yarnpkg.com/@jbx-protocol/contracts-v2/-/contracts-v2-0.0.5.tgz#b58ce9db7bf85af051e8a9c034e7982fb4ad506c"
-  integrity sha512-Q3ChDbDNBgynAyDIRIdy3AGpOWJEALlQJDMt+g6zVbaqxnM0Yz6rZ6+m6lLRkz1vSv1jponNyaHIftjn/g+jnw==
+"@jbx-protocol/contracts-v2@^0.0.6":
+  version "0.0.6"
+  resolved "https://registry.yarnpkg.com/@jbx-protocol/contracts-v2/-/contracts-v2-0.0.6.tgz#7f1e94d951d770e10dfd5f46109586c0d545cbc5"
+  integrity sha512-PCy06LIb6pZLWlpIwbsJ6O7h80JtZwm986RQT6Qv4W0oObKaHEDxYbU5CyjvxsaSg+z6rwcCjaUXubp+bwfB3w==
   dependencies:
     "@chainlink/contracts" "^0.1.6"
     "@nomiclabs/hardhat-etherscan" "^2.1.4"
@@ -811,10 +811,10 @@
   resolved "https://registry.yarnpkg.com/@truffle/blockchain-utils/-/blockchain-utils-0.1.0.tgz#96742866e5d0274dd715402610162dbf51e31e6f"
   integrity sha512-9mzYXPQkjOc23rHQM1i630i3ackITWP1cxf3PvBObaAnGqwPCQuqtmZtNDPdvN+YpOLpBGpZIdYolI91xLdJNQ==
 
-"@truffle/codec@^0.12.0":
-  version "0.12.0"
-  resolved "https://registry.yarnpkg.com/@truffle/codec/-/codec-0.12.0.tgz#65f795f87a58b0fea3e8f4532ee1c949319f48ec"
-  integrity sha512-DE/26w5jtBPPqVBseLX1cL0i3b3IUnHaHtKmQvqkEatd6T+uZfPIaiI15ru8cynR7KrYNhuSfeq9k8/N+OFN1Q==
+"@truffle/codec@^0.12.1":
+  version "0.12.1"
+  resolved "https://registry.yarnpkg.com/@truffle/codec/-/codec-0.12.1.tgz#06e12357996f84853044c80258a9bf56117f8144"
+  integrity sha512-Qkr6aZmm5UmFZ8KOdzbqwI02h6zE0p12gn/kM9ZfNBZI7/X/dsnBVBAhoMAp5lCHVqhh14bXXnLOzsQ7SkRolA==
   dependencies:
     "@truffle/abi-utils" "^0.2.9"
     "@truffle/compile-common" "^0.7.28"
@@ -822,10 +822,7 @@
     bn.js "^5.1.3"
     cbor "^5.1.0"
     debug "^4.3.1"
-    lodash.clonedeep "^4.5.0"
-    lodash.escaperegexp "^4.1.2"
-    lodash.partition "^4.6.0"
-    lodash.sum "^4.0.2"
+    lodash "^4.17.21"
     semver "^7.3.4"
     utf8 "^3.0.0"
     web3-utils "1.5.3"
@@ -847,14 +844,14 @@
     debug "^4.3.1"
 
 "@truffle/contract@^4.3.8":
-  version "4.4.10"
-  resolved "https://registry.yarnpkg.com/@truffle/contract/-/contract-4.4.10.tgz#4bf7f803feb202ed3b80391020f874664aacbad2"
-  integrity sha512-UsAZuVZ9V0oRNLR599VLuOQd5sPc5kjXRKRRGEYfB3mmnPfrJCnlSzfC5bzbGHanx6hmct3epD4Y/EFhoAit4A==
+  version "4.4.11"
+  resolved "https://registry.yarnpkg.com/@truffle/contract/-/contract-4.4.11.tgz#ab49c88e9448fa6a4a15e045fe5e5317b52406ee"
+  integrity sha512-U5z2j3rU5JYkWeHGQL2518CKQE/arv7Oe3FVpIxUYW/d8M4F90P+/2edT/cRS+ftinMvD5svaI1lt6bO3xghBw==
   dependencies:
     "@ensdomains/ensjs" "^2.0.1"
     "@truffle/blockchain-utils" "^0.1.0"
     "@truffle/contract-schema" "^3.4.5"
-    "@truffle/debug-utils" "^6.0.10"
+    "@truffle/debug-utils" "^6.0.11"
     "@truffle/error" "^0.1.0"
     "@truffle/interface-adapter" "^0.5.11"
     bignumber.js "^7.2.1"
@@ -866,12 +863,12 @@
     web3-eth-abi "1.5.3"
     web3-utils "1.5.3"
 
-"@truffle/debug-utils@^6.0.10":
-  version "6.0.10"
-  resolved "https://registry.yarnpkg.com/@truffle/debug-utils/-/debug-utils-6.0.10.tgz#3569500c4582b691d204468c17fe490867a370b6"
-  integrity sha512-ZK9gwhfqJLnrPBIWe4tUmdm01KnLcbzoJHze18/Z4/dJxp7xfLAW/iL6RiKSA3+LBy85g49gt508DCYtQkDs9w==
+"@truffle/debug-utils@^6.0.11":
+  version "6.0.11"
+  resolved "https://registry.yarnpkg.com/@truffle/debug-utils/-/debug-utils-6.0.11.tgz#4a144cd8e3d306cc0c03aebcf85fbf0235d219a3"
+  integrity sha512-NB4VNMgY4okYmM8tsp9VQCdAuVN/jSTcLkJkr/5yjUSmUDqw5ZhF+MHt6y2a6vpxBadJmkq8465GyX91IkOwyA==
   dependencies:
-    "@truffle/codec" "^0.12.0"
+    "@truffle/codec" "^0.12.1"
     "@trufflesuite/chromafi" "^3.0.0"
     bn.js "^5.1.3"
     chalk "^2.4.2"
@@ -5095,9 +5092,9 @@ has-symbol-support-x@^1.4.1:
   integrity sha512-3ToOva++HaW+eCpgqZrCfN51IPB+7bJNVT6CUATzueB5Heb8o6Nam0V3HG5dlDvZU1Gn5QLcbahiKw/XVk5JJw==
 
 has-symbols@^1.0.0, has-symbols@^1.0.1, has-symbols@^1.0.2:
-  version "1.0.2"
-  resolved "https://registry.yarnpkg.com/has-symbols/-/has-symbols-1.0.2.tgz#165d3070c00309752a1236a479331e3ac56f1423"
-  integrity sha512-chXa79rL/UC2KlX17jo3vRGz0azaWEx5tGqZg5pO3NUyEJVB17dMruQlzCCOfUvElghKcm5194+BCRvi2Rv/Gw==
+  version "1.0.3"
+  resolved "https://registry.yarnpkg.com/has-symbols/-/has-symbols-1.0.3.tgz#bb7b2c4349251dce87b125f7bdf874aa7c8b39f8"
+  integrity sha512-l3LCuF6MgDNwTDKkdYGEihYjt5pRPbEg46rtlmnSPlUbgmB8LOIrKJbYYFBSbnPaJexMKtiPO8hmeRjRz2Td+A==
 
 has-to-string-tag-x@^1.2.0:
   version "1.4.1"
@@ -6348,30 +6345,10 @@ lodash.assign@^4.0.3, lodash.assign@^4.0.6:
   resolved "https://registry.yarnpkg.com/lodash.assign/-/lodash.assign-4.2.0.tgz#0d99f3ccd7a6d261d19bdaeb9245005d285808e7"
   integrity sha1-DZnzzNem0mHRm9rrkkUAXShYCOc=
 
-lodash.clonedeep@^4.5.0:
-  version "4.5.0"
-  resolved "https://registry.yarnpkg.com/lodash.clonedeep/-/lodash.clonedeep-4.5.0.tgz#e23f3f9c4f8fbdde872529c1071857a086e5ccef"
-  integrity sha1-4j8/nE+Pvd6HJSnBBxhXoIblzO8=
-
-lodash.escaperegexp@^4.1.2:
-  version "4.1.2"
-  resolved "https://registry.yarnpkg.com/lodash.escaperegexp/-/lodash.escaperegexp-4.1.2.tgz#64762c48618082518ac3df4ccf5d5886dae20347"
-  integrity sha1-ZHYsSGGAglGKw99Mz11YhtriA0c=
-
 lodash.merge@^4.6.2:
   version "4.6.2"
   resolved "https://registry.yarnpkg.com/lodash.merge/-/lodash.merge-4.6.2.tgz#558aa53b43b661e1925a0afdfa36a9a1085fe57a"
   integrity sha512-0KpjqXRVvrYyCsX1swR/XTK0va6VQkQM6MNo7PqW77ByjAhoARA8EfrP1N4+KlKj8YS0ZUCtRT/YUuhyYDujIQ==
-
-lodash.partition@^4.6.0:
-  version "4.6.0"
-  resolved "https://registry.yarnpkg.com/lodash.partition/-/lodash.partition-4.6.0.tgz#a38e46b73469e0420b0da1212e66d414be364ba4"
-  integrity sha1-o45GtzRp4EILDaEhLmbUFL42S6Q=
-
-lodash.sum@^4.0.2:
-  version "4.0.2"
-  resolved "https://registry.yarnpkg.com/lodash.sum/-/lodash.sum-4.0.2.tgz#ad90e397965d803d4f1ff7aa5b2d0197f3b4637b"
-  integrity sha1-rZDjl5ZdgD1PH/eqWy0Bl/O0Y3s=
 
 lodash@4.17.20:
   version "4.17.20"
@@ -6510,9 +6487,9 @@ match-all@^1.2.6:
   integrity sha512-0EESkXiTkWzrQQntBu2uzKvLu6vVkUGz40nGPbSZuegcfE5UuSzNjLaIu76zJWuaT/2I3Z/8M06OlUOZLGwLlQ==
 
 mathjs@^10.1.1:
-  version "10.2.0"
-  resolved "https://registry.yarnpkg.com/mathjs/-/mathjs-10.2.0.tgz#d75af9f1fd0232f950b57fd8127a33ab04ecd2ac"
-  integrity sha512-SSr0E069ZePcqxlxG9QnPYFk+JZbY9L1d7bm/C/ySsOEvHvDGixTtlXwYXvkCWX+mtk1KmlluB6ShpXu53TEvw==
+  version "10.3.0"
+  resolved "https://registry.yarnpkg.com/mathjs/-/mathjs-10.3.0.tgz#24424e6820299b6d2144d6b5f33a3819b1338de5"
+  integrity sha512-SHWkCPOMYNUyBc4FW27dg/s3P7iWBF9fmhAsIKxEyDRilymtPKhm4QVvdDP9TvXPn3w8J1pHhfNoC/b606H2ng==
   dependencies:
     "@babel/runtime" "^7.17.2"
     complex.js "^2.0.15"
@@ -10148,9 +10125,9 @@ web3-utils@1.5.3:
     utf8 "3.0.0"
 
 web3-utils@^1.0.0-beta.31, web3-utils@^1.3.0:
-  version "1.7.0"
-  resolved "https://registry.yarnpkg.com/web3-utils/-/web3-utils-1.7.0.tgz#c59f0fd43b2449357296eb54541810b99b1c771c"
-  integrity sha512-O8Tl4Ky40Sp6pe89Olk2FsaUkgHyb5QAXuaKo38ms3CxZZ4d3rPGfjP9DNKGm5+IUgAZBNpF1VmlSmNCqfDI1w==
+  version "1.7.1"
+  resolved "https://registry.yarnpkg.com/web3-utils/-/web3-utils-1.7.1.tgz#77d8bacaf426c66027d8aa4864d77f0ed211aacd"
+  integrity sha512-fef0EsqMGJUgiHPdX+KN9okVWshbIumyJPmR+btnD1HgvoXijKEkuKBv0OmUqjbeqmLKP2/N9EiXKJel5+E1Dw==
   dependencies:
     bn.js "^4.11.9"
     ethereum-bloom-filters "^1.0.6"
