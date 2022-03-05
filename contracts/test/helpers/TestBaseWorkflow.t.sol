@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.6;
 
-import './DSTest.sol';
-import './hevm.sol';
+import './DSTest.t.sol';
+import './hevm.t.sol';
 import '../../JBveBanny.sol';
 import '../../JBVeTokenUriResolver.sol';
 
@@ -13,6 +13,15 @@ import '@jbx-protocol/contracts-v2/contracts/JBTokenStore.sol';
 import '@jbx-protocol/contracts-v2/contracts/JBFundingCycleStore.sol';
 import '@jbx-protocol/contracts-v2/contracts/JBSplitsStore.sol';
 import '@jbx-protocol/contracts-v2/contracts/JBController.sol';
+
+import '@jbx-protocol/contracts-v2/contracts/structs/JBProjectMetadata.sol';
+import '@jbx-protocol/contracts-v2/contracts/structs/JBFundingCycleData.sol';
+import '@jbx-protocol/contracts-v2/contracts/structs/JBFundingCycleMetadata.sol';
+import '@jbx-protocol/contracts-v2/contracts/structs/JBGroupedSplits.sol';
+import '@jbx-protocol/contracts-v2/contracts/structs/JBFundAccessConstraints.sol';
+import '@jbx-protocol/contracts-v2/contracts/interfaces/IJBTerminal.sol';
+import '@jbx-protocol/contracts-v2/contracts/interfaces/IJBToken.sol';
+
 
 // Base contract for Juicebox system tests.
 //
@@ -42,6 +51,18 @@ abstract contract TestBaseWorkflow is DSTest {
   JBSplitsStore private _jbSplitsStore;
   // JBController
   JBController private _jbController;
+
+  JBProjectMetadata private _projectMetadata;
+  JBFundingCycleData private _data;
+  JBFundingCycleMetadata private _metadata;
+  JBGroupedSplits[] private _groupedSplits; // Default empty
+  JBFundAccessConstraints[] private _fundAccessConstraints; // Default empty
+  IJBTerminal[] private _terminals; // Default empty
+
+  uint256 private _projectId;
+  address private _projectOwner;
+  uint256 private _reservedRate = 5000;
+
   // JBveBanny
   JBveBanny private _jbveBanny;
   // JBVeTokenUriResolver
@@ -91,6 +112,10 @@ abstract contract TestBaseWorkflow is DSTest {
     return _jbveTokenUriResolver;
   }
 
+  function projectID() internal view returns (uint256) {
+    return _projectId;
+  }
+
   //*********************************************************************//
   // --------------------------- test setup ---------------------------- //
   //*********************************************************************//
@@ -103,9 +128,78 @@ abstract contract TestBaseWorkflow is DSTest {
     _jbProjects = new JBProjects(_jbOperatorStore);
     // JBDirectory
     _jbDirectory = new JBDirectory(_jbOperatorStore, _jbProjects);
+    // JBFundingCycleStore
+    _jbFundingCycleStore = new JBFundingCycleStore(_jbDirectory);
     // JBTokenStore
     _jbTokenStore = new JBTokenStore(_jbOperatorStore, _jbProjects, _jbDirectory);
+    // JBSplitsStore
+    _jbSplitsStore = new JBSplitsStore(_jbOperatorStore, _jbProjects, _jbDirectory);
+    // JBController
+    _jbController = new JBController(
+      _jbOperatorStore,
+      _jbProjects,
+      _jbDirectory,
+      _jbFundingCycleStore,
+      _jbTokenStore,
+      _jbSplitsStore
+    );
+    _jbDirectory.addToSetControllerAllowlist(address(_jbController));
     // JBVeTokenUriResolver
     _jbveTokenUriResolver = new JBVeTokenUriResolver();
+
+
+    _projectMetadata = JBProjectMetadata({content: 'myIPFSHash', domain: 1});
+
+    _data = JBFundingCycleData({
+      duration: 14,
+      weight: 1000 * 10**18,
+      discountRate: 450000000,
+      ballot: IJBFundingCycleBallot(address(0))
+    });
+
+    _metadata = JBFundingCycleMetadata({
+      reservedRate: _reservedRate,
+      redemptionRate: 5000,
+      ballotRedemptionRate: 0,
+      pausePay: false,
+      pauseDistributions: false,
+      pauseRedeem: false,
+      pauseMint: false,
+      pauseBurn: false,
+      allowChangeToken: true,
+      allowTerminalMigration: false,
+      allowControllerMigration: false,
+      holdFees: false,
+      useLocalBalanceForRedemptions: false,
+      useDataSourceForPay: false,
+      useDataSourceForRedeem: false,
+      dataSource: IJBFundingCycleDataSource(address(0))
+    });
+
+    _projectOwner = multisig();
+
+    _projectId = _jbController.launchProjectFor(
+      _projectOwner,
+      _projectMetadata,
+      _data,
+      _metadata,
+      block.timestamp,
+      _groupedSplits,
+      _fundAccessConstraints,
+      _terminals
+    );
+
+    // calls will originate from projectOwner addr
+    evm.startPrank(_projectOwner);
+
+    // issue an ERC-20 token for project
+    _jbController.issueTokenFor(_projectId, 'TestName', 'TestSymbol');
+
+    // create a new IJBToken and change it's owner to the tokenStore
+    IJBToken _newToken = new JBToken('NewTestName', 'NewTestSymbol');
+    _newToken.transferOwnership(address(_jbTokenStore));
+
+    // change the projects token to _newToken
+    _jbController.changeTokenOf(_projectId, _newToken, address(0));
   }
 }
