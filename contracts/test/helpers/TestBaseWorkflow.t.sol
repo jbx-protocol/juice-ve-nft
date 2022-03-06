@@ -21,9 +21,10 @@ import '@jbx-protocol/contracts-v2/contracts/structs/JBGroupedSplits.sol';
 import '@jbx-protocol/contracts-v2/contracts/structs/JBFundAccessConstraints.sol';
 import '@jbx-protocol/contracts-v2/contracts/interfaces/IJBTerminal.sol';
 import '@jbx-protocol/contracts-v2/contracts/interfaces/IJBToken.sol';
+import '@jbx-protocol/contracts-v2/contracts/interfaces/IJBTokenStore.sol';
+import '@jbx-protocol/contracts-v2/contracts/abstract/JBOperatable.sol';
 
-
-// Base contract for Juicebox system tests.
+// Base contract for JBX Banny system tests.
 //
 // Provides common functionality, such as deploying contracts on test setup.
 abstract contract TestBaseWorkflow is DSTest {
@@ -51,22 +52,25 @@ abstract contract TestBaseWorkflow is DSTest {
   JBSplitsStore private _jbSplitsStore;
   // JBController
   JBController private _jbController;
-
+    // JBVeTokenUriResolver
+  JBVeTokenUriResolver private _jbveTokenUriResolver;
+  // JBProjectMetadata
   JBProjectMetadata private _projectMetadata;
+    // JBFundingCycleData
   JBFundingCycleData private _data;
+    // JBFundingCycleMetadata
   JBFundingCycleMetadata private _metadata;
-  JBGroupedSplits[] private _groupedSplits; // Default empty
-  JBFundAccessConstraints[] private _fundAccessConstraints; // Default empty
-  IJBTerminal[] private _terminals; // Default empty
+    // JBGroupedSplits
+  JBGroupedSplits[] private _groupedSplits;
+    // JBFundAccessConstraints
+  JBFundAccessConstraints[] private _fundAccessConstraints;
+    // IJBTerminal
+  IJBTerminal[] private _terminals;
 
   uint256 private _projectId;
   address private _projectOwner;
   uint256 private _reservedRate = 5000;
 
-  // JBveBanny
-  JBveBanny private _jbveBanny;
-  // JBVeTokenUriResolver
-  JBVeTokenUriResolver private _jbveTokenUriResolver;
 
   //*********************************************************************//
   // ------------------------- internal views -------------------------- //
@@ -102,10 +106,6 @@ abstract contract TestBaseWorkflow is DSTest {
 
   function jbController() internal view returns (JBController) {
     return _jbController;
-  }
-
-  function jbveBanny() internal view returns (JBveBanny) {
-    return _jbveBanny;
   }
 
   function jbveTokenUriResolver() internal view returns (JBVeTokenUriResolver) {
@@ -147,7 +147,7 @@ abstract contract TestBaseWorkflow is DSTest {
     // JBVeTokenUriResolver
     _jbveTokenUriResolver = new JBVeTokenUriResolver();
 
-
+    // issuing token to be used for banny tests
     _projectMetadata = JBProjectMetadata({content: 'myIPFSHash', domain: 1});
 
     _data = JBFundingCycleData({
