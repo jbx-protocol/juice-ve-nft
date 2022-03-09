@@ -325,7 +325,7 @@ contract JBveBanny is ERC721Votes, ERC721Enumerable, Ownable, ReentrancyGuard, J
   */
   function tokenURI(uint256 _tokenId) public view override returns (string memory) {
     (uint256 _amount, uint256 _duration, uint256 _lockedUntil, ) = getSpecs(_tokenId);
-    return uriResolver.tokenURI(_tokenId, _amount, _duration, _lockedUntil);
+    return uriResolver.tokenURI(_tokenId, _amount, _duration, _lockedUntil, lockDurationOptions);
   }
 
   /**
