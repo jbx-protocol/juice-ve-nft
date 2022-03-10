@@ -17,3 +17,5 @@ coverage.json
 
 # VSCode
 workspace.code-workspace
+
+*.log

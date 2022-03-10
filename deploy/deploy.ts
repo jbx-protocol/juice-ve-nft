@@ -1,4 +1,4 @@
-const { ethers } = require('hardhat');
+// import { ethers } from 'hardhat';
 
 /**
  * Deploys the JBX STaking Contracts.
@@ -8,8 +8,8 @@ const { ethers } = require('hardhat');
  * npx hardhat deploy --network rinkeby
  *
  */
-module.exports = async ({ getNamedAccounts, deployments, getChainId }) => {
-  const { deploy } = deployments;
+export default async ({ getNamedAccounts, deployments, getChainId }: { [k: string]: Function }) => {
+  // const { deploy } = deployments;
   const { deployer } = await getNamedAccounts();
 
   let multisigAddress;
@@ -18,11 +18,11 @@ module.exports = async ({ getNamedAccounts, deployments, getChainId }) => {
   switch (await getChainId()) {
     // mainnet
     case '1':
-      multisigAddress = '0xAF28bcB48C40dBC86f52D459A6562F658fc94B1e';
+      multisigAddress = '0x23cB4bD6007b75dD34f43F1fE593C167A39f0A29';
       break;
     // rinkeby
     case '4':
-      multisigAddress = '0x69C6026e3938adE9e1ddE8Ff6A37eC96595bF1e1';
+      multisigAddress = '0x1d98FdCB503E5013ABF779Cb0fFbE2a30B740AE7';
       break;
     // hardhat / localhost
     case '31337':
@@ -31,5 +31,4 @@ module.exports = async ({ getNamedAccounts, deployments, getChainId }) => {
   }
 
   console.log({ multisigAddress });
-
 };
