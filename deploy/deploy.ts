@@ -1,4 +1,4 @@
-// import { ethers } from 'hardhat';
+import { DeployFunction } from 'hardhat-deploy/dist/types';
 
 /**
  * Deploys the JBX STaking Contracts.
@@ -8,8 +8,8 @@
  * npx hardhat deploy --network rinkeby
  *
  */
-export default async ({ getNamedAccounts, deployments, getChainId }: { [k: string]: Function }) => {
-  // const { deploy } = deployments;
+const fn: DeployFunction = async ({ getNamedAccounts, deployments, getChainId }) => {
+  const { deploy } = deployments;
   const { deployer } = await getNamedAccounts();
 
   let multisigAddress;
@@ -31,4 +31,12 @@ export default async ({ getNamedAccounts, deployments, getChainId }: { [k: strin
   }
 
   console.log({ multisigAddress });
+
+  const JBVeTokenUriResolver = await deploy('JBVeTokenUriResolver', {
+    from: deployer,
+    args: [],
+  });
+  console.log({ address: JBVeTokenUriResolver.address });
 };
+
+export default fn;
