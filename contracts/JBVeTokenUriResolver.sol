@@ -188,13 +188,18 @@ contract JBVeTokenUriResolver {
     if (_duration <= 0) {
       revert INVALID_DURATION();
     }
+    // Convert the token amount and duration to indexes
     uint256 _tokenRange = getTokenRange(_amount);
-    uint256 _stakeMultiplier = getTokenDuration(_duration);
+    uint256 _stakeDuration = getTokenDuration(_duration);
+    /*
+      To account for multiplicative identity and since we don't have zero as an index we 
+      can do the following magic to insure proper Banny character assignment.
+    */
     return
       string(
         abi.encodePacked(
           'ipfs://QmauKpZU5NyDWJBkcFZGLCcbXLXZV4z86k2Mhi3sPHvuUZ/',
-          Strings.toString(_tokenRange * 5 - 5 + _stakeMultiplier)
+          Strings.toString(_tokenRange * 5 - 5 + _stakeDuration)
         )
       );
   }
