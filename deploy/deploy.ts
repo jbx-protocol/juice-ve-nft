@@ -18,11 +18,11 @@ const fn: DeployFunction = async ({ getNamedAccounts, deployments, getChainId })
   switch (await getChainId()) {
     // mainnet
     case '1':
-      multisigAddress = '0x23cB4bD6007b75dD34f43F1fE593C167A39f0A29';
+      multisigAddress = deployer;
       break;
     // rinkeby
     case '4':
-      multisigAddress = '0x1d98FdCB503E5013ABF779Cb0fFbE2a30B740AE7';
+      multisigAddress = deployer;
       break;
     // hardhat / localhost
     case '31337':

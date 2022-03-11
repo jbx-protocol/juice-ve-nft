@@ -23,6 +23,7 @@
     "typechain/**/*",
     "types/**/*",
     "previous/TemplateToken_v2.behavior.ts",
-    "./deploy/*"
+    "./deploy/*",
+    "./scripts/*",
   ]
 }

@@ -190,6 +190,12 @@ contract JBVeTokenUriResolver {
     }
     uint256 _tokenRange = getTokenRange(_amount);
     uint256 _stakeMultiplier = getTokenDuration(_duration);
-    return string(abi.encodePacked('ipfs://QmVicV3vNyPKtKxYPPPiVKxaAFa8X2kP5xys6NFhiHf8zj/', Strings.toString(_tokenRange * _stakeMultiplier)));
+    return
+      string(
+        abi.encodePacked(
+          'ipfs://QmauKpZU5NyDWJBkcFZGLCcbXLXZV4z86k2Mhi3sPHvuUZ/',
+          Strings.toString(_tokenRange * 5 - 5 + _stakeMultiplier)
+        )
+      );
   }
 }
