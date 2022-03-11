@@ -12,14 +12,7 @@ const amounts = [
   20000001, 40000001, 50000001, 100000001, 500000001, 700000001,
 ];
 
-async function main() {
-  //   const [signer] = await ethers.getSigners();
-  //   const contract = new ethers.Contract(
-  //     JBVeTokenUriResolver.address,
-  //     JBVeTokenUriResolver.abi,
-  //     signer,
-  //   );
-  //   console.log(contract);
+async function simulate(): Promise<void> {
   let str = '';
   for (const amount of amounts) {
     for (const duration of durations) {
@@ -27,12 +20,10 @@ async function main() {
     }
     str += '\n';
   }
-
-  // writeFileSync(resolve(__dirname, '../out.csv'), str);
   console.log(str);
 }
 
-main();
+simulate();
 
 function getTokenRange(_amount: number) {
   if (_amount <= 0) {
