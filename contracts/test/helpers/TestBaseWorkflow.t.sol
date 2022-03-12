@@ -194,12 +194,5 @@ abstract contract TestBaseWorkflow is DSTest {
 
     // issue an ERC-20 token for project
     _jbController.issueTokenFor(_projectId, 'TestName', 'TestSymbol');
-
-    // create a new IJBToken and change it's owner to the tokenStore
-    IJBToken _newToken = new JBToken('NewTestName', 'NewTestSymbol');
-    _newToken.transferOwnership(address(_jbTokenStore));
-
-    // change the projects token to _newToken
-    _jbController.changeTokenOf(_projectId, _newToken, address(0));
   }
 }
