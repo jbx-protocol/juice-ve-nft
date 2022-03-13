@@ -13,6 +13,7 @@ import '@jbx-protocol/contracts-v2/contracts/JBTokenStore.sol';
 import '@jbx-protocol/contracts-v2/contracts/JBFundingCycleStore.sol';
 import '@jbx-protocol/contracts-v2/contracts/JBSplitsStore.sol';
 import '@jbx-protocol/contracts-v2/contracts/JBController.sol';
+import '@jbx-protocol/contracts-v2/contracts/JBToken.sol';
 
 import '@jbx-protocol/contracts-v2/contracts/structs/JBProjectMetadata.sol';
 import '@jbx-protocol/contracts-v2/contracts/structs/JBFundingCycleData.sol';
@@ -116,6 +117,10 @@ abstract contract TestBaseWorkflow is DSTest {
     return _projectId;
   }
 
+  function projectOwner() internal view returns (address) {
+    return _projectOwner;
+  }
+
   //*********************************************************************//
   // --------------------------- test setup ---------------------------- //
   //*********************************************************************//
@@ -191,7 +196,6 @@ abstract contract TestBaseWorkflow is DSTest {
 
     // calls will originate from projectOwner addr
     evm.startPrank(_projectOwner);
-
     // issue an ERC-20 token for project
     _jbController.issueTokenFor(_projectId, 'TestName', 'TestSymbol');
   }
