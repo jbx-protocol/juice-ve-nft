@@ -2,7 +2,6 @@ pragma solidity 0.8.6;
 
 import './helpers/TestBaseWorkflow.t.sol';
 import '../interfaces/IJBVeTokenUriResolver.sol';
-import "hardhat/console.sol";
 
 contract JBveBannyTests is TestBaseWorkflow {
   //*********************************************************************//
@@ -67,8 +66,9 @@ contract JBveBannyTests is TestBaseWorkflow {
     _token.approveSpender(address(_jbveBanny), 10 ether);
     _jbveBanny.lock(_projectOwner, 10 ether, 864000, _projectOwner, true);
     assertEq(_jbveBanny.ownerOf(1), _projectOwner);
-    (uint256 amount, , , bool isJbToken) = _jbveBanny.getSpecs(1);
+    (uint256 amount, uint256 duration, , bool isJbToken) = _jbveBanny.getSpecs(1);
     assertEq(amount, 10 ether);
+    assertEq(duration, 864000);
     assert(isJbToken);
   }
 }

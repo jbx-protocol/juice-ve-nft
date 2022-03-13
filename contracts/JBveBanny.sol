@@ -353,9 +353,9 @@ contract JBveBanny is ERC721Votes, ERC721Enumerable, Ownable, ReentrancyGuard, J
     // amount in the bits 0-151.
     amount = uint256(uint152(_packedValue));
     // duration in the bits 152-199.
-    duration = uint256(uint48(_packedValue));
+    duration = uint256(uint48(_packedValue >> 152));
     // lockedUntil in the bits 200-247.
-    lockedUntil = uint256(uint48(_packedValue >> 200));
+    lockedUntil = uint256(uint48(_packedValue));
     // isJbToken in the bits 248.
     isJbToken = (_packedValue >> 248) & 1 == 1;
   }
