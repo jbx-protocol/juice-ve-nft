@@ -15,6 +15,7 @@ contract JBveBannyTests is TestBaseWorkflow {
   uint256 private _projectId;
   address private _projectOwner;
 
+
   //*********************************************************************//
   // --------------------------- test setup ---------------------------- //
   //*********************************************************************//
@@ -62,13 +63,28 @@ contract JBveBannyTests is TestBaseWorkflow {
     IJBToken _token = _jbTokenStore.tokenOf(_projectId);
     _projectOwner = projectOwner();
     evm.startPrank(_projectOwner);
-    _jbController.mintTokensOf(_projectId, 100 ether, _projectOwner, 'Test Memo', true, 100);
-    _token.approveSpender(address(_jbveBanny), 10 ether);
+    _jbController.mintTokensOf(_projectId, 100 ether, _projectOwner, 'Test Memo', true, true);
+    _token.approve(_projectId, address(_jbveBanny), 10 ether);
     _jbveBanny.lock(_projectOwner, 10 ether, 864000, _projectOwner, true);
     assertEq(_jbveBanny.ownerOf(1), _projectOwner);
     (uint256 amount, uint256 duration, , bool isJbToken) = _jbveBanny.getSpecs(1);
     assertEq(amount, 10 ether);
     assertEq(duration, 864000);
     assert(isJbToken);
+  }
+
+  function testUnlockingTokens() public {
+    IJBToken _token = _jbTokenStore.tokenOf(_projectId);
+    _projectOwner = projectOwner();
+    evm.startPrank(_projectOwner);
+    _jbController.mintTokensOf(_projectId, 100 ether, _projectOwner, 'Test Memo', true, true);
+    _token.approve(_projectId, address(_jbveBanny), 100 ether);
+    _jbveBanny.lock(_projectOwner, 10 ether, 864000, _projectOwner, true);
+    (, , uint256 lockedUntil,) = _jbveBanny.getSpecs(1);
+    evm.warp(lockedUntil * 2);
+    _jbveBanny.approve(address(_jbveBanny), 1);
+    _jbveBanny.unlock(1, _projectOwner);
+    assertEq(_token.balanceOf(address(_jbveBanny), _projectId), 0);
+
   }
 }
