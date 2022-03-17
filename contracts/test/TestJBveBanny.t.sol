@@ -85,6 +85,19 @@ contract JBveBannyTests is TestBaseWorkflow {
     _jbveBanny.approve(address(_jbveBanny), 1);
     _jbveBanny.unlock(1, _projectOwner);
     assertEq(_token.balanceOf(address(_jbveBanny), _projectId), 0);
+  }
 
+  function testExtendLock() public {
+    IJBToken _token = _jbTokenStore.tokenOf(_projectId);
+    _projectOwner = projectOwner();
+    evm.startPrank(_projectOwner);
+    _jbController.mintTokensOf(_projectId, 100 ether, _projectOwner, 'Test Memo', true, true);
+    _token.approve(_projectId, address(_jbveBanny), 100 ether);
+    _jbveBanny.lock(_projectOwner, 10 ether, 864000, _projectOwner, true);
+    (, , uint256 lockedUntil,) = _jbveBanny.getSpecs(1);
+    evm.warp(lockedUntil * 2);
+    _jbveBanny.extendLock(1, 8640000);
+    (, uint256 duration, ,) = _jbveBanny.getSpecs(1);
+    assertEq(duration, 8640000);
   }
 }

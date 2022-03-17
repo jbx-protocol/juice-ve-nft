@@ -281,7 +281,7 @@ contract JBveBanny is ERC721Votes, ERC721Enumerable, Ownable, ReentrancyGuard, J
       revert INVALID_LOCK_DURATION();
     }
 
-    (, , uint256 _lockedUntil, ) = getSpecs(_tokenId);
+    (uint256 _amount, , uint256 _lockedUntil, bool _useJbToken) = getSpecs(_tokenId);
 
     // Calculate the updated time when this lock will end (in seconds).
     uint256 _updatedLockedUntil = block.timestamp + _updatedDuration;
@@ -292,14 +292,14 @@ contract JBveBanny is ERC721Votes, ERC721Enumerable, Ownable, ReentrancyGuard, J
     }
 
     // fetch the stored packed value.
-    uint256 packedValue = _packedSpecs[_tokenId];
-    // update the value in these bits.
-    packedValue |= uint48(_updatedDuration << 152);
+    uint256 packedValue = _amount;
+    // _duration in the bits 152-199.
+    packedValue |= _updatedDuration << 152;
     // _lockedUntil in the bits 200-247.
-    // update the value in these bits.
-    packedValue |= uint48(_updatedLockedUntil << 200);
+    packedValue |= _updatedLockedUntil << 200;
+    // _isJbToken in bit 248.
+    if (_useJbToken) packedValue |= 1 << 248;
 
-    // update the mapping with new packed values
     _packedSpecs[_tokenId] = packedValue;
     emit ExtendLock(_tokenId, _updatedDuration, msg.sender);
   }
@@ -355,7 +355,7 @@ contract JBveBanny is ERC721Votes, ERC721Enumerable, Ownable, ReentrancyGuard, J
     // duration in the bits 152-199.
     duration = uint256(uint48(_packedValue >> 152));
     // lockedUntil in the bits 200-247.
-    lockedUntil = uint256(uint48(_packedValue));
+    lockedUntil = uint256(uint48(_packedValue) >> 200);
     // isJbToken in the bits 248.
     isJbToken = (_packedValue >> 248) & 1 == 1;
   }
