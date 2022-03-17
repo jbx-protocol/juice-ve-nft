@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 pragma solidity 0.8.6;
 
 import './helpers/TestBaseWorkflow.t.sol';
@@ -14,7 +15,6 @@ contract JBveBannyTests is TestBaseWorkflow {
   JBOperatorStore private _jbOperatorStore;
   uint256 private _projectId;
   address private _projectOwner;
-
 
   //*********************************************************************//
   // --------------------------- test setup ---------------------------- //
@@ -80,7 +80,7 @@ contract JBveBannyTests is TestBaseWorkflow {
     _jbController.mintTokensOf(_projectId, 100 ether, _projectOwner, 'Test Memo', true, true);
     _token.approve(_projectId, address(_jbveBanny), 100 ether);
     _jbveBanny.lock(_projectOwner, 10 ether, 864000, _projectOwner, true);
-    (, , uint256 lockedUntil,) = _jbveBanny.getSpecs(1);
+    (, , uint256 lockedUntil, ) = _jbveBanny.getSpecs(1);
     evm.warp(lockedUntil * 2);
     _jbveBanny.approve(address(_jbveBanny), 1);
     _jbveBanny.unlock(1, _projectOwner);
@@ -94,10 +94,11 @@ contract JBveBannyTests is TestBaseWorkflow {
     _jbController.mintTokensOf(_projectId, 100 ether, _projectOwner, 'Test Memo', true, true);
     _token.approve(_projectId, address(_jbveBanny), 100 ether);
     _jbveBanny.lock(_projectOwner, 10 ether, 864000, _projectOwner, true);
-    (, , uint256 lockedUntil,) = _jbveBanny.getSpecs(1);
+    (, uint256 d, uint256 lockedUntil, ) = _jbveBanny.getSpecs(1);
+    assertEq(d, 864000);
     evm.warp(lockedUntil * 2);
     _jbveBanny.extendLock(1, 8640000);
-    (, uint256 duration, ,) = _jbveBanny.getSpecs(1);
+    (, uint256 duration, , ) = _jbveBanny.getSpecs(1);
     assertEq(duration, 8640000);
   }
 }

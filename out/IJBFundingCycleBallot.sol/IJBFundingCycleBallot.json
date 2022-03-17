@@ -1,0 +1,53 @@
+{
+  "abi": [
+    {
+      "type": "function",
+      "name": "duration",
+      "inputs": [],
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "constant": null,
+      "stateMutability": "view"
+    },
+    {
+      "type": "function",
+      "name": "stateOf",
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "_projectId",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "_configured",
+          "type": "uint256"
+        }
+      ],
+      "outputs": [
+        {
+          "internalType": "enum JBBallotState",
+          "name": "",
+          "type": "uint8"
+        }
+      ],
+      "constant": null,
+      "stateMutability": "view"
+    }
+  ],
+  "bytecode": {
+    "object": "0x",
+    "sourceMap": "",
+    "linkReferences": {}
+  },
+  "deployed_bytecode": {
+    "object": "0x",
+    "sourceMap": "",
+    "linkReferences": {}
+  }
+}

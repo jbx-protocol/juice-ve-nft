@@ -1,0 +1,63 @@
+{
+  "abi": [
+    {
+      "type": "function",
+      "name": "allocate",
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "_amount",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "_projectId",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "_group",
+          "type": "uint256"
+        },
+        {
+          "internalType": "struct JBSplit",
+          "name": "_split",
+          "type": "tuple",
+          "components": [
+            {
+              "type": "bool"
+            },
+            {
+              "type": "uint256"
+            },
+            {
+              "type": "uint256"
+            },
+            {
+              "type": "address"
+            },
+            {
+              "type": "uint256"
+            },
+            {
+              "type": "address"
+            }
+          ]
+        }
+      ],
+      "outputs": [],
+      "constant": null,
+      "stateMutability": "payable"
+    }
+  ],
+  "bytecode": {
+    "object": "0x",
+    "sourceMap": "",
+    "linkReferences": {}
+  },
+  "deployed_bytecode": {
+    "object": "0x",
+    "sourceMap": "",
+    "linkReferences": {}
+  }
+}

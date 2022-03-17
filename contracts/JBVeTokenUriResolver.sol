@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 pragma solidity 0.8.6;
 
 contract JBVeTokenUriResolver {
@@ -16,6 +17,6 @@ contract JBVeTokenUriResolver {
     uint256 _duration,
     uint256 _lockedUntil
   ) external view returns (string memory) {
-      return 'Token URI';
+    return 'Token URI';
   }
 }

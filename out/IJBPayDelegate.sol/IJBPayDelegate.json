@@ -1,0 +1,60 @@
+{
+  "abi": [
+    {
+      "type": "function",
+      "name": "didPay",
+      "inputs": [
+        {
+          "internalType": "struct JBDidPayData",
+          "name": "_param",
+          "type": "tuple",
+          "components": [
+            {
+              "type": "address"
+            },
+            {
+              "type": "uint256"
+            },
+            {
+              "type": "address"
+            },
+            {
+              "type": "uint256"
+            },
+            {
+              "type": "uint256"
+            },
+            {
+              "type": "uint256"
+            },
+            {
+              "type": "uint256"
+            },
+            {
+              "type": "address"
+            },
+            {
+              "type": "string"
+            },
+            {
+              "type": "bytes"
+            }
+          ]
+        }
+      ],
+      "outputs": [],
+      "constant": null,
+      "stateMutability": "nonpayable"
+    }
+  ],
+  "bytecode": {
+    "object": "0x",
+    "sourceMap": "",
+    "linkReferences": {}
+  },
+  "deployed_bytecode": {
+    "object": "0x",
+    "sourceMap": "",
+    "linkReferences": {}
+  }
+}

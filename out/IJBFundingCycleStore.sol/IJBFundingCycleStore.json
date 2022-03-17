@@ -1,0 +1,357 @@
+{
+  "abi": [
+    {
+      "type": "function",
+      "name": "configureFor",
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "_projectId",
+          "type": "uint256"
+        },
+        {
+          "internalType": "struct JBFundingCycleData",
+          "name": "_data",
+          "type": "tuple",
+          "components": [
+            {
+              "type": "uint256"
+            },
+            {
+              "type": "uint256"
+            },
+            {
+              "type": "uint256"
+            },
+            {
+              "type": "address"
+            }
+          ]
+        },
+        {
+          "internalType": "uint256",
+          "name": "_metadata",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "_mustStartAtOrAfter",
+          "type": "uint256"
+        }
+      ],
+      "outputs": [
+        {
+          "internalType": "struct JBFundingCycle",
+          "name": "fundingCycle",
+          "type": "tuple",
+          "components": [
+            {
+              "type": "uint256"
+            },
+            {
+              "type": "uint256"
+            },
+            {
+              "type": "uint256"
+            },
+            {
+              "type": "uint256"
+            },
+            {
+              "type": "uint256"
+            },
+            {
+              "type": "uint256"
+            },
+            {
+              "type": "uint256"
+            },
+            {
+              "type": "address"
+            },
+            {
+              "type": "uint256"
+            }
+          ]
+        }
+      ],
+      "constant": null,
+      "stateMutability": "nonpayable"
+    },
+    {
+      "type": "function",
+      "name": "currentBallotStateOf",
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "_projectId",
+          "type": "uint256"
+        }
+      ],
+      "outputs": [
+        {
+          "internalType": "enum JBBallotState",
+          "name": "",
+          "type": "uint8"
+        }
+      ],
+      "constant": null,
+      "stateMutability": "view"
+    },
+    {
+      "type": "function",
+      "name": "currentOf",
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "_projectId",
+          "type": "uint256"
+        }
+      ],
+      "outputs": [
+        {
+          "internalType": "struct JBFundingCycle",
+          "name": "",
+          "type": "tuple",
+          "components": [
+            {
+              "type": "uint256"
+            },
+            {
+              "type": "uint256"
+            },
+            {
+              "type": "uint256"
+            },
+            {
+              "type": "uint256"
+            },
+            {
+              "type": "uint256"
+            },
+            {
+              "type": "uint256"
+            },
+            {
+              "type": "uint256"
+            },
+            {
+              "type": "address"
+            },
+            {
+              "type": "uint256"
+            }
+          ]
+        }
+      ],
+      "constant": null,
+      "stateMutability": "view"
+    },
+    {
+      "type": "function",
+      "name": "get",
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "_projectId",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "_configuration",
+          "type": "uint256"
+        }
+      ],
+      "outputs": [
+        {
+          "internalType": "struct JBFundingCycle",
+          "name": "",
+          "type": "tuple",
+          "components": [
+            {
+              "type": "uint256"
+            },
+            {
+              "type": "uint256"
+            },
+            {
+              "type": "uint256"
+            },
+            {
+              "type": "uint256"
+            },
+            {
+              "type": "uint256"
+            },
+            {
+              "type": "uint256"
+            },
+            {
+              "type": "uint256"
+            },
+            {
+              "type": "address"
+            },
+            {
+              "type": "uint256"
+            }
+          ]
+        }
+      ],
+      "constant": null,
+      "stateMutability": "view"
+    },
+    {
+      "type": "function",
+      "name": "latestConfigurationOf",
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "_projectId",
+          "type": "uint256"
+        }
+      ],
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "constant": null,
+      "stateMutability": "view"
+    },
+    {
+      "type": "function",
+      "name": "queuedOf",
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "_projectId",
+          "type": "uint256"
+        }
+      ],
+      "outputs": [
+        {
+          "internalType": "struct JBFundingCycle",
+          "name": "",
+          "type": "tuple",
+          "components": [
+            {
+              "type": "uint256"
+            },
+            {
+              "type": "uint256"
+            },
+            {
+              "type": "uint256"
+            },
+            {
+              "type": "uint256"
+            },
+            {
+              "type": "uint256"
+            },
+            {
+              "type": "uint256"
+            },
+            {
+              "type": "uint256"
+            },
+            {
+              "type": "address"
+            },
+            {
+              "type": "uint256"
+            }
+          ]
+        }
+      ],
+      "constant": null,
+      "stateMutability": "view"
+    },
+    {
+      "type": "event",
+      "name": "Configure",
+      "inputs": [
+        {
+          "name": "configuration",
+          "type": "uint256",
+          "indexed": true
+        },
+        {
+          "name": "projectId",
+          "type": "uint256",
+          "indexed": true
+        },
+        {
+          "name": "data",
+          "type": "tuple",
+          "indexed": false,
+          "components": [
+            {
+              "type": "uint256"
+            },
+            {
+              "type": "uint256"
+            },
+            {
+              "type": "uint256"
+            },
+            {
+              "type": "address"
+            }
+          ]
+        },
+        {
+          "name": "metadata",
+          "type": "uint256",
+          "indexed": false
+        },
+        {
+          "name": "mustStartAtOrAfter",
+          "type": "uint256",
+          "indexed": false
+        },
+        {
+          "name": "caller",
+          "type": "address",
+          "indexed": false
+        }
+      ],
+      "anonymous": false
+    },
+    {
+      "type": "event",
+      "name": "Init",
+      "inputs": [
+        {
+          "name": "configuration",
+          "type": "uint256",
+          "indexed": true
+        },
+        {
+          "name": "projectId",
+          "type": "uint256",
+          "indexed": true
+        },
+        {
+          "name": "basedOn",
+          "type": "uint256",
+          "indexed": true
+        }
+      ],
+      "anonymous": false
+    }
+  ],
+  "bytecode": {
+    "object": "0x",
+    "sourceMap": "",
+    "linkReferences": {}
+  },
+  "deployed_bytecode": {
+    "object": "0x",
+    "sourceMap": "",
+    "linkReferences": {}
+  }
+}
