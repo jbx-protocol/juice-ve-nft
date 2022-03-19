@@ -11,15 +11,15 @@ import '@jbx-protocol/contracts-v2/contracts/abstract/JBOperatable.sol';
 
 import './interfaces/IJBVeTokenUriResolver.sol';
 import './libraries/JBStakingOperations.sol';
+import './libraries/JBErrors.sol';
 
 //*********************************************************************//
 // --------------------------- custom errors ------------------------- //
 //*********************************************************************//
 error INVALID_ACCOUNT();
-error INSUFFICIENT_BALANCE();
+
 error INSUFFICIENT_ALLOWANCE();
 error LOCK_PERIOD_NOT_OVER();
-error INVALID_LOCK_DURATION();
 error TOKEN_MISMATCH();
 error INVALID_LOCK_EXTENSION();
 
@@ -182,13 +182,13 @@ contract JBveBanny is ERC721Votes, ERC721Enumerable, Ownable, ReentrancyGuard, J
     }
 
     // Duration must match.
-    if (!_isLockDurationAcceptable(_duration)) revert INVALID_LOCK_DURATION();
+    if (!_isLockDurationAcceptable(_duration)) revert JBErrors.INVALID_LOCK_DURATION();
 
     // Make sure the token balance of the account is enough to lock the specified _amount of tokens.
     if (_useJbToken && token.balanceOf(_account, projectId) < _amount)
-      revert INSUFFICIENT_BALANCE();
+      revert JBErrors.INSUFFICIENT_BALANCE();
     else if (!_useJbToken && tokenStore.unclaimedBalanceOf(_account, projectId) < _amount)
-      revert INSUFFICIENT_BALANCE();
+      revert JBErrors.INSUFFICIENT_BALANCE();
 
     // Increment the number of ve positions that have been minted.
     tokenId = ++count;
@@ -272,7 +272,7 @@ contract JBveBanny is ERC721Votes, ERC721Enumerable, Ownable, ReentrancyGuard, J
     requirePermission(ownerOf(_tokenId), projectId, JBStakingOperations.EXTEND_LOCK)
   {
     // Duration must match.
-    if (!_isLockDurationAcceptable(_updatedDuration)) revert INVALID_LOCK_DURATION();
+    if (!_isLockDurationAcceptable(_updatedDuration)) revert JBErrors.INVALID_LOCK_DURATION();
 
     (uint256 _amount, , uint256 _lockedUntil, bool _useJbToken) = getSpecs(_tokenId);
 
@@ -317,7 +317,7 @@ contract JBveBanny is ERC721Votes, ERC721Enumerable, Ownable, ReentrancyGuard, J
   */
   function tokenURI(uint256 _tokenId) public view override returns (string memory) {
     (uint256 _amount, uint256 _duration, uint256 _lockedUntil, ) = getSpecs(_tokenId);
-    return uriResolver.tokenURI(_tokenId, _amount, _duration, _lockedUntil);
+    return uriResolver.tokenURI(_tokenId, _amount, _duration, _lockedUntil, lockDurationOptions);
   }
 
   /**

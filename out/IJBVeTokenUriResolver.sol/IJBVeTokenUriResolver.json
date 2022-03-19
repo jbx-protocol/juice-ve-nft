@@ -21,6 +21,11 @@
           "internalType": "uint256",
           "name": "_lockedUntil",
           "type": "uint256"
+        },
+        {
+          "internalType": "uint256[]",
+          "name": "_lockDurationOptions",
+          "type": "uint256[]"
         }
       ],
       "name": "tokenURI",
