@@ -1,8 +1,43 @@
 {
   "abi": [
     {
-      "type": "function",
-      "name": "hasPermission",
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "operator",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "account",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "internalType": "uint256",
+          "name": "domain",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256[]",
+          "name": "permissionIndexes",
+          "type": "uint256[]"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "packed",
+          "type": "uint256"
+        }
+      ],
+      "name": "SetOperator",
+      "type": "event"
+    },
+    {
       "inputs": [
         {
           "internalType": "address",
@@ -25,6 +60,7 @@
           "type": "uint256"
         }
       ],
+      "name": "hasPermission",
       "outputs": [
         {
           "internalType": "bool",
@@ -32,12 +68,10 @@
           "type": "bool"
         }
       ],
-      "constant": null,
-      "stateMutability": "view"
+      "stateMutability": "view",
+      "type": "function"
     },
     {
-      "type": "function",
-      "name": "hasPermissions",
       "inputs": [
         {
           "internalType": "address",
@@ -60,6 +94,7 @@
           "type": "uint256[]"
         }
       ],
+      "name": "hasPermissions",
       "outputs": [
         {
           "internalType": "bool",
@@ -67,12 +102,10 @@
           "type": "bool"
         }
       ],
-      "constant": null,
-      "stateMutability": "view"
+      "stateMutability": "view",
+      "type": "function"
     },
     {
-      "type": "function",
-      "name": "permissionsOf",
       "inputs": [
         {
           "internalType": "address",
@@ -90,6 +123,7 @@
           "type": "uint256"
         }
       ],
+      "name": "permissionsOf",
       "outputs": [
         {
           "internalType": "uint256",
@@ -97,90 +131,68 @@
           "type": "uint256"
         }
       ],
-      "constant": null,
-      "stateMutability": "view"
+      "stateMutability": "view",
+      "type": "function"
     },
     {
-      "type": "function",
-      "name": "setOperator",
       "inputs": [
         {
+          "components": [
+            {
+              "internalType": "address",
+              "name": "operator",
+              "type": "address"
+            },
+            {
+              "internalType": "uint256",
+              "name": "domain",
+              "type": "uint256"
+            },
+            {
+              "internalType": "uint256[]",
+              "name": "permissionIndexes",
+              "type": "uint256[]"
+            }
+          ],
           "internalType": "struct JBOperatorData",
           "name": "_operatorData",
-          "type": "tuple",
+          "type": "tuple"
+        }
+      ],
+      "name": "setOperator",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
           "components": [
             {
+              "internalType": "address",
+              "name": "operator",
               "type": "address"
             },
             {
+              "internalType": "uint256",
+              "name": "domain",
               "type": "uint256"
             },
             {
+              "internalType": "uint256[]",
+              "name": "permissionIndexes",
               "type": "uint256[]"
             }
-          ]
-        }
-      ],
-      "outputs": [],
-      "constant": null,
-      "stateMutability": "nonpayable"
-    },
-    {
-      "type": "function",
-      "name": "setOperators",
-      "inputs": [
-        {
+          ],
           "internalType": "struct JBOperatorData[]",
           "name": "_operatorData",
-          "type": "tuple[]",
-          "components": [
-            {
-              "type": "address"
-            },
-            {
-              "type": "uint256"
-            },
-            {
-              "type": "uint256[]"
-            }
-          ]
+          "type": "tuple[]"
         }
       ],
+      "name": "setOperators",
       "outputs": [],
-      "constant": null,
-      "stateMutability": "nonpayable"
-    },
-    {
-      "type": "event",
-      "name": "SetOperator",
-      "inputs": [
-        {
-          "name": "operator",
-          "type": "address",
-          "indexed": true
-        },
-        {
-          "name": "account",
-          "type": "address",
-          "indexed": true
-        },
-        {
-          "name": "domain",
-          "type": "uint256",
-          "indexed": true
-        },
-        {
-          "name": "permissionIndexes",
-          "type": "uint256[]",
-          "indexed": false
-        },
-        {
-          "name": "packed",
-          "type": "uint256",
-          "indexed": false
-        }
-      ],
-      "anonymous": false
+      "stateMutability": "nonpayable",
+      "type": "function"
     }
   ],
   "bytecode": {
@@ -188,7 +200,7 @@
     "sourceMap": "",
     "linkReferences": {}
   },
-  "deployed_bytecode": {
+  "deployedBytecode": {
     "object": "0x",
     "sourceMap": "",
     "linkReferences": {}

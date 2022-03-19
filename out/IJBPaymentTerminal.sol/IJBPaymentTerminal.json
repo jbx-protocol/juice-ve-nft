@@ -1,8 +1,6 @@
 {
   "abi": [
     {
-      "type": "function",
-      "name": "addToBalanceOf",
       "inputs": [
         {
           "internalType": "uint256",
@@ -20,14 +18,14 @@
           "type": "string"
         }
       ],
+      "name": "addToBalanceOf",
       "outputs": [],
-      "constant": null,
-      "stateMutability": "payable"
+      "stateMutability": "payable",
+      "type": "function"
     },
     {
-      "type": "function",
+      "inputs": [],
       "name": "baseWeightCurrency",
-      "inputs": [],
       "outputs": [
         {
           "internalType": "uint256",
@@ -35,13 +33,12 @@
           "type": "uint256"
         }
       ],
-      "constant": null,
-      "stateMutability": "view"
+      "stateMutability": "view",
+      "type": "function"
     },
     {
-      "type": "function",
+      "inputs": [],
       "name": "currency",
-      "inputs": [],
       "outputs": [
         {
           "internalType": "uint256",
@@ -49,12 +46,10 @@
           "type": "uint256"
         }
       ],
-      "constant": null,
-      "stateMutability": "view"
+      "stateMutability": "view",
+      "type": "function"
     },
     {
-      "type": "function",
-      "name": "currentEthOverflowOf",
       "inputs": [
         {
           "internalType": "uint256",
@@ -62,6 +57,7 @@
           "type": "uint256"
         }
       ],
+      "name": "currentEthOverflowOf",
       "outputs": [
         {
           "internalType": "uint256",
@@ -69,12 +65,10 @@
           "type": "uint256"
         }
       ],
-      "constant": null,
-      "stateMutability": "view"
+      "stateMutability": "view",
+      "type": "function"
     },
     {
-      "type": "function",
-      "name": "pay",
       "inputs": [
         {
           "internalType": "uint256",
@@ -112,14 +106,14 @@
           "type": "bytes"
         }
       ],
+      "name": "pay",
       "outputs": [],
-      "constant": null,
-      "stateMutability": "payable"
+      "stateMutability": "payable",
+      "type": "function"
     },
     {
-      "type": "function",
-      "name": "payoutSplitsGroup",
       "inputs": [],
+      "name": "payoutSplitsGroup",
       "outputs": [
         {
           "internalType": "uint256",
@@ -127,13 +121,12 @@
           "type": "uint256"
         }
       ],
-      "constant": null,
-      "stateMutability": "view"
+      "stateMutability": "view",
+      "type": "function"
     },
     {
-      "type": "function",
-      "name": "token",
       "inputs": [],
+      "name": "token",
       "outputs": [
         {
           "internalType": "address",
@@ -141,8 +134,8 @@
           "type": "address"
         }
       ],
-      "constant": null,
-      "stateMutability": "view"
+      "stateMutability": "view",
+      "type": "function"
     }
   ],
   "bytecode": {
@@ -150,7 +143,7 @@
     "sourceMap": "",
     "linkReferences": {}
   },
-  "deployed_bytecode": {
+  "deployedBytecode": {
     "object": "0x",
     "sourceMap": "",
     "linkReferences": {}

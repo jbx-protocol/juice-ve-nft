@@ -1,8 +1,271 @@
 {
   "abi": [
     {
-      "type": "function",
-      "name": "balanceOf",
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "holder",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "internalType": "uint256",
+          "name": "projectId",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "amount",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "initialUnclaimedBalance",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "initialClaimedBalance",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "internalType": "bool",
+          "name": "preferClaimedTokens",
+          "type": "bool"
+        },
+        {
+          "indexed": false,
+          "internalType": "address",
+          "name": "caller",
+          "type": "address"
+        }
+      ],
+      "name": "Burn",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "uint256",
+          "name": "projectId",
+          "type": "uint256"
+        },
+        {
+          "indexed": true,
+          "internalType": "contract IJBToken",
+          "name": "newToken",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "internalType": "contract IJBToken",
+          "name": "oldToken",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "internalType": "address",
+          "name": "owner",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "internalType": "address",
+          "name": "caller",
+          "type": "address"
+        }
+      ],
+      "name": "Change",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "holder",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "internalType": "uint256",
+          "name": "projectId",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "initialUnclaimedBalance",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "amount",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "internalType": "address",
+          "name": "caller",
+          "type": "address"
+        }
+      ],
+      "name": "Claim",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "uint256",
+          "name": "projectId",
+          "type": "uint256"
+        },
+        {
+          "indexed": true,
+          "internalType": "contract IJBToken",
+          "name": "token",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "internalType": "string",
+          "name": "name",
+          "type": "string"
+        },
+        {
+          "indexed": false,
+          "internalType": "string",
+          "name": "symbol",
+          "type": "string"
+        },
+        {
+          "indexed": false,
+          "internalType": "address",
+          "name": "caller",
+          "type": "address"
+        }
+      ],
+      "name": "Issue",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "holder",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "internalType": "uint256",
+          "name": "projectId",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "amount",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "internalType": "bool",
+          "name": "tokensWereClaimed",
+          "type": "bool"
+        },
+        {
+          "indexed": false,
+          "internalType": "bool",
+          "name": "preferClaimedTokens",
+          "type": "bool"
+        },
+        {
+          "indexed": false,
+          "internalType": "address",
+          "name": "caller",
+          "type": "address"
+        }
+      ],
+      "name": "Mint",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "uint256",
+          "name": "projectId",
+          "type": "uint256"
+        },
+        {
+          "indexed": true,
+          "internalType": "bool",
+          "name": "flag",
+          "type": "bool"
+        },
+        {
+          "indexed": false,
+          "internalType": "address",
+          "name": "caller",
+          "type": "address"
+        }
+      ],
+      "name": "ShouldRequireClaim",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "holder",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "internalType": "uint256",
+          "name": "projectId",
+          "type": "uint256"
+        },
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "recipient",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "amount",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "internalType": "address",
+          "name": "caller",
+          "type": "address"
+        }
+      ],
+      "name": "Transfer",
+      "type": "event"
+    },
+    {
       "inputs": [
         {
           "internalType": "address",
@@ -15,6 +278,7 @@
           "type": "uint256"
         }
       ],
+      "name": "balanceOf",
       "outputs": [
         {
           "internalType": "uint256",
@@ -22,12 +286,10 @@
           "type": "uint256"
         }
       ],
-      "constant": null,
-      "stateMutability": "view"
+      "stateMutability": "view",
+      "type": "function"
     },
     {
-      "type": "function",
-      "name": "burnFrom",
       "inputs": [
         {
           "internalType": "address",
@@ -50,13 +312,12 @@
           "type": "bool"
         }
       ],
+      "name": "burnFrom",
       "outputs": [],
-      "constant": null,
-      "stateMutability": "nonpayable"
+      "stateMutability": "nonpayable",
+      "type": "function"
     },
     {
-      "type": "function",
-      "name": "changeFor",
       "inputs": [
         {
           "internalType": "uint256",
@@ -74,6 +335,7 @@
           "type": "address"
         }
       ],
+      "name": "changeFor",
       "outputs": [
         {
           "internalType": "contract IJBToken",
@@ -81,12 +343,10 @@
           "type": "address"
         }
       ],
-      "constant": null,
-      "stateMutability": "nonpayable"
+      "stateMutability": "nonpayable",
+      "type": "function"
     },
     {
-      "type": "function",
-      "name": "claimFor",
       "inputs": [
         {
           "internalType": "address",
@@ -104,13 +364,12 @@
           "type": "uint256"
         }
       ],
+      "name": "claimFor",
       "outputs": [],
-      "constant": null,
-      "stateMutability": "nonpayable"
+      "stateMutability": "nonpayable",
+      "type": "function"
     },
     {
-      "type": "function",
-      "name": "issueFor",
       "inputs": [
         {
           "internalType": "uint256",
@@ -128,6 +387,7 @@
           "type": "string"
         }
       ],
+      "name": "issueFor",
       "outputs": [
         {
           "internalType": "contract IJBToken",
@@ -135,12 +395,10 @@
           "type": "address"
         }
       ],
-      "constant": null,
-      "stateMutability": "nonpayable"
+      "stateMutability": "nonpayable",
+      "type": "function"
     },
     {
-      "type": "function",
-      "name": "mintFor",
       "inputs": [
         {
           "internalType": "address",
@@ -163,14 +421,14 @@
           "type": "bool"
         }
       ],
+      "name": "mintFor",
       "outputs": [],
-      "constant": null,
-      "stateMutability": "nonpayable"
+      "stateMutability": "nonpayable",
+      "type": "function"
     },
     {
-      "type": "function",
-      "name": "projects",
       "inputs": [],
+      "name": "projects",
       "outputs": [
         {
           "internalType": "contract IJBProjects",
@@ -178,12 +436,10 @@
           "type": "address"
         }
       ],
-      "constant": null,
-      "stateMutability": "view"
+      "stateMutability": "view",
+      "type": "function"
     },
     {
-      "type": "function",
-      "name": "requireClaimFor",
       "inputs": [
         {
           "internalType": "uint256",
@@ -191,6 +447,7 @@
           "type": "uint256"
         }
       ],
+      "name": "requireClaimFor",
       "outputs": [
         {
           "internalType": "bool",
@@ -198,12 +455,10 @@
           "type": "bool"
         }
       ],
-      "constant": null,
-      "stateMutability": "view"
+      "stateMutability": "view",
+      "type": "function"
     },
     {
-      "type": "function",
-      "name": "shouldRequireClaimingFor",
       "inputs": [
         {
           "internalType": "uint256",
@@ -216,13 +471,12 @@
           "type": "bool"
         }
       ],
+      "name": "shouldRequireClaimingFor",
       "outputs": [],
-      "constant": null,
-      "stateMutability": "nonpayable"
+      "stateMutability": "nonpayable",
+      "type": "function"
     },
     {
-      "type": "function",
-      "name": "tokenOf",
       "inputs": [
         {
           "internalType": "uint256",
@@ -230,6 +484,7 @@
           "type": "uint256"
         }
       ],
+      "name": "tokenOf",
       "outputs": [
         {
           "internalType": "contract IJBToken",
@@ -237,12 +492,10 @@
           "type": "address"
         }
       ],
-      "constant": null,
-      "stateMutability": "view"
+      "stateMutability": "view",
+      "type": "function"
     },
     {
-      "type": "function",
-      "name": "totalSupplyOf",
       "inputs": [
         {
           "internalType": "uint256",
@@ -250,6 +503,7 @@
           "type": "uint256"
         }
       ],
+      "name": "totalSupplyOf",
       "outputs": [
         {
           "internalType": "uint256",
@@ -257,12 +511,10 @@
           "type": "uint256"
         }
       ],
-      "constant": null,
-      "stateMutability": "view"
+      "stateMutability": "view",
+      "type": "function"
     },
     {
-      "type": "function",
-      "name": "transferFrom",
       "inputs": [
         {
           "internalType": "address",
@@ -285,13 +537,12 @@
           "type": "uint256"
         }
       ],
+      "name": "transferFrom",
       "outputs": [],
-      "constant": null,
-      "stateMutability": "nonpayable"
+      "stateMutability": "nonpayable",
+      "type": "function"
     },
     {
-      "type": "function",
-      "name": "unclaimedBalanceOf",
       "inputs": [
         {
           "internalType": "address",
@@ -304,6 +555,7 @@
           "type": "uint256"
         }
       ],
+      "name": "unclaimedBalanceOf",
       "outputs": [
         {
           "internalType": "uint256",
@@ -311,12 +563,10 @@
           "type": "uint256"
         }
       ],
-      "constant": null,
-      "stateMutability": "view"
+      "stateMutability": "view",
+      "type": "function"
     },
     {
-      "type": "function",
-      "name": "unclaimedTotalSupplyOf",
       "inputs": [
         {
           "internalType": "uint256",
@@ -324,6 +574,7 @@
           "type": "uint256"
         }
       ],
+      "name": "unclaimedTotalSupplyOf",
       "outputs": [
         {
           "internalType": "uint256",
@@ -331,237 +582,8 @@
           "type": "uint256"
         }
       ],
-      "constant": null,
-      "stateMutability": "view"
-    },
-    {
-      "type": "event",
-      "name": "Burn",
-      "inputs": [
-        {
-          "name": "holder",
-          "type": "address",
-          "indexed": true
-        },
-        {
-          "name": "projectId",
-          "type": "uint256",
-          "indexed": true
-        },
-        {
-          "name": "amount",
-          "type": "uint256",
-          "indexed": false
-        },
-        {
-          "name": "initialUnclaimedBalance",
-          "type": "uint256",
-          "indexed": false
-        },
-        {
-          "name": "initialClaimedBalance",
-          "type": "uint256",
-          "indexed": false
-        },
-        {
-          "name": "preferClaimedTokens",
-          "type": "bool",
-          "indexed": false
-        },
-        {
-          "name": "caller",
-          "type": "address",
-          "indexed": false
-        }
-      ],
-      "anonymous": false
-    },
-    {
-      "type": "event",
-      "name": "Change",
-      "inputs": [
-        {
-          "name": "projectId",
-          "type": "uint256",
-          "indexed": true
-        },
-        {
-          "name": "newToken",
-          "type": "address",
-          "indexed": true
-        },
-        {
-          "name": "oldToken",
-          "type": "address",
-          "indexed": true
-        },
-        {
-          "name": "owner",
-          "type": "address",
-          "indexed": false
-        },
-        {
-          "name": "caller",
-          "type": "address",
-          "indexed": false
-        }
-      ],
-      "anonymous": false
-    },
-    {
-      "type": "event",
-      "name": "Claim",
-      "inputs": [
-        {
-          "name": "holder",
-          "type": "address",
-          "indexed": true
-        },
-        {
-          "name": "projectId",
-          "type": "uint256",
-          "indexed": true
-        },
-        {
-          "name": "initialUnclaimedBalance",
-          "type": "uint256",
-          "indexed": false
-        },
-        {
-          "name": "amount",
-          "type": "uint256",
-          "indexed": false
-        },
-        {
-          "name": "caller",
-          "type": "address",
-          "indexed": false
-        }
-      ],
-      "anonymous": false
-    },
-    {
-      "type": "event",
-      "name": "Issue",
-      "inputs": [
-        {
-          "name": "projectId",
-          "type": "uint256",
-          "indexed": true
-        },
-        {
-          "name": "token",
-          "type": "address",
-          "indexed": true
-        },
-        {
-          "name": "name",
-          "type": "string",
-          "indexed": false
-        },
-        {
-          "name": "symbol",
-          "type": "string",
-          "indexed": false
-        },
-        {
-          "name": "caller",
-          "type": "address",
-          "indexed": false
-        }
-      ],
-      "anonymous": false
-    },
-    {
-      "type": "event",
-      "name": "Mint",
-      "inputs": [
-        {
-          "name": "holder",
-          "type": "address",
-          "indexed": true
-        },
-        {
-          "name": "projectId",
-          "type": "uint256",
-          "indexed": true
-        },
-        {
-          "name": "amount",
-          "type": "uint256",
-          "indexed": false
-        },
-        {
-          "name": "tokensWereClaimed",
-          "type": "bool",
-          "indexed": false
-        },
-        {
-          "name": "preferClaimedTokens",
-          "type": "bool",
-          "indexed": false
-        },
-        {
-          "name": "caller",
-          "type": "address",
-          "indexed": false
-        }
-      ],
-      "anonymous": false
-    },
-    {
-      "type": "event",
-      "name": "ShouldRequireClaim",
-      "inputs": [
-        {
-          "name": "projectId",
-          "type": "uint256",
-          "indexed": true
-        },
-        {
-          "name": "flag",
-          "type": "bool",
-          "indexed": true
-        },
-        {
-          "name": "caller",
-          "type": "address",
-          "indexed": false
-        }
-      ],
-      "anonymous": false
-    },
-    {
-      "type": "event",
-      "name": "Transfer",
-      "inputs": [
-        {
-          "name": "holder",
-          "type": "address",
-          "indexed": true
-        },
-        {
-          "name": "projectId",
-          "type": "uint256",
-          "indexed": true
-        },
-        {
-          "name": "recipient",
-          "type": "address",
-          "indexed": true
-        },
-        {
-          "name": "amount",
-          "type": "uint256",
-          "indexed": false
-        },
-        {
-          "name": "caller",
-          "type": "address",
-          "indexed": false
-        }
-      ],
-      "anonymous": false
+      "stateMutability": "view",
+      "type": "function"
     }
   ],
   "bytecode": {
@@ -569,7 +591,7 @@
     "sourceMap": "",
     "linkReferences": {}
   },
-  "deployed_bytecode": {
+  "deployedBytecode": {
     "object": "0x",
     "sourceMap": "",
     "linkReferences": {}

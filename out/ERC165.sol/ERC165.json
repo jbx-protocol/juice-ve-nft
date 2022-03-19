@@ -1,8 +1,6 @@
 {
   "abi": [
     {
-      "type": "function",
-      "name": "supportsInterface",
       "inputs": [
         {
           "internalType": "bytes4",
@@ -10,6 +8,7 @@
           "type": "bytes4"
         }
       ],
+      "name": "supportsInterface",
       "outputs": [
         {
           "internalType": "bool",
@@ -17,8 +16,8 @@
           "type": "bool"
         }
       ],
-      "constant": null,
-      "stateMutability": "view"
+      "stateMutability": "view",
+      "type": "function"
     }
   ],
   "bytecode": {
@@ -26,7 +25,7 @@
     "sourceMap": "",
     "linkReferences": {}
   },
-  "deployed_bytecode": {
+  "deployedBytecode": {
     "object": "0x",
     "sourceMap": "",
     "linkReferences": {}

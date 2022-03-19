@@ -1,9 +1,8 @@
 {
   "abi": [
     {
-      "type": "function",
-      "name": "directory",
       "inputs": [],
+      "name": "directory",
       "outputs": [
         {
           "internalType": "contract IJBDirectory",
@@ -11,8 +10,8 @@
           "type": "address"
         }
       ],
-      "constant": null,
-      "stateMutability": "view"
+      "stateMutability": "view",
+      "type": "function"
     }
   ],
   "bytecode": {
@@ -20,7 +19,7 @@
     "sourceMap": "",
     "linkReferences": {}
   },
-  "deployed_bytecode": {
+  "deployedBytecode": {
     "object": "0x",
     "sourceMap": "",
     "linkReferences": {}

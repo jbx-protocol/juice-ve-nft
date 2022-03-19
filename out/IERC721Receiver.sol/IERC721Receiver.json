@@ -1,8 +1,6 @@
 {
   "abi": [
     {
-      "type": "function",
-      "name": "onERC721Received",
       "inputs": [
         {
           "internalType": "address",
@@ -25,6 +23,7 @@
           "type": "bytes"
         }
       ],
+      "name": "onERC721Received",
       "outputs": [
         {
           "internalType": "bytes4",
@@ -32,8 +31,8 @@
           "type": "bytes4"
         }
       ],
-      "constant": null,
-      "stateMutability": "nonpayable"
+      "stateMutability": "nonpayable",
+      "type": "function"
     }
   ],
   "bytecode": {
@@ -41,7 +40,7 @@
     "sourceMap": "",
     "linkReferences": {}
   },
-  "deployed_bytecode": {
+  "deployedBytecode": {
     "object": "0x",
     "sourceMap": "",
     "linkReferences": {}

@@ -1,8 +1,6 @@
 {
   "abi": [
     {
-      "type": "function",
-      "name": "approve",
       "inputs": [
         {
           "internalType": "uint256",
@@ -20,25 +18,25 @@
           "type": "uint256"
         }
       ],
+      "name": "approve",
       "outputs": [],
-      "constant": null,
-      "stateMutability": "nonpayable"
+      "stateMutability": "nonpayable",
+      "type": "function"
     },
     {
-      "type": "function",
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "_account",
+          "type": "address"
+        },
+        {
+          "internalType": "uint256",
+          "name": "_projectId",
+          "type": "uint256"
+        }
+      ],
       "name": "balanceOf",
-      "inputs": [
-        {
-          "internalType": "address",
-          "name": "_account",
-          "type": "address"
-        },
-        {
-          "internalType": "uint256",
-          "name": "_projectId",
-          "type": "uint256"
-        }
-      ],
       "outputs": [
         {
           "internalType": "uint256",
@@ -46,12 +44,33 @@
           "type": "uint256"
         }
       ],
-      "constant": null,
-      "stateMutability": "view"
+      "stateMutability": "view",
+      "type": "function"
     },
     {
-      "type": "function",
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "_projectId",
+          "type": "uint256"
+        },
+        {
+          "internalType": "address",
+          "name": "_account",
+          "type": "address"
+        },
+        {
+          "internalType": "uint256",
+          "name": "_amount",
+          "type": "uint256"
+        }
+      ],
       "name": "burn",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
       "inputs": [
         {
           "internalType": "uint256",
@@ -69,37 +88,12 @@
           "type": "uint256"
         }
       ],
-      "outputs": [],
-      "constant": null,
-      "stateMutability": "nonpayable"
-    },
-    {
-      "type": "function",
       "name": "mint",
-      "inputs": [
-        {
-          "internalType": "uint256",
-          "name": "_projectId",
-          "type": "uint256"
-        },
-        {
-          "internalType": "address",
-          "name": "_account",
-          "type": "address"
-        },
-        {
-          "internalType": "uint256",
-          "name": "_amount",
-          "type": "uint256"
-        }
-      ],
       "outputs": [],
-      "constant": null,
-      "stateMutability": "nonpayable"
+      "stateMutability": "nonpayable",
+      "type": "function"
     },
     {
-      "type": "function",
-      "name": "totalSupply",
       "inputs": [
         {
           "internalType": "uint256",
@@ -107,6 +101,7 @@
           "type": "uint256"
         }
       ],
+      "name": "totalSupply",
       "outputs": [
         {
           "internalType": "uint256",
@@ -114,12 +109,10 @@
           "type": "uint256"
         }
       ],
-      "constant": null,
-      "stateMutability": "view"
+      "stateMutability": "view",
+      "type": "function"
     },
     {
-      "type": "function",
-      "name": "transfer",
       "inputs": [
         {
           "internalType": "uint256",
@@ -137,13 +130,12 @@
           "type": "uint256"
         }
       ],
+      "name": "transfer",
       "outputs": [],
-      "constant": null,
-      "stateMutability": "nonpayable"
+      "stateMutability": "nonpayable",
+      "type": "function"
     },
     {
-      "type": "function",
-      "name": "transferFrom",
       "inputs": [
         {
           "internalType": "uint256",
@@ -166,13 +158,12 @@
           "type": "uint256"
         }
       ],
+      "name": "transferFrom",
       "outputs": [],
-      "constant": null,
-      "stateMutability": "nonpayable"
+      "stateMutability": "nonpayable",
+      "type": "function"
     },
     {
-      "type": "function",
-      "name": "transferOwnership",
       "inputs": [
         {
           "internalType": "address",
@@ -180,9 +171,10 @@
           "type": "address"
         }
       ],
+      "name": "transferOwnership",
       "outputs": [],
-      "constant": null,
-      "stateMutability": "nonpayable"
+      "stateMutability": "nonpayable",
+      "type": "function"
     }
   ],
   "bytecode": {
@@ -190,7 +182,7 @@
     "sourceMap": "",
     "linkReferences": {}
   },
-  "deployed_bytecode": {
+  "deployedBytecode": {
     "object": "0x",
     "sourceMap": "",
     "linkReferences": {}

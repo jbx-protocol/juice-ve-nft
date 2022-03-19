@@ -101,4 +101,68 @@ contract JBveBannyTests is TestBaseWorkflow {
     (, uint256 duration, , ) = _jbveBanny.getSpecs(1);
     assertEq(duration, 8640000);
   }
+
+  function testScenarioWithInvalidLockDuration() public {
+    IJBToken _token = _jbTokenStore.tokenOf(_projectId);
+    _projectOwner = projectOwner();
+    evm.startPrank(_projectOwner);
+    _jbController.mintTokensOf(_projectId, 100 ether, _projectOwner, 'Test Memo', true, true);
+    _token.approve(_projectId, address(_jbveBanny), 10 ether);
+    evm.expectRevert(abi.encodeWithSignature('INVALID_LOCK_DURATION()'));
+    _jbveBanny.lock(_projectOwner, 10 ether, 864001, _projectOwner, true);
+  }
+
+  function testScenarioWithInsufficientBalance() public {
+    IJBToken _token = _jbTokenStore.tokenOf(_projectId);
+    _projectOwner = projectOwner();
+    evm.startPrank(_projectOwner);
+    _jbController.mintTokensOf(_projectId, 5 ether, _projectOwner, 'Test Memo', true, true);
+    _token.approve(_projectId, address(_jbveBanny), 10 ether);
+    evm.expectRevert(abi.encodeWithSignature('INSUFFICIENT_BALANCE()'));
+    _jbveBanny.lock(_projectOwner, 10 ether, 864000, _projectOwner, true);
+  }
+
+  function testScenarioWhenLockPeriodIsNotOver() public {
+    IJBToken _token = _jbTokenStore.tokenOf(_projectId);
+    _projectOwner = projectOwner();
+    evm.startPrank(_projectOwner);
+    _jbController.mintTokensOf(_projectId, 100 ether, _projectOwner, 'Test Memo', true, true);
+    _token.approve(_projectId, address(_jbveBanny), 100 ether);
+    _jbveBanny.lock(_projectOwner, 10 ether, 864000, _projectOwner, true);
+    (, , uint256 lockedUntil, ) = _jbveBanny.getSpecs(1);
+    evm.warp(lockedUntil / 2);
+    _jbveBanny.approve(address(_jbveBanny), 1);
+    evm.expectRevert(abi.encodeWithSignature('LOCK_PERIOD_NOT_OVER()'));
+    _jbveBanny.unlock(1, _projectOwner);
+  }
+
+  function testScenarioWithInvalidLockDurationWhenExtendingDuration () public {
+    IJBToken _token = _jbTokenStore.tokenOf(_projectId);
+    _projectOwner = projectOwner();
+    evm.startPrank(_projectOwner);
+    _jbController.mintTokensOf(_projectId, 100 ether, _projectOwner, 'Test Memo', true, true);
+    _token.approve(_projectId, address(_jbveBanny), 100 ether);
+    _jbveBanny.lock(_projectOwner, 10 ether, 864000, _projectOwner, true);
+    (, uint256 d, uint256 lockedUntil, ) = _jbveBanny.getSpecs(1);
+    assertEq(d, 864000);
+    evm.warp(lockedUntil * 2);
+    evm.expectRevert(abi.encodeWithSignature('INVALID_LOCK_DURATION()'));
+    _jbveBanny.extendLock(1, 8640001);
+  }
+
+  function testScenarioWithInvalidLockExtension() public {
+    IJBToken _token = _jbTokenStore.tokenOf(_projectId);
+    _projectOwner = projectOwner();
+    evm.startPrank(_projectOwner);
+    _jbController.mintTokensOf(_projectId, 100 ether, _projectOwner, 'Test Memo', true, true);
+    _token.approve(_projectId, address(_jbveBanny), 100 ether);
+    _jbveBanny.lock(_projectOwner, 10 ether, 864000, _projectOwner, true);
+    (, uint256 d, uint256 lockedUntil, ) = _jbveBanny.getSpecs(1);
+    assertEq(d, 864000);
+    evm.warp(lockedUntil / 2);
+    evm.expectRevert(abi.encodeWithSignature('INVALID_LOCK_EXTENSION()'));
+    _jbveBanny.extendLock(1, 8640000);
+  }
+
+
 }

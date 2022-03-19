@@ -1,9 +1,58 @@
 {
   "abi": [
     {
-      "type": "function",
-      "name": "DOMAIN_SEPARATOR",
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "delegator",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "fromDelegate",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "toDelegate",
+          "type": "address"
+        }
+      ],
+      "name": "DelegateChanged",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "delegate",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "previousBalance",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "newBalance",
+          "type": "uint256"
+        }
+      ],
+      "name": "DelegateVotesChanged",
+      "type": "event"
+    },
+    {
       "inputs": [],
+      "name": "DOMAIN_SEPARATOR",
       "outputs": [
         {
           "internalType": "bytes32",
@@ -11,12 +60,10 @@
           "type": "bytes32"
         }
       ],
-      "constant": null,
-      "stateMutability": "view"
+      "stateMutability": "view",
+      "type": "function"
     },
     {
-      "type": "function",
-      "name": "delegate",
       "inputs": [
         {
           "internalType": "address",
@@ -24,13 +71,12 @@
           "type": "address"
         }
       ],
+      "name": "delegate",
       "outputs": [],
-      "constant": null,
-      "stateMutability": "nonpayable"
+      "stateMutability": "nonpayable",
+      "type": "function"
     },
     {
-      "type": "function",
-      "name": "delegateBySig",
       "inputs": [
         {
           "internalType": "address",
@@ -63,13 +109,12 @@
           "type": "bytes32"
         }
       ],
+      "name": "delegateBySig",
       "outputs": [],
-      "constant": null,
-      "stateMutability": "nonpayable"
+      "stateMutability": "nonpayable",
+      "type": "function"
     },
     {
-      "type": "function",
-      "name": "delegates",
       "inputs": [
         {
           "internalType": "address",
@@ -77,6 +122,7 @@
           "type": "address"
         }
       ],
+      "name": "delegates",
       "outputs": [
         {
           "internalType": "address",
@@ -84,12 +130,10 @@
           "type": "address"
         }
       ],
-      "constant": null,
-      "stateMutability": "view"
+      "stateMutability": "view",
+      "type": "function"
     },
     {
-      "type": "function",
-      "name": "getPastTotalSupply",
       "inputs": [
         {
           "internalType": "uint256",
@@ -97,6 +141,7 @@
           "type": "uint256"
         }
       ],
+      "name": "getPastTotalSupply",
       "outputs": [
         {
           "internalType": "uint256",
@@ -104,12 +149,10 @@
           "type": "uint256"
         }
       ],
-      "constant": null,
-      "stateMutability": "view"
+      "stateMutability": "view",
+      "type": "function"
     },
     {
-      "type": "function",
-      "name": "getPastVotes",
       "inputs": [
         {
           "internalType": "address",
@@ -122,6 +165,7 @@
           "type": "uint256"
         }
       ],
+      "name": "getPastVotes",
       "outputs": [
         {
           "internalType": "uint256",
@@ -129,12 +173,10 @@
           "type": "uint256"
         }
       ],
-      "constant": null,
-      "stateMutability": "view"
+      "stateMutability": "view",
+      "type": "function"
     },
     {
-      "type": "function",
-      "name": "getVotes",
       "inputs": [
         {
           "internalType": "address",
@@ -142,6 +184,7 @@
           "type": "address"
         }
       ],
+      "name": "getVotes",
       "outputs": [
         {
           "internalType": "uint256",
@@ -149,12 +192,10 @@
           "type": "uint256"
         }
       ],
-      "constant": null,
-      "stateMutability": "view"
+      "stateMutability": "view",
+      "type": "function"
     },
     {
-      "type": "function",
-      "name": "nonces",
       "inputs": [
         {
           "internalType": "address",
@@ -162,6 +203,7 @@
           "type": "address"
         }
       ],
+      "name": "nonces",
       "outputs": [
         {
           "internalType": "uint256",
@@ -169,52 +211,8 @@
           "type": "uint256"
         }
       ],
-      "constant": null,
-      "stateMutability": "view"
-    },
-    {
-      "type": "event",
-      "name": "DelegateChanged",
-      "inputs": [
-        {
-          "name": "delegator",
-          "type": "address",
-          "indexed": true
-        },
-        {
-          "name": "fromDelegate",
-          "type": "address",
-          "indexed": true
-        },
-        {
-          "name": "toDelegate",
-          "type": "address",
-          "indexed": true
-        }
-      ],
-      "anonymous": false
-    },
-    {
-      "type": "event",
-      "name": "DelegateVotesChanged",
-      "inputs": [
-        {
-          "name": "delegate",
-          "type": "address",
-          "indexed": true
-        },
-        {
-          "name": "previousBalance",
-          "type": "uint256",
-          "indexed": false
-        },
-        {
-          "name": "newBalance",
-          "type": "uint256",
-          "indexed": false
-        }
-      ],
-      "anonymous": false
+      "stateMutability": "view",
+      "type": "function"
     }
   ],
   "bytecode": {
@@ -222,7 +220,7 @@
     "sourceMap": "",
     "linkReferences": {}
   },
-  "deployed_bytecode": {
+  "deployedBytecode": {
     "object": "0x",
     "sourceMap": "",
     "linkReferences": {}

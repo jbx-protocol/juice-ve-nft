@@ -1,8 +1,150 @@
 {
   "abi": [
     {
-      "type": "function",
-      "name": "addTerminalsOf",
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "uint256",
+          "name": "projectId",
+          "type": "uint256"
+        },
+        {
+          "indexed": true,
+          "internalType": "contract IJBPaymentTerminal",
+          "name": "terminal",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "internalType": "address",
+          "name": "caller",
+          "type": "address"
+        }
+      ],
+      "name": "AddTerminal",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "_address",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "internalType": "address",
+          "name": "caller",
+          "type": "address"
+        }
+      ],
+      "name": "AddToSetControllerAllowlist",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "_address",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "internalType": "address",
+          "name": "caller",
+          "type": "address"
+        }
+      ],
+      "name": "RemoveFromSetControllerAllowlist",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "uint256",
+          "name": "projectId",
+          "type": "uint256"
+        },
+        {
+          "indexed": true,
+          "internalType": "contract IJBPaymentTerminal",
+          "name": "terminal",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "internalType": "address",
+          "name": "caller",
+          "type": "address"
+        }
+      ],
+      "name": "RemoveTerminal",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "uint256",
+          "name": "projectId",
+          "type": "uint256"
+        },
+        {
+          "indexed": true,
+          "internalType": "contract IJBController",
+          "name": "controller",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "internalType": "address",
+          "name": "caller",
+          "type": "address"
+        }
+      ],
+      "name": "SetController",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "uint256",
+          "name": "projectId",
+          "type": "uint256"
+        },
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "token",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "internalType": "contract IJBPaymentTerminal",
+          "name": "terminal",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "internalType": "address",
+          "name": "caller",
+          "type": "address"
+        }
+      ],
+      "name": "SetPrimaryTerminal",
+      "type": "event"
+    },
+    {
       "inputs": [
         {
           "internalType": "uint256",
@@ -15,13 +157,12 @@
           "type": "address[]"
         }
       ],
+      "name": "addTerminalsOf",
       "outputs": [],
-      "constant": null,
-      "stateMutability": "nonpayable"
+      "stateMutability": "nonpayable",
+      "type": "function"
     },
     {
-      "type": "function",
-      "name": "addToSetControllerAllowlist",
       "inputs": [
         {
           "internalType": "address",
@@ -29,13 +170,12 @@
           "type": "address"
         }
       ],
+      "name": "addToSetControllerAllowlist",
       "outputs": [],
-      "constant": null,
-      "stateMutability": "nonpayable"
+      "stateMutability": "nonpayable",
+      "type": "function"
     },
     {
-      "type": "function",
-      "name": "controllerOf",
       "inputs": [
         {
           "internalType": "uint256",
@@ -43,6 +183,7 @@
           "type": "uint256"
         }
       ],
+      "name": "controllerOf",
       "outputs": [
         {
           "internalType": "contract IJBController",
@@ -50,12 +191,10 @@
           "type": "address"
         }
       ],
-      "constant": null,
-      "stateMutability": "view"
+      "stateMutability": "view",
+      "type": "function"
     },
     {
-      "type": "function",
-      "name": "isAllowedToSetController",
       "inputs": [
         {
           "internalType": "address",
@@ -63,6 +202,7 @@
           "type": "address"
         }
       ],
+      "name": "isAllowedToSetController",
       "outputs": [
         {
           "internalType": "bool",
@@ -70,12 +210,10 @@
           "type": "bool"
         }
       ],
-      "constant": null,
-      "stateMutability": "view"
+      "stateMutability": "view",
+      "type": "function"
     },
     {
-      "type": "function",
-      "name": "isTerminalOf",
       "inputs": [
         {
           "internalType": "uint256",
@@ -88,6 +226,7 @@
           "type": "address"
         }
       ],
+      "name": "isTerminalOf",
       "outputs": [
         {
           "internalType": "bool",
@@ -95,12 +234,10 @@
           "type": "bool"
         }
       ],
-      "constant": null,
-      "stateMutability": "view"
+      "stateMutability": "view",
+      "type": "function"
     },
     {
-      "type": "function",
-      "name": "primaryTerminalOf",
       "inputs": [
         {
           "internalType": "uint256",
@@ -113,6 +250,7 @@
           "type": "address"
         }
       ],
+      "name": "primaryTerminalOf",
       "outputs": [
         {
           "internalType": "contract IJBPaymentTerminal",
@@ -120,13 +258,12 @@
           "type": "address"
         }
       ],
-      "constant": null,
-      "stateMutability": "view"
+      "stateMutability": "view",
+      "type": "function"
     },
     {
-      "type": "function",
-      "name": "projects",
       "inputs": [],
+      "name": "projects",
       "outputs": [
         {
           "internalType": "contract IJBProjects",
@@ -134,12 +271,10 @@
           "type": "address"
         }
       ],
-      "constant": null,
-      "stateMutability": "view"
+      "stateMutability": "view",
+      "type": "function"
     },
     {
-      "type": "function",
-      "name": "removeFromSetControllerAllowlist",
       "inputs": [
         {
           "internalType": "address",
@@ -147,13 +282,12 @@
           "type": "address"
         }
       ],
+      "name": "removeFromSetControllerAllowlist",
       "outputs": [],
-      "constant": null,
-      "stateMutability": "nonpayable"
+      "stateMutability": "nonpayable",
+      "type": "function"
     },
     {
-      "type": "function",
-      "name": "removeTerminalOf",
       "inputs": [
         {
           "internalType": "uint256",
@@ -166,13 +300,12 @@
           "type": "address"
         }
       ],
+      "name": "removeTerminalOf",
       "outputs": [],
-      "constant": null,
-      "stateMutability": "nonpayable"
+      "stateMutability": "nonpayable",
+      "type": "function"
     },
     {
-      "type": "function",
-      "name": "setControllerOf",
       "inputs": [
         {
           "internalType": "uint256",
@@ -185,13 +318,12 @@
           "type": "address"
         }
       ],
+      "name": "setControllerOf",
       "outputs": [],
-      "constant": null,
-      "stateMutability": "nonpayable"
+      "stateMutability": "nonpayable",
+      "type": "function"
     },
     {
-      "type": "function",
-      "name": "setPrimaryTerminalOf",
       "inputs": [
         {
           "internalType": "uint256",
@@ -204,13 +336,12 @@
           "type": "address"
         }
       ],
+      "name": "setPrimaryTerminalOf",
       "outputs": [],
-      "constant": null,
-      "stateMutability": "nonpayable"
+      "stateMutability": "nonpayable",
+      "type": "function"
     },
     {
-      "type": "function",
-      "name": "terminalsOf",
       "inputs": [
         {
           "internalType": "uint256",
@@ -218,6 +349,7 @@
           "type": "uint256"
         }
       ],
+      "name": "terminalsOf",
       "outputs": [
         {
           "internalType": "contract IJBPaymentTerminal[]",
@@ -225,135 +357,8 @@
           "type": "address[]"
         }
       ],
-      "constant": null,
-      "stateMutability": "view"
-    },
-    {
-      "type": "event",
-      "name": "AddTerminal",
-      "inputs": [
-        {
-          "name": "projectId",
-          "type": "uint256",
-          "indexed": true
-        },
-        {
-          "name": "terminal",
-          "type": "address",
-          "indexed": true
-        },
-        {
-          "name": "caller",
-          "type": "address",
-          "indexed": false
-        }
-      ],
-      "anonymous": false
-    },
-    {
-      "type": "event",
-      "name": "AddToSetControllerAllowlist",
-      "inputs": [
-        {
-          "name": "_address",
-          "type": "address",
-          "indexed": true
-        },
-        {
-          "name": "caller",
-          "type": "address",
-          "indexed": false
-        }
-      ],
-      "anonymous": false
-    },
-    {
-      "type": "event",
-      "name": "RemoveFromSetControllerAllowlist",
-      "inputs": [
-        {
-          "name": "_address",
-          "type": "address",
-          "indexed": true
-        },
-        {
-          "name": "caller",
-          "type": "address",
-          "indexed": false
-        }
-      ],
-      "anonymous": false
-    },
-    {
-      "type": "event",
-      "name": "RemoveTerminal",
-      "inputs": [
-        {
-          "name": "projectId",
-          "type": "uint256",
-          "indexed": true
-        },
-        {
-          "name": "terminal",
-          "type": "address",
-          "indexed": true
-        },
-        {
-          "name": "caller",
-          "type": "address",
-          "indexed": false
-        }
-      ],
-      "anonymous": false
-    },
-    {
-      "type": "event",
-      "name": "SetController",
-      "inputs": [
-        {
-          "name": "projectId",
-          "type": "uint256",
-          "indexed": true
-        },
-        {
-          "name": "controller",
-          "type": "address",
-          "indexed": true
-        },
-        {
-          "name": "caller",
-          "type": "address",
-          "indexed": false
-        }
-      ],
-      "anonymous": false
-    },
-    {
-      "type": "event",
-      "name": "SetPrimaryTerminal",
-      "inputs": [
-        {
-          "name": "projectId",
-          "type": "uint256",
-          "indexed": true
-        },
-        {
-          "name": "token",
-          "type": "address",
-          "indexed": true
-        },
-        {
-          "name": "terminal",
-          "type": "address",
-          "indexed": true
-        },
-        {
-          "name": "caller",
-          "type": "address",
-          "indexed": false
-        }
-      ],
-      "anonymous": false
+      "stateMutability": "view",
+      "type": "function"
     }
   ],
   "bytecode": {
@@ -361,7 +366,7 @@
     "sourceMap": "",
     "linkReferences": {}
   },
-  "deployed_bytecode": {
+  "deployedBytecode": {
     "object": "0x",
     "sourceMap": "",
     "linkReferences": {}

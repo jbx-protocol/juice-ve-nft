@@ -1,8 +1,6 @@
 {
   "abi": [
     {
-      "type": "function",
-      "name": "burnTokensOf",
       "inputs": [
         {
           "internalType": "address",
@@ -30,13 +28,41 @@
           "type": "bool"
         }
       ],
+      "name": "burnTokensOf",
       "outputs": [],
-      "constant": null,
-      "stateMutability": "nonpayable"
+      "stateMutability": "nonpayable",
+      "type": "function"
     },
     {
-      "type": "function",
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "_projectId",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "_configuration",
+          "type": "uint256"
+        },
+        {
+          "internalType": "contract IJBPaymentTerminal",
+          "name": "_terminal",
+          "type": "address"
+        }
+      ],
       "name": "distributionLimitCurrencyOf",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
       "inputs": [
         {
           "internalType": "uint256",
@@ -54,36 +80,7 @@
           "type": "address"
         }
       ],
-      "outputs": [
-        {
-          "internalType": "uint256",
-          "name": "",
-          "type": "uint256"
-        }
-      ],
-      "constant": null,
-      "stateMutability": "view"
-    },
-    {
-      "type": "function",
       "name": "distributionLimitOf",
-      "inputs": [
-        {
-          "internalType": "uint256",
-          "name": "_projectId",
-          "type": "uint256"
-        },
-        {
-          "internalType": "uint256",
-          "name": "_configuration",
-          "type": "uint256"
-        },
-        {
-          "internalType": "contract IJBPaymentTerminal",
-          "name": "_terminal",
-          "type": "address"
-        }
-      ],
       "outputs": [
         {
           "internalType": "uint256",
@@ -91,12 +88,10 @@
           "type": "uint256"
         }
       ],
-      "constant": null,
-      "stateMutability": "view"
+      "stateMutability": "view",
+      "type": "function"
     },
     {
-      "type": "function",
-      "name": "mintTokensOf",
       "inputs": [
         {
           "internalType": "uint256",
@@ -129,6 +124,7 @@
           "type": "bool"
         }
       ],
+      "name": "mintTokensOf",
       "outputs": [
         {
           "internalType": "uint256",
@@ -136,12 +132,39 @@
           "type": "uint256"
         }
       ],
-      "constant": null,
-      "stateMutability": "nonpayable"
+      "stateMutability": "nonpayable",
+      "type": "function"
     },
     {
-      "type": "function",
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "_projectId",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "_configuration",
+          "type": "uint256"
+        },
+        {
+          "internalType": "contract IJBPaymentTerminal",
+          "name": "_terminal",
+          "type": "address"
+        }
+      ],
       "name": "overflowAllowanceCurrencyOf",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
       "inputs": [
         {
           "internalType": "uint256",
@@ -159,36 +182,7 @@
           "type": "address"
         }
       ],
-      "outputs": [
-        {
-          "internalType": "uint256",
-          "name": "",
-          "type": "uint256"
-        }
-      ],
-      "constant": null,
-      "stateMutability": "view"
-    },
-    {
-      "type": "function",
       "name": "overflowAllowanceOf",
-      "inputs": [
-        {
-          "internalType": "uint256",
-          "name": "_projectId",
-          "type": "uint256"
-        },
-        {
-          "internalType": "uint256",
-          "name": "_configuration",
-          "type": "uint256"
-        },
-        {
-          "internalType": "contract IJBPaymentTerminal",
-          "name": "_terminal",
-          "type": "address"
-        }
-      ],
       "outputs": [
         {
           "internalType": "uint256",
@@ -196,12 +190,10 @@
           "type": "uint256"
         }
       ],
-      "constant": null,
-      "stateMutability": "view"
+      "stateMutability": "view",
+      "type": "function"
     },
     {
-      "type": "function",
-      "name": "prepForMigrationOf",
       "inputs": [
         {
           "internalType": "uint256",
@@ -214,13 +206,12 @@
           "type": "address"
         }
       ],
+      "name": "prepForMigrationOf",
       "outputs": [],
-      "constant": null,
-      "stateMutability": "nonpayable"
+      "stateMutability": "nonpayable",
+      "type": "function"
     },
     {
-      "type": "function",
-      "name": "reservedTokenBalanceOf",
       "inputs": [
         {
           "internalType": "uint256",
@@ -233,6 +224,7 @@
           "type": "uint256"
         }
       ],
+      "name": "reservedTokenBalanceOf",
       "outputs": [
         {
           "internalType": "uint256",
@@ -240,8 +232,8 @@
           "type": "uint256"
         }
       ],
-      "constant": null,
-      "stateMutability": "view"
+      "stateMutability": "view",
+      "type": "function"
     }
   ],
   "bytecode": {
@@ -249,7 +241,7 @@
     "sourceMap": "",
     "linkReferences": {}
   },
-  "deployed_bytecode": {
+  "deployedBytecode": {
     "object": "0x",
     "sourceMap": "",
     "linkReferences": {}

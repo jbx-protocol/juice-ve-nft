@@ -1,47 +1,66 @@
 {
   "abi": [
     {
-      "type": "function",
-      "name": "payParams",
       "inputs": [
         {
-          "internalType": "struct JBPayParamsData",
-          "name": "_param",
-          "type": "tuple",
           "components": [
             {
+              "internalType": "contract IJBPaymentTerminal",
+              "name": "terminal",
               "type": "address"
             },
             {
+              "internalType": "address",
+              "name": "payer",
               "type": "address"
             },
             {
+              "internalType": "uint256",
+              "name": "amount",
               "type": "uint256"
             },
             {
+              "internalType": "uint256",
+              "name": "decimals",
               "type": "uint256"
             },
             {
+              "internalType": "uint256",
+              "name": "projectId",
               "type": "uint256"
             },
             {
+              "internalType": "uint256",
+              "name": "weight",
               "type": "uint256"
             },
             {
+              "internalType": "uint256",
+              "name": "reservedRate",
               "type": "uint256"
             },
             {
+              "internalType": "address",
+              "name": "beneficiary",
               "type": "address"
             },
             {
+              "internalType": "string",
+              "name": "memo",
               "type": "string"
             },
             {
+              "internalType": "bytes",
+              "name": "metadata",
               "type": "bytes"
             }
-          ]
+          ],
+          "internalType": "struct JBPayParamsData",
+          "name": "_param",
+          "type": "tuple"
         }
       ],
+      "name": "payParams",
       "outputs": [
         {
           "internalType": "uint256",
@@ -59,54 +78,75 @@
           "type": "address"
         }
       ],
-      "constant": null,
-      "stateMutability": "view"
+      "stateMutability": "view",
+      "type": "function"
     },
     {
-      "type": "function",
-      "name": "redeemParams",
       "inputs": [
         {
-          "internalType": "struct JBRedeemParamsData",
-          "name": "_param",
-          "type": "tuple",
           "components": [
             {
+              "internalType": "contract IJBPaymentTerminal",
+              "name": "terminal",
               "type": "address"
             },
             {
+              "internalType": "address",
+              "name": "holder",
               "type": "address"
             },
             {
+              "internalType": "uint256",
+              "name": "tokenCount",
               "type": "uint256"
             },
             {
+              "internalType": "uint256",
+              "name": "decimals",
               "type": "uint256"
             },
             {
+              "internalType": "uint256",
+              "name": "projectId",
               "type": "uint256"
             },
             {
+              "internalType": "uint256",
+              "name": "redemptionRate",
               "type": "uint256"
             },
             {
+              "internalType": "uint256",
+              "name": "ballotRedemptionRate",
               "type": "uint256"
             },
             {
+              "internalType": "uint256",
+              "name": "currency",
               "type": "uint256"
             },
             {
+              "internalType": "address",
+              "name": "beneficiary",
               "type": "address"
             },
             {
+              "internalType": "string",
+              "name": "memo",
               "type": "string"
             },
             {
+              "internalType": "bytes",
+              "name": "metadata",
               "type": "bytes"
             }
-          ]
+          ],
+          "internalType": "struct JBRedeemParamsData",
+          "name": "_param",
+          "type": "tuple"
         }
       ],
+      "name": "redeemParams",
       "outputs": [
         {
           "internalType": "uint256",
@@ -124,8 +164,8 @@
           "type": "address"
         }
       ],
-      "constant": null,
-      "stateMutability": "view"
+      "stateMutability": "view",
+      "type": "function"
     }
   ],
   "bytecode": {
@@ -133,7 +173,7 @@
     "sourceMap": "",
     "linkReferences": {}
   },
-  "deployed_bytecode": {
+  "deployedBytecode": {
     "object": "0x",
     "sourceMap": "",
     "linkReferences": {}

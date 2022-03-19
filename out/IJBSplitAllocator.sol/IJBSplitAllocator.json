@@ -1,8 +1,6 @@
 {
   "abi": [
     {
-      "type": "function",
-      "name": "allocate",
       "inputs": [
         {
           "internalType": "uint256",
@@ -20,34 +18,47 @@
           "type": "uint256"
         },
         {
-          "internalType": "struct JBSplit",
-          "name": "_split",
-          "type": "tuple",
           "components": [
             {
+              "internalType": "bool",
+              "name": "preferClaimed",
               "type": "bool"
             },
             {
+              "internalType": "uint256",
+              "name": "percent",
               "type": "uint256"
             },
             {
+              "internalType": "uint256",
+              "name": "projectId",
               "type": "uint256"
             },
             {
+              "internalType": "address payable",
+              "name": "beneficiary",
               "type": "address"
             },
             {
+              "internalType": "uint256",
+              "name": "lockedUntil",
               "type": "uint256"
             },
             {
+              "internalType": "contract IJBSplitAllocator",
+              "name": "allocator",
               "type": "address"
             }
-          ]
+          ],
+          "internalType": "struct JBSplit",
+          "name": "_split",
+          "type": "tuple"
         }
       ],
+      "name": "allocate",
       "outputs": [],
-      "constant": null,
-      "stateMutability": "payable"
+      "stateMutability": "payable",
+      "type": "function"
     }
   ],
   "bytecode": {
@@ -55,7 +66,7 @@
     "sourceMap": "",
     "linkReferences": {}
   },
-  "deployed_bytecode": {
+  "deployedBytecode": {
     "object": "0x",
     "sourceMap": "",
     "linkReferences": {}

@@ -1,9 +1,27 @@
 {
   "abi": [
     {
-      "type": "function",
-      "name": "owner",
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "previousOwner",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "newOwner",
+          "type": "address"
+        }
+      ],
+      "name": "OwnershipTransferred",
+      "type": "event"
+    },
+    {
       "inputs": [],
+      "name": "owner",
       "outputs": [
         {
           "internalType": "address",
@@ -11,20 +29,17 @@
           "type": "address"
         }
       ],
-      "constant": null,
-      "stateMutability": "view"
+      "stateMutability": "view",
+      "type": "function"
     },
     {
-      "type": "function",
-      "name": "renounceOwnership",
       "inputs": [],
+      "name": "renounceOwnership",
       "outputs": [],
-      "constant": null,
-      "stateMutability": "nonpayable"
+      "stateMutability": "nonpayable",
+      "type": "function"
     },
     {
-      "type": "function",
-      "name": "transferOwnership",
       "inputs": [
         {
           "internalType": "address",
@@ -32,26 +47,10 @@
           "type": "address"
         }
       ],
+      "name": "transferOwnership",
       "outputs": [],
-      "constant": null,
-      "stateMutability": "nonpayable"
-    },
-    {
-      "type": "event",
-      "name": "OwnershipTransferred",
-      "inputs": [
-        {
-          "name": "previousOwner",
-          "type": "address",
-          "indexed": true
-        },
-        {
-          "name": "newOwner",
-          "type": "address",
-          "indexed": true
-        }
-      ],
-      "anonymous": false
+      "stateMutability": "nonpayable",
+      "type": "function"
     }
   ],
   "bytecode": {
@@ -59,7 +58,7 @@
     "sourceMap": "",
     "linkReferences": {}
   },
-  "deployed_bytecode": {
+  "deployedBytecode": {
     "object": "0x",
     "sourceMap": "",
     "linkReferences": {}

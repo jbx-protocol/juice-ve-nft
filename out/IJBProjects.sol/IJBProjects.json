@@ -1,8 +1,180 @@
 {
   "abi": [
     {
-      "type": "function",
-      "name": "approve",
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "owner",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "approved",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "internalType": "uint256",
+          "name": "tokenId",
+          "type": "uint256"
+        }
+      ],
+      "name": "Approval",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "owner",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "operator",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "internalType": "bool",
+          "name": "approved",
+          "type": "bool"
+        }
+      ],
+      "name": "ApprovalForAll",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "uint256",
+          "name": "projectId",
+          "type": "uint256"
+        },
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "owner",
+          "type": "address"
+        },
+        {
+          "components": [
+            {
+              "internalType": "string",
+              "name": "content",
+              "type": "string"
+            },
+            {
+              "internalType": "uint256",
+              "name": "domain",
+              "type": "uint256"
+            }
+          ],
+          "indexed": false,
+          "internalType": "struct JBProjectMetadata",
+          "name": "metadata",
+          "type": "tuple"
+        },
+        {
+          "indexed": false,
+          "internalType": "address",
+          "name": "caller",
+          "type": "address"
+        }
+      ],
+      "name": "Create",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "uint256",
+          "name": "projectId",
+          "type": "uint256"
+        },
+        {
+          "components": [
+            {
+              "internalType": "string",
+              "name": "content",
+              "type": "string"
+            },
+            {
+              "internalType": "uint256",
+              "name": "domain",
+              "type": "uint256"
+            }
+          ],
+          "indexed": false,
+          "internalType": "struct JBProjectMetadata",
+          "name": "metadata",
+          "type": "tuple"
+        },
+        {
+          "indexed": false,
+          "internalType": "address",
+          "name": "caller",
+          "type": "address"
+        }
+      ],
+      "name": "SetMetadata",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
+          "internalType": "contract IJBTokenUriResolver",
+          "name": "resolver",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "internalType": "address",
+          "name": "caller",
+          "type": "address"
+        }
+      ],
+      "name": "SetTokenUriResolver",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "from",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "to",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "internalType": "uint256",
+          "name": "tokenId",
+          "type": "uint256"
+        }
+      ],
+      "name": "Transfer",
+      "type": "event"
+    },
+    {
       "inputs": [
         {
           "internalType": "address",
@@ -15,13 +187,12 @@
           "type": "uint256"
         }
       ],
+      "name": "approve",
       "outputs": [],
-      "constant": null,
-      "stateMutability": "nonpayable"
+      "stateMutability": "nonpayable",
+      "type": "function"
     },
     {
-      "type": "function",
-      "name": "balanceOf",
       "inputs": [
         {
           "internalType": "address",
@@ -29,6 +200,7 @@
           "type": "address"
         }
       ],
+      "name": "balanceOf",
       "outputs": [
         {
           "internalType": "uint256",
@@ -36,13 +208,12 @@
           "type": "uint256"
         }
       ],
-      "constant": null,
-      "stateMutability": "view"
+      "stateMutability": "view",
+      "type": "function"
     },
     {
-      "type": "function",
-      "name": "count",
       "inputs": [],
+      "name": "count",
       "outputs": [
         {
           "internalType": "uint256",
@@ -50,12 +221,10 @@
           "type": "uint256"
         }
       ],
-      "constant": null,
-      "stateMutability": "view"
+      "stateMutability": "view",
+      "type": "function"
     },
     {
-      "type": "function",
-      "name": "createFor",
       "inputs": [
         {
           "internalType": "address",
@@ -63,19 +232,24 @@
           "type": "address"
         },
         {
-          "internalType": "struct JBProjectMetadata",
-          "name": "_metadata",
-          "type": "tuple",
           "components": [
             {
+              "internalType": "string",
+              "name": "content",
               "type": "string"
             },
             {
+              "internalType": "uint256",
+              "name": "domain",
               "type": "uint256"
             }
-          ]
+          ],
+          "internalType": "struct JBProjectMetadata",
+          "name": "_metadata",
+          "type": "tuple"
         }
       ],
+      "name": "createFor",
       "outputs": [
         {
           "internalType": "uint256",
@@ -83,12 +257,10 @@
           "type": "uint256"
         }
       ],
-      "constant": null,
-      "stateMutability": "nonpayable"
+      "stateMutability": "nonpayable",
+      "type": "function"
     },
     {
-      "type": "function",
-      "name": "getApproved",
       "inputs": [
         {
           "internalType": "uint256",
@@ -96,6 +268,7 @@
           "type": "uint256"
         }
       ],
+      "name": "getApproved",
       "outputs": [
         {
           "internalType": "address",
@@ -103,12 +276,10 @@
           "type": "address"
         }
       ],
-      "constant": null,
-      "stateMutability": "view"
+      "stateMutability": "view",
+      "type": "function"
     },
     {
-      "type": "function",
-      "name": "isApprovedForAll",
       "inputs": [
         {
           "internalType": "address",
@@ -121,6 +292,7 @@
           "type": "address"
         }
       ],
+      "name": "isApprovedForAll",
       "outputs": [
         {
           "internalType": "bool",
@@ -128,12 +300,10 @@
           "type": "bool"
         }
       ],
-      "constant": null,
-      "stateMutability": "view"
+      "stateMutability": "view",
+      "type": "function"
     },
     {
-      "type": "function",
-      "name": "metadataContentOf",
       "inputs": [
         {
           "internalType": "uint256",
@@ -146,6 +316,7 @@
           "type": "uint256"
         }
       ],
+      "name": "metadataContentOf",
       "outputs": [
         {
           "internalType": "string",
@@ -153,12 +324,10 @@
           "type": "string"
         }
       ],
-      "constant": null,
-      "stateMutability": "view"
+      "stateMutability": "view",
+      "type": "function"
     },
     {
-      "type": "function",
-      "name": "ownerOf",
       "inputs": [
         {
           "internalType": "uint256",
@@ -166,6 +335,7 @@
           "type": "uint256"
         }
       ],
+      "name": "ownerOf",
       "outputs": [
         {
           "internalType": "address",
@@ -173,12 +343,10 @@
           "type": "address"
         }
       ],
-      "constant": null,
-      "stateMutability": "view"
+      "stateMutability": "view",
+      "type": "function"
     },
     {
-      "type": "function",
-      "name": "safeTransferFrom",
       "inputs": [
         {
           "internalType": "address",
@@ -196,13 +364,12 @@
           "type": "uint256"
         }
       ],
+      "name": "safeTransferFrom",
       "outputs": [],
-      "constant": null,
-      "stateMutability": "nonpayable"
+      "stateMutability": "nonpayable",
+      "type": "function"
     },
     {
-      "type": "function",
-      "name": "safeTransferFrom",
       "inputs": [
         {
           "internalType": "address",
@@ -225,13 +392,12 @@
           "type": "bytes"
         }
       ],
+      "name": "safeTransferFrom",
       "outputs": [],
-      "constant": null,
-      "stateMutability": "nonpayable"
+      "stateMutability": "nonpayable",
+      "type": "function"
     },
     {
-      "type": "function",
-      "name": "setApprovalForAll",
       "inputs": [
         {
           "internalType": "address",
@@ -244,13 +410,12 @@
           "type": "bool"
         }
       ],
+      "name": "setApprovalForAll",
       "outputs": [],
-      "constant": null,
-      "stateMutability": "nonpayable"
+      "stateMutability": "nonpayable",
+      "type": "function"
     },
     {
-      "type": "function",
-      "name": "setMetadataOf",
       "inputs": [
         {
           "internalType": "uint256",
@@ -258,26 +423,29 @@
           "type": "uint256"
         },
         {
-          "internalType": "struct JBProjectMetadata",
-          "name": "_metadata",
-          "type": "tuple",
           "components": [
             {
+              "internalType": "string",
+              "name": "content",
               "type": "string"
             },
             {
+              "internalType": "uint256",
+              "name": "domain",
               "type": "uint256"
             }
-          ]
+          ],
+          "internalType": "struct JBProjectMetadata",
+          "name": "_metadata",
+          "type": "tuple"
         }
       ],
+      "name": "setMetadataOf",
       "outputs": [],
-      "constant": null,
-      "stateMutability": "nonpayable"
+      "stateMutability": "nonpayable",
+      "type": "function"
     },
     {
-      "type": "function",
-      "name": "setTokenUriResolver",
       "inputs": [
         {
           "internalType": "contract IJBTokenUriResolver",
@@ -285,13 +453,12 @@
           "type": "address"
         }
       ],
+      "name": "setTokenUriResolver",
       "outputs": [],
-      "constant": null,
-      "stateMutability": "nonpayable"
+      "stateMutability": "nonpayable",
+      "type": "function"
     },
     {
-      "type": "function",
-      "name": "supportsInterface",
       "inputs": [
         {
           "internalType": "bytes4",
@@ -299,6 +466,7 @@
           "type": "bytes4"
         }
       ],
+      "name": "supportsInterface",
       "outputs": [
         {
           "internalType": "bool",
@@ -306,13 +474,12 @@
           "type": "bool"
         }
       ],
-      "constant": null,
-      "stateMutability": "view"
+      "stateMutability": "view",
+      "type": "function"
     },
     {
-      "type": "function",
-      "name": "tokenUriResolver",
       "inputs": [],
+      "name": "tokenUriResolver",
       "outputs": [
         {
           "internalType": "contract IJBTokenUriResolver",
@@ -320,12 +487,10 @@
           "type": "address"
         }
       ],
-      "constant": null,
-      "stateMutability": "view"
+      "stateMutability": "view",
+      "type": "function"
     },
     {
-      "type": "function",
-      "name": "transferFrom",
       "inputs": [
         {
           "internalType": "address",
@@ -343,157 +508,10 @@
           "type": "uint256"
         }
       ],
+      "name": "transferFrom",
       "outputs": [],
-      "constant": null,
-      "stateMutability": "nonpayable"
-    },
-    {
-      "type": "event",
-      "name": "Approval",
-      "inputs": [
-        {
-          "name": "owner",
-          "type": "address",
-          "indexed": true
-        },
-        {
-          "name": "approved",
-          "type": "address",
-          "indexed": true
-        },
-        {
-          "name": "tokenId",
-          "type": "uint256",
-          "indexed": true
-        }
-      ],
-      "anonymous": false
-    },
-    {
-      "type": "event",
-      "name": "ApprovalForAll",
-      "inputs": [
-        {
-          "name": "owner",
-          "type": "address",
-          "indexed": true
-        },
-        {
-          "name": "operator",
-          "type": "address",
-          "indexed": true
-        },
-        {
-          "name": "approved",
-          "type": "bool",
-          "indexed": false
-        }
-      ],
-      "anonymous": false
-    },
-    {
-      "type": "event",
-      "name": "Create",
-      "inputs": [
-        {
-          "name": "projectId",
-          "type": "uint256",
-          "indexed": true
-        },
-        {
-          "name": "owner",
-          "type": "address",
-          "indexed": true
-        },
-        {
-          "name": "metadata",
-          "type": "tuple",
-          "indexed": false,
-          "components": [
-            {
-              "type": "string"
-            },
-            {
-              "type": "uint256"
-            }
-          ]
-        },
-        {
-          "name": "caller",
-          "type": "address",
-          "indexed": false
-        }
-      ],
-      "anonymous": false
-    },
-    {
-      "type": "event",
-      "name": "SetMetadata",
-      "inputs": [
-        {
-          "name": "projectId",
-          "type": "uint256",
-          "indexed": true
-        },
-        {
-          "name": "metadata",
-          "type": "tuple",
-          "indexed": false,
-          "components": [
-            {
-              "type": "string"
-            },
-            {
-              "type": "uint256"
-            }
-          ]
-        },
-        {
-          "name": "caller",
-          "type": "address",
-          "indexed": false
-        }
-      ],
-      "anonymous": false
-    },
-    {
-      "type": "event",
-      "name": "SetTokenUriResolver",
-      "inputs": [
-        {
-          "name": "resolver",
-          "type": "address",
-          "indexed": false
-        },
-        {
-          "name": "caller",
-          "type": "address",
-          "indexed": false
-        }
-      ],
-      "anonymous": false
-    },
-    {
-      "type": "event",
-      "name": "Transfer",
-      "inputs": [
-        {
-          "name": "from",
-          "type": "address",
-          "indexed": true
-        },
-        {
-          "name": "to",
-          "type": "address",
-          "indexed": true
-        },
-        {
-          "name": "tokenId",
-          "type": "uint256",
-          "indexed": true
-        }
-      ],
-      "anonymous": false
+      "stateMutability": "nonpayable",
+      "type": "function"
     }
   ],
   "bytecode": {
@@ -501,7 +519,7 @@
     "sourceMap": "",
     "linkReferences": {}
   },
-  "deployed_bytecode": {
+  "deployedBytecode": {
     "object": "0x",
     "sourceMap": "",
     "linkReferences": {}

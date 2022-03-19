@@ -1,47 +1,64 @@
 {
   "abi": [
     {
-      "type": "function",
-      "name": "didRedeem",
       "inputs": [
         {
-          "internalType": "struct JBDidRedeemData",
-          "name": "_param",
-          "type": "tuple",
           "components": [
             {
+              "internalType": "address",
+              "name": "holder",
               "type": "address"
             },
             {
+              "internalType": "uint256",
+              "name": "projectId",
               "type": "uint256"
             },
             {
+              "internalType": "uint256",
+              "name": "projectTokenCount",
               "type": "uint256"
             },
             {
+              "internalType": "address",
+              "name": "token",
               "type": "address"
             },
             {
+              "internalType": "uint256",
+              "name": "reclaimedAmount",
               "type": "uint256"
             },
             {
+              "internalType": "uint256",
+              "name": "decimals",
               "type": "uint256"
             },
             {
+              "internalType": "address payable",
+              "name": "beneficiary",
               "type": "address"
             },
             {
+              "internalType": "string",
+              "name": "memo",
               "type": "string"
             },
             {
+              "internalType": "bytes",
+              "name": "metadata",
               "type": "bytes"
             }
-          ]
+          ],
+          "internalType": "struct JBDidRedeemData",
+          "name": "_param",
+          "type": "tuple"
         }
       ],
+      "name": "didRedeem",
       "outputs": [],
-      "constant": null,
-      "stateMutability": "nonpayable"
+      "stateMutability": "nonpayable",
+      "type": "function"
     }
   ],
   "bytecode": {
@@ -49,7 +66,7 @@
     "sourceMap": "",
     "linkReferences": {}
   },
-  "deployed_bytecode": {
+  "deployedBytecode": {
     "object": "0x",
     "sourceMap": "",
     "linkReferences": {}

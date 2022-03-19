@@ -1,8 +1,6 @@
 {
   "abi": [
     {
-      "type": "function",
-      "name": "tokenURI",
       "inputs": [
         {
           "internalType": "uint256",
@@ -25,6 +23,7 @@
           "type": "uint256"
         }
       ],
+      "name": "tokenURI",
       "outputs": [
         {
           "internalType": "string",
@@ -32,8 +31,8 @@
           "type": "string"
         }
       ],
-      "constant": null,
-      "stateMutability": "view"
+      "stateMutability": "view",
+      "type": "function"
     }
   ],
   "bytecode": {
@@ -41,7 +40,7 @@
     "sourceMap": "",
     "linkReferences": {}
   },
-  "deployed_bytecode": {
+  "deployedBytecode": {
     "object": "0x",
     "sourceMap": "",
     "linkReferences": {}

@@ -1,9 +1,8 @@
 {
   "abi": [
     {
-      "type": "function",
-      "name": "duration",
       "inputs": [],
+      "name": "duration",
       "outputs": [
         {
           "internalType": "uint256",
@@ -11,12 +10,10 @@
           "type": "uint256"
         }
       ],
-      "constant": null,
-      "stateMutability": "view"
+      "stateMutability": "view",
+      "type": "function"
     },
     {
-      "type": "function",
-      "name": "stateOf",
       "inputs": [
         {
           "internalType": "uint256",
@@ -29,6 +26,7 @@
           "type": "uint256"
         }
       ],
+      "name": "stateOf",
       "outputs": [
         {
           "internalType": "enum JBBallotState",
@@ -36,8 +34,8 @@
           "type": "uint8"
         }
       ],
-      "constant": null,
-      "stateMutability": "view"
+      "stateMutability": "view",
+      "type": "function"
     }
   ],
   "bytecode": {
@@ -45,7 +43,7 @@
     "sourceMap": "",
     "linkReferences": {}
   },
-  "deployed_bytecode": {
+  "deployedBytecode": {
     "object": "0x",
     "sourceMap": "",
     "linkReferences": {}
