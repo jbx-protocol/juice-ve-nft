@@ -20,6 +20,8 @@ import '@jbx-protocol/contracts-v2/contracts/structs/JBFundingCycleData.sol';
 import '@jbx-protocol/contracts-v2/contracts/structs/JBFundingCycleMetadata.sol';
 import '@jbx-protocol/contracts-v2/contracts/structs/JBGroupedSplits.sol';
 import '@jbx-protocol/contracts-v2/contracts/structs/JBFundAccessConstraints.sol';
+import '@jbx-protocol/contracts-v2/contracts/structs/JBOperatorData.sol';
+
 import '@jbx-protocol/contracts-v2/contracts/interfaces/IJBPaymentTerminal.sol';
 import '@jbx-protocol/contracts-v2/contracts/interfaces/IJBToken.sol';
 import '@jbx-protocol/contracts-v2/contracts/interfaces/IJBTokenStore.sol';
@@ -53,19 +55,19 @@ abstract contract TestBaseWorkflow is DSTest {
   JBSplitsStore private _jbSplitsStore;
   // JBController
   JBController private _jbController;
-    // JBVeTokenUriResolver
+  // JBVeTokenUriResolver
   JBVeTokenUriResolver private _jbveTokenUriResolver;
   // JBProjectMetadata
   JBProjectMetadata private _projectMetadata;
-    // JBFundingCycleData
+  // JBFundingCycleData
   JBFundingCycleData private _data;
-    // JBFundingCycleMetadata
+  // JBFundingCycleMetadata
   JBFundingCycleMetadata private _metadata;
-    // JBGroupedSplits
+  // JBGroupedSplits
   JBGroupedSplits[] private _groupedSplits;
-    // JBFundAccessConstraints
+  // JBFundAccessConstraints
   JBFundAccessConstraints[] private _fundAccessConstraints;
-    // IJBTerminal
+  // IJBTerminal
   IJBPaymentTerminal[] private _terminals;
 
   uint256 private _projectId;

@@ -141,5 +141,20 @@ contract JBveBannyTests is TestBaseWorkflow {
     _jbveBanny.extendLock(1, 8640000);
   }
 
-
+  function testLockWithNonJbToken() public {
+    _projectOwner = projectOwner();
+    evm.startPrank(_projectOwner);
+    _jbController.mintTokensOf(_projectId, 100 ether, _projectOwner, 'Test Memo', false, true);
+    uint256[] memory _permissionIndexes = new uint256[](1);
+    _permissionIndexes[0] = 11;
+    JBOperatorData memory _operatorData = JBOperatorData(address(_jbveBanny), _projectId, _permissionIndexes);
+    bytes memory data = abi.encodeWithSignature('setOperator((address,uint256,uint256[]))', _operatorData); 
+    (bool success, ) = address(_jbOperatorStore).call(data);
+    require(success);
+    _jbveBanny.lock(_projectOwner, 10 ether, 864000, _projectOwner, false);
+    assertEq(_jbveBanny.ownerOf(1), _projectOwner);
+    (uint256 amount, uint256 duration, ,) = _jbveBanny.getSpecs(1);
+    assertEq(amount, 10 ether);
+    assertEq(duration, 864000);
+  }
 }
