@@ -72,6 +72,12 @@ contract JBveBanny is ERC721Votes, ERC721Enumerable, Ownable, ReentrancyGuard, J
   */
   uint256 private immutable _maxLockDuration;
 
+  /** 
+    @notice 
+    The options for lock durations.
+  */
+  uint256[] private _lockDurationOptions;
+
   //*********************************************************************//
   // --------------------- public stored properties -------------------- //
   //*********************************************************************//
@@ -87,12 +93,6 @@ contract JBveBanny is ERC721Votes, ERC721Enumerable, Ownable, ReentrancyGuard, J
     JBProject id.
   */
   uint256 public immutable projectId;
-
-  /** 
-    @notice 
-    The options for lock durations.
-  */
-  uint256[] public lockDurationOptions;
 
   /** 
     @notice 
@@ -113,6 +113,20 @@ contract JBveBanny is ERC721Votes, ERC721Enumerable, Ownable, ReentrancyGuard, J
   uint256 public count;
 
   //*********************************************************************//
+  // ------------------------- external views -------------------------- //
+  //*********************************************************************//
+
+  /** 
+    @notice
+    The lock duration options
+
+    @return An array of lock duration options, in seconds.
+  */
+  function lockDurationOptions() external view returns (uint256[] memory) {
+    return _lockDurationOptions;
+  }
+
+  //*********************************************************************//
   // ---------------------------- constructor -------------------------- //
   //*********************************************************************//
 
@@ -122,7 +136,7 @@ contract JBveBanny is ERC721Votes, ERC721Enumerable, Ownable, ReentrancyGuard, J
     @param _symbol Nft symbol.
     @param _uriResolver Token uri resolver instance.
     @param _tokenStore The JBTokenStore where unclaimed tokens are accounted for.
-    @param _lockDurationOptions The lock options, in seconds, for lock durations.
+    @param __lockDurationOptions The lock options, in seconds, for lock durations.
   */
   constructor(
     uint256 _projectId,
@@ -131,13 +145,13 @@ contract JBveBanny is ERC721Votes, ERC721Enumerable, Ownable, ReentrancyGuard, J
     IJBVeTokenUriResolver _uriResolver,
     IJBTokenStore _tokenStore,
     IJBOperatorStore _operatorStore,
-    uint256[] memory _lockDurationOptions
+    uint256[] memory __lockDurationOptions
   ) ERC721(_name, _symbol) EIP712('JBveBanny', '1') JBOperatable(_operatorStore) {
     token = _tokenStore.tokenOf(_projectId);
     projectId = _projectId;
     uriResolver = _uriResolver;
     tokenStore = _tokenStore;
-    lockDurationOptions = _lockDurationOptions;
+    _lockDurationOptions = __lockDurationOptions;
 
     // Save the max lock duration.
     uint256 _max = 0;
@@ -317,7 +331,7 @@ contract JBveBanny is ERC721Votes, ERC721Enumerable, Ownable, ReentrancyGuard, J
   */
   function tokenURI(uint256 _tokenId) public view override returns (string memory) {
     (uint256 _amount, uint256 _duration, uint256 _lockedUntil, ) = getSpecs(_tokenId);
-    return uriResolver.tokenURI(_tokenId, _amount, _duration, _lockedUntil, lockDurationOptions);
+    return uriResolver.tokenURI(_tokenId, _amount, _duration, _lockedUntil, _lockDurationOptions);
   }
 
   /**
@@ -385,8 +399,8 @@ contract JBveBanny is ERC721Votes, ERC721Enumerable, Ownable, ReentrancyGuard, J
     @return A flag.
   */
   function _isLockDurationAcceptable(uint256 _duration) private view returns (bool) {
-    for (uint256 _i; _i < lockDurationOptions.length; _i++)
-      if (lockDurationOptions[_i] == _duration) return true;
+    for (uint256 _i; _i < _lockDurationOptions.length; _i++)
+      if (_lockDurationOptions[_i] == _duration) return true;
     return false;
   }
 
