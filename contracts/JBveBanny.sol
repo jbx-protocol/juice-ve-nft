@@ -368,6 +368,9 @@ contract JBveBanny is ERC721Votes, ERC721Enumerable, Ownable, ReentrancyGuard, J
 
       (uint256 _amount, , uint256 _lockedUntil, ) = getSpecs(_tokenId);
 
+      // No voting units if the lock has expired.
+      if (block.timestamp >= _lockedUntil) continue;
+
       // Voting balance for each token is a function of how much time is left on the lock.
       units += PRBMath.mulDiv(_amount, (_lockedUntil - block.timestamp), _maxLockDuration);
     }
