@@ -263,6 +263,7 @@ contract JBveBanny is ERC721Votes, ERC721Enumerable, Ownable, ReentrancyGuard, J
     nonReentrant
     requirePermission(ownerOf(_tokenId), projectId, JBStakingOperations.UNLOCK)
   {
+    // Get the specs for the token ID.
     (uint256 _count, , uint256 _lockedUntil, bool _useJbToken) = getSpecs(_tokenId);
 
     // The lock must have expired.
@@ -299,6 +300,7 @@ contract JBveBanny is ERC721Votes, ERC721Enumerable, Ownable, ReentrancyGuard, J
     // Duration must match.
     if (!_isLockDurationAcceptable(_updatedDuration)) revert JBErrors.INVALID_LOCK_DURATION();
 
+    // Get the specs for the token ID.
     (uint256 _count, , uint256 _lockedUntil, bool _useJbToken) = getSpecs(_tokenId);
 
     // Calculate the updated time when this lock will end (in seconds).
