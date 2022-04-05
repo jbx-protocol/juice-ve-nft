@@ -7,6 +7,7 @@ import '@openzeppelin/contracts/access/Ownable.sol';
 import '@openzeppelin/contracts/security/ReentrancyGuard.sol';
 import '@paulrberg/contracts/math/PRBMath.sol';
 import '@jbx-protocol/contracts-v2/contracts/interfaces/IJBTokenStore.sol';
+import '@jbx-protocol/contracts-v2/contracts/interfaces/IJBPayoutRedemptionPaymentTerminal.sol';
 import '@jbx-protocol/contracts-v2/contracts/abstract/JBOperatable.sol';
 
 import './interfaces/IJBVeTokenUriResolver.sol';
@@ -52,6 +53,16 @@ contract JBveBanny is ERC721Votes, ERC721Enumerable, Ownable, ReentrancyGuard, J
     uint256 indexed tokenId,
     uint256 updatedDuration,
     uint256 updatedLockedUntil,
+    address caller
+  );
+
+  event Redeem(
+    uint256 indexed tokenId,
+    address holder,
+    address beneficiary,
+    uint256 tokenCount,
+    uint256 claimedAmount,
+    string memo,
     address caller
   );
 
@@ -168,7 +179,7 @@ contract JBveBanny is ERC721Votes, ERC721Enumerable, Ownable, ReentrancyGuard, J
     Only an account or a designated operator can lock its tokens.
     
     @param _account JBToken Holder.
-    @param _amount Lock Amount.
+    @param _count Lock Amount.
     @param _duration Lock time in seconds.
     @param _beneficiary Address to mint the banny.
     @param _useJbToken A flag indicating if JBtokens are being locked. If false, unclaimed project tokens from the JBTokenStore will be locked.
@@ -177,7 +188,7 @@ contract JBveBanny is ERC721Votes, ERC721Enumerable, Ownable, ReentrancyGuard, J
   */
   function lock(
     address _account,
-    uint256 _amount,
+    uint256 _count,
     uint256 _duration,
     address _beneficiary,
     bool _useJbToken
@@ -198,10 +209,10 @@ contract JBveBanny is ERC721Votes, ERC721Enumerable, Ownable, ReentrancyGuard, J
     // Duration must match.
     if (!_isLockDurationAcceptable(_duration)) revert JBErrors.INVALID_LOCK_DURATION();
 
-    // Make sure the token balance of the account is enough to lock the specified _amount of tokens.
-    if (_useJbToken && token.balanceOf(_account, projectId) < _amount)
+    // Make sure the token balance of the account is enough to lock the specified _count of tokens.
+    if (_useJbToken && token.balanceOf(_account, projectId) < _count)
       revert JBErrors.INSUFFICIENT_BALANCE();
-    else if (!_useJbToken && tokenStore.unclaimedBalanceOf(_account, projectId) < _amount)
+    else if (!_useJbToken && tokenStore.unclaimedBalanceOf(_account, projectId) < _count)
       revert JBErrors.INSUFFICIENT_BALANCE();
 
     // Increment the number of ve positions that have been minted.
@@ -211,8 +222,8 @@ contract JBveBanny is ERC721Votes, ERC721Enumerable, Ownable, ReentrancyGuard, J
     uint256 _lockedUntil = block.timestamp + _duration;
 
     // Store packed specification values for the ve position.
-    // _amount in the bits 0-151.
-    uint256 packedValue = _amount;
+    // _count in the bits 0-151.
+    uint256 packedValue = _count;
     // _duration in the bits 152-199.
     packedValue |= _duration << 152;
     // _lockedUntil in the bits 200-247.
@@ -228,13 +239,13 @@ contract JBveBanny is ERC721Votes, ERC721Enumerable, Ownable, ReentrancyGuard, J
     if (_useJbToken)
       // Transfer the token to this contract where they'll be locked.
       // Will revert if not enough allowance.
-      token.transferFrom(projectId, msg.sender, address(this), _amount);
+      token.transferFrom(projectId, msg.sender, address(this), _count);
       // Transfer the token to this contract where they'll be locked.
       // Will revert if this contract isn't an opperator.
-    else tokenStore.transferFrom(msg.sender, projectId, address(this), _amount);
+    else tokenStore.transferFrom(msg.sender, projectId, address(this), _count);
 
     // Emit event.
-    emit Lock(tokenId, _account, _amount, _duration, _beneficiary, _lockedUntil, msg.sender);
+    emit Lock(tokenId, _account, _count, _duration, _beneficiary, _lockedUntil, msg.sender);
   }
 
   /**
@@ -252,7 +263,7 @@ contract JBveBanny is ERC721Votes, ERC721Enumerable, Ownable, ReentrancyGuard, J
     nonReentrant
     requirePermission(ownerOf(_tokenId), projectId, JBStakingOperations.UNLOCK)
   {
-    (uint256 _amount, , uint256 _lockedUntil, bool _useJbToken) = getSpecs(_tokenId);
+    (uint256 _count, , uint256 _lockedUntil, bool _useJbToken) = getSpecs(_tokenId);
 
     // The lock must have expired.
     if (block.timestamp <= _lockedUntil) revert LOCK_PERIOD_NOT_OVER();
@@ -262,12 +273,12 @@ contract JBveBanny is ERC721Votes, ERC721Enumerable, Ownable, ReentrancyGuard, J
 
     if (_useJbToken)
       // Transfer the amount of locked tokens to beneficiary.
-      token.transfer(projectId, _beneficiary, _amount);
+      token.transfer(projectId, _beneficiary, _count);
       // Transfer the tokens from this contract.
-    else tokenStore.transferFrom(_beneficiary, projectId, address(this), _amount);
+    else tokenStore.transferFrom(_beneficiary, projectId, address(this), _count);
 
     // Emit event.
-    emit Unlock(_tokenId, _beneficiary, _amount, msg.sender);
+    emit Unlock(_tokenId, _beneficiary, _count, msg.sender);
   }
 
   /**
@@ -288,7 +299,7 @@ contract JBveBanny is ERC721Votes, ERC721Enumerable, Ownable, ReentrancyGuard, J
     // Duration must match.
     if (!_isLockDurationAcceptable(_updatedDuration)) revert JBErrors.INVALID_LOCK_DURATION();
 
-    (uint256 _amount, , uint256 _lockedUntil, bool _useJbToken) = getSpecs(_tokenId);
+    (uint256 _count, , uint256 _lockedUntil, bool _useJbToken) = getSpecs(_tokenId);
 
     // Calculate the updated time when this lock will end (in seconds).
     uint256 _updatedLockedUntil = block.timestamp + _updatedDuration;
@@ -297,7 +308,7 @@ contract JBveBanny is ERC721Votes, ERC721Enumerable, Ownable, ReentrancyGuard, J
     if (_lockedUntil > _updatedLockedUntil) revert INVALID_LOCK_EXTENSION();
 
     // fetch the stored packed value.
-    uint256 packedValue = _amount;
+    uint256 packedValue = _count;
     // _duration in the bits 152-199.
     packedValue |= _updatedDuration << 152;
     // _lockedUntil in the bits 200-247.
@@ -308,6 +319,54 @@ contract JBveBanny is ERC721Votes, ERC721Enumerable, Ownable, ReentrancyGuard, J
     _packedSpecs[_tokenId] = packedValue;
 
     emit ExtendLock(_tokenId, _updatedDuration, _updatedLockedUntil, msg.sender);
+  }
+
+  /**
+    @notice
+    Unlock the position and redeem the locked tokens.
+
+    @dev
+    Only an account or a designated operator can unlock its tokens.
+
+    @param _tokenId Banny Id.
+    @param _holder The account to redeem tokens for.
+    @param _minReturnedTokens The minimum amount of terminal tokens expected in return, as a fixed point number with the same amount of decimals as the terminal.
+    @param _beneficiary The address to send the terminal tokens to.
+    @param _memo A memo to pass along to the emitted event.
+    @param _metadata Bytes to send along to the data source and delegate, if provided.
+  */
+  function redeem(
+    uint256 _tokenId,
+    address _holder,
+    uint256 _minReturnedTokens,
+    address payable _beneficiary,
+    string memory _memo,
+    bytes memory _metadata,
+    IJBPayoutRedemptionPaymentTerminal _terminal
+  )
+    external
+    nonReentrant
+    requirePermission(ownerOf(_tokenId), projectId, JBStakingOperations.UNLOCK)
+  {
+    // Get the specs for the token ID.
+    (uint256 _count, , , ) = getSpecs(_tokenId);
+
+    // Burn the token.
+    _burn(_tokenId);
+
+    // Redeem the locked tokens to reclaim treasury funds.
+    uint256 _reclaimedAmount = _terminal.redeemTokensOf(
+      _holder,
+      projectId,
+      _count,
+      _minReturnedTokens,
+      _beneficiary,
+      _memo,
+      _metadata
+    );
+
+    // Emit event.
+    emit Redeem(_tokenId, _holder, _beneficiary, _count, _reclaimedAmount, _memo, msg.sender);
   }
 
   /**
@@ -330,8 +389,8 @@ contract JBveBanny is ERC721Votes, ERC721Enumerable, Ownable, ReentrancyGuard, J
      @return dynamic uri based on the svg logic for that particular banny
   */
   function tokenURI(uint256 _tokenId) public view override returns (string memory) {
-    (uint256 _amount, uint256 _duration, uint256 _lockedUntil, ) = getSpecs(_tokenId);
-    return uriResolver.tokenURI(_tokenId, _amount, _duration, _lockedUntil, _lockDurationOptions);
+    (uint256 _count, uint256 _duration, uint256 _lockedUntil, ) = getSpecs(_tokenId);
+    return uriResolver.tokenURI(_tokenId, _count, _duration, _lockedUntil, _lockDurationOptions);
   }
 
   /**
@@ -340,8 +399,8 @@ contract JBveBanny is ERC721Votes, ERC721Enumerable, Ownable, ReentrancyGuard, J
 
     @param _tokenId Banny Id.
 
-    @return amount Locked amount
-    @return duration Locked duration
+    @return amount Locked token count.
+    @return duration Locked duration.
     @return lockedUntil Locked until this timestamp.
     @return useJbToken If the locked tokens are JBTokens. 
   */
@@ -380,13 +439,13 @@ contract JBveBanny is ERC721Votes, ERC721Enumerable, Ownable, ReentrancyGuard, J
       // Get the token represented a positioned owned by the account.
       uint256 _tokenId = tokenOfOwnerByIndex(_account, _i);
 
-      (uint256 _amount, , uint256 _lockedUntil, ) = getSpecs(_tokenId);
+      (uint256 _count, , uint256 _lockedUntil, ) = getSpecs(_tokenId);
 
       // No voting units if the lock has expired.
       if (block.timestamp >= _lockedUntil) continue;
 
       // Voting balance for each token is a function of how much time is left on the lock.
-      units += PRBMath.mulDiv(_amount, (_lockedUntil - block.timestamp), _maxLockDuration);
+      units += PRBMath.mulDiv(_count, (_lockedUntil - block.timestamp), _maxLockDuration);
     }
   }
 
