@@ -339,26 +339,24 @@ contract JBveBanny is ERC721Votes, ERC721Enumerable, Ownable, ReentrancyGuard, J
   */
   function redeem(
     uint256 _tokenId,
-    address _holder,
     uint256 _minReturnedTokens,
     address payable _beneficiary,
     string memory _memo,
     bytes memory _metadata,
     IJBPayoutRedemptionPaymentTerminal _terminal
-  )
-    external
-    nonReentrant
-    requirePermission(ownerOf(_tokenId), projectId, JBStakingOperations.UNLOCK)
-  {
+  ) external nonReentrant {
     // Get the specs for the token ID.
     (uint256 _count, , , ) = getSpecs(_tokenId);
 
     // Burn the token.
     _burn(_tokenId);
 
+    // Get a reference to the owner of the position.
+    address _owner = ownerOf(_tokenId);
+
     // Redeem the locked tokens to reclaim treasury funds.
     uint256 _reclaimedAmount = _terminal.redeemTokensOf(
-      _holder,
+      _owner,
       projectId,
       _count,
       _minReturnedTokens,
@@ -368,7 +366,7 @@ contract JBveBanny is ERC721Votes, ERC721Enumerable, Ownable, ReentrancyGuard, J
     );
 
     // Emit event.
-    emit Redeem(_tokenId, _holder, _beneficiary, _count, _reclaimedAmount, _memo, msg.sender);
+    emit Redeem(_tokenId, _owner, _beneficiary, _count, _reclaimedAmount, _memo, msg.sender);
   }
 
   /**
