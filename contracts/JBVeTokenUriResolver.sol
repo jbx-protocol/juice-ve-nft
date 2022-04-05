@@ -5,12 +5,8 @@ import '@openzeppelin/contracts/utils/math/SafeMath.sol';
 import '@openzeppelin/contracts/utils/Strings.sol';
 
 import './interfaces/IJBVeTokenUriResolver.sol';
+import './libraries/JBErrors.sol';
 
-//*********************************************************************//
-// --------------------------- custom errors ------------------------- //
-//*********************************************************************//
-error INVALID_DURATION();
-error INSUFFICIENT_BALANCE();
 
 contract JBVeTokenUriResolver is IJBVeTokenUriResolver {
   using SafeMath for uint256;
@@ -33,10 +29,10 @@ contract JBVeTokenUriResolver is IJBVeTokenUriResolver {
     uint256[] memory _lockDurationOptions
   ) external pure override returns (string memory) {
     if (_amount <= 0) {
-      revert INSUFFICIENT_BALANCE();
+      revert JBErrors.INSUFFICIENT_BALANCE();
     }
     if (_duration <= 0) {
-      revert INVALID_DURATION();
+      revert JBErrors.INVALID_LOCK_DURATION();
     }
     uint256 _tokenRange = _getTokenRange(_amount);
     uint256 _stakeMultiplier = _getTokenStakeMultiplier(_duration, _lockDurationOptions);
@@ -200,6 +196,6 @@ contract JBVeTokenUriResolver is IJBVeTokenUriResolver {
   {
     for (uint256 _i = 0; _i < _lockDurationOptions.length; _i++)
       if (_lockDurationOptions[_i] == _duration) return _i + 1;
-    revert INVALID_DURATION();
+    revert JBErrors.INVALID_LOCK_DURATION();
   }
 }

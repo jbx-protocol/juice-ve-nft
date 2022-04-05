@@ -1,0 +1,27 @@
+{
+  "abi": [
+    {
+      "inputs": [],
+      "name": "operatorStore",
+      "outputs": [
+        {
+          "internalType": "contract IJBOperatorStore",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    }
+  ],
+  "bytecode": {
+    "object": "0x",
+    "sourceMap": "",
+    "linkReferences": {}
+  },
+  "deployedBytecode": {
+    "object": "0x",
+    "sourceMap": "",
+    "linkReferences": {}
+  }
+}
