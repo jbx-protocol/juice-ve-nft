@@ -348,11 +348,11 @@ contract JBveBanny is ERC721Votes, ERC721Enumerable, Ownable, ReentrancyGuard, J
     // Get the specs for the token ID.
     (uint256 _count, , , ) = getSpecs(_tokenId);
 
-    // Burn the token.
-    _burn(_tokenId);
-
     // Get a reference to the owner of the position.
     address _owner = ownerOf(_tokenId);
+
+    // Burn the token.
+    _burn(_tokenId);
 
     // Redeem the locked tokens to reclaim treasury funds.
     uint256 _reclaimedAmount = _terminal.redeemTokensOf(
