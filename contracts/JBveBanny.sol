@@ -301,9 +301,7 @@ contract JBveBanny is ERC721Votes, ERC721Enumerable, Ownable, ReentrancyGuard, J
     if (!_isLockDurationAcceptable(_updatedDuration)) revert JBErrors.INVALID_LOCK_DURATION();
 
     // Get the specs for the token ID.
-    (uint256 _count, uint256 _duration, uint256 _lockedUntil, bool _useJbToken) = getSpecs(
-      _tokenId
-    );
+    (uint256 _count, , uint256 _lockedUntil, bool _useJbToken) = getSpecs(_tokenId);
 
     // No time remaining if the lock has expired.
     uint256 _timeRemaining = (block.timestamp >= _lockedUntil) ? 0 : _lockedUntil - block.timestamp;
