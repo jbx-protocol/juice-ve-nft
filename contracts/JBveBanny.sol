@@ -331,7 +331,6 @@ contract JBveBanny is ERC721Votes, ERC721Enumerable, Ownable, ReentrancyGuard, J
     Only an account or a designated operator can unlock its tokens.
 
     @param _tokenId Banny Id.
-    @param _holder The account to redeem tokens for.
     @param _minReturnedTokens The minimum amount of terminal tokens expected in return, as a fixed point number with the same amount of decimals as the terminal.
     @param _beneficiary The address to send the terminal tokens to.
     @param _memo A memo to pass along to the emitted event.
