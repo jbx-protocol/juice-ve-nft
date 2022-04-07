@@ -301,9 +301,9 @@ contract JBveBanny is ERC721Votes, ERC721Enumerable, Ownable, ReentrancyGuard, J
     @param _lockExtensionData An array of locks to extend.
   */
   function extendLock(JBLockExtensionData[] calldata _lockExtensionData) external nonReentrant {
-    for (uint256 _i; _i < _lockExtensionData; _i++) {
+    for (uint256 _i; _i < _lockExtensionData.length; _i++) {
       // Get a reference to the extension being iterated.
-      JBLockExtensionData _data = _lockExtensionData[_i];
+      JBLockExtensionData memory _data = _lockExtensionData[_i];
 
       // Duration must match.
       if (!_isLockDurationAcceptable(_data.updatedDuration))
@@ -312,14 +312,14 @@ contract JBveBanny is ERC721Votes, ERC721Enumerable, Ownable, ReentrancyGuard, J
       // Get the specs for the token ID.
       (
         uint256 _count,
-        ,
+        uint256 _duration,
         uint256 _lockedUntil,
         bool _useJbToken,
         bool _allowPublicExtension
       ) = getSpecs(_data.tokenId);
 
-      // If the operation isn't allowed publicly, check if the msg.sender is either the position owner or is an operator.
       if (!_allowPublicExtension)
+        // If the operation isn't allowed publicly, check if the msg.sender is either the position owner or is an operator.
         _requirePermission(ownerOf(_data.tokenId), projectId, JBStakingOperations.EXTEND_LOCK);
 
       // No time remaining if the lock has expired.
@@ -359,12 +359,13 @@ contract JBveBanny is ERC721Votes, ERC721Enumerable, Ownable, ReentrancyGuard, J
 
     @param _allowPublicExtensionData An array of locks to extend.
   */
-  function setAllowPublicExtensionFlag(
-    JBAllowPublicExtensionData[] calldata _allowPublicExtensionData
-  ) external nonReentrant {
-    for (uint256 _i; _i < _allowPublicExtensionData; _i++) {
+  function setAllowPublicExtension(JBAllowPublicExtensionData[] calldata _allowPublicExtensionData)
+    external
+    nonReentrant
+  {
+    for (uint256 _i; _i < _allowPublicExtensionData.length; _i++) {
       // Get a reference to the extension being iterated.
-      JBAllowPublicExtensionData _data = _allowPublicExtensionData[_i];
+      JBAllowPublicExtensionData memory _data = _allowPublicExtensionData[_i];
 
       // Get the specs for the token ID.
       (uint256 _count, uint256 _duration, uint256 _lockedUntil, bool _useJbToken, ) = getSpecs(
