@@ -31,7 +31,7 @@ contract JBveBanny is ERC721Votes, ERC721Enumerable, Ownable, ReentrancyGuard, J
   // --------------------------- custom errors ------------------------- //
   //*********************************************************************//
   error INVALID_ACCOUNT();
-
+  error NON_EXISTENT_TOKEN();
   error INSUFFICIENT_ALLOWANCE();
   error LOCK_PERIOD_NOT_OVER();
   error TOKEN_MISMATCH();
@@ -138,6 +138,19 @@ contract JBveBanny is ERC721Votes, ERC721Enumerable, Ownable, ReentrancyGuard, J
     return _lockDurationOptions;
   }
 
+  /**
+    @dev Requires override. Calls super.
+  */
+  function supportsInterface(bytes4 _interfaceId)
+    public
+    view
+    virtual
+    override(ERC721, ERC721Enumerable)
+    returns (bool)
+  {
+    return super.supportsInterface(_interfaceId);
+  }
+
   //*********************************************************************//
   // ---------------------------- constructor -------------------------- //
   //*********************************************************************//
@@ -171,6 +184,10 @@ contract JBveBanny is ERC721Votes, ERC721Enumerable, Ownable, ReentrancyGuard, J
       if (_lockDurationOptions[_i] > _max) _max = _lockDurationOptions[_i];
     _maxLockDuration = _max;
   }
+
+  //*********************************************************************//
+  // --------------------- external transactions ----------------------- //
+  //*********************************************************************//
 
   /**
     @notice
@@ -221,18 +238,7 @@ contract JBveBanny is ERC721Votes, ERC721Enumerable, Ownable, ReentrancyGuard, J
 
     // Calculate the time when this lock will end (in seconds).
     uint256 _lockedUntil = block.timestamp + _duration;
-
-    // Store packed specification values for the ve position.
-    // _count in the bits 0-151.
-    uint256 packedValue = _count;
-    // _duration in the bits 152-199.
-    packedValue |= _duration << 152;
-    // _lockedUntil in the bits 200-247.
-    packedValue |= _lockedUntil << 200;
-    // _useJbToken in bit 248.
-    if (_useJbToken) packedValue |= 1 << 248;
-
-    _packedSpecs[tokenId] = packedValue;
+    _setSpecs(tokenId, _count, _duration, _lockedUntil, _useJbToken);
 
     // Mint the position for the beneficiary.
     _safeMint(_beneficiary, tokenId);
@@ -311,22 +317,17 @@ contract JBveBanny is ERC721Votes, ERC721Enumerable, Ownable, ReentrancyGuard, J
     // The new lock must be greater than the current lock.
     if (_lockedUntil > _updatedLockedUntil) revert INVALID_LOCK_EXTENSION();
 
-    // fetch the stored packed value.
-    uint256 packedValue = _count;
-    // _duration in the bits 152-199.
-    packedValue |= _updatedDuration << 152;
-    // _lockedUntil in the bits 200-247.
-    packedValue |= _updatedLockedUntil << 200;
-    // _useJbToken in bit 248.
-    if (_useJbToken) packedValue |= 1 << 248;
-
-    // // Burn the old NFT
+    // Burn the old NFT
     address _ownerOf = ownerOf(_tokenId);
     _burn(_tokenId);
 
-    // // Mint the new NFT
+    // Increment the number of ve positions that have been minted.
     newTokenId = ++count;
-    _packedSpecs[newTokenId] = packedValue;
+
+    // Set the specifications of the new lock
+    _setSpecs(newTokenId, _count, _updatedDuration, _lockedUntil, _useJbToken);
+
+    // Mint the new NFT
     _safeMint(_ownerOf, newTokenId);
 
     emit ExtendLock(_tokenId, newTokenId, _updatedDuration, _updatedLockedUntil, msg.sender);
@@ -353,6 +354,11 @@ contract JBveBanny is ERC721Votes, ERC721Enumerable, Ownable, ReentrancyGuard, J
     bytes memory _metadata,
     IJBPayoutRedemptionPaymentTerminal _terminal
   ) external nonReentrant {
+    {
+      // Check the permissions scoped to prevent stack too deep
+      _requirePermission(ownerOf(_tokenId), projectId, JBStakingOperations.REDEEM);
+    }
+
     // Get the specs for the token ID.
     (uint256 _count, , , ) = getSpecs(_tokenId);
 
@@ -364,7 +370,7 @@ contract JBveBanny is ERC721Votes, ERC721Enumerable, Ownable, ReentrancyGuard, J
 
     // Redeem the locked tokens to reclaim treasury funds.
     uint256 _reclaimedAmount = _terminal.redeemTokensOf(
-      _owner,
+      address(this),
       projectId,
       _count,
       address(token),
@@ -424,7 +430,7 @@ contract JBveBanny is ERC721Votes, ERC721Enumerable, Ownable, ReentrancyGuard, J
     )
   {
     uint256 _packedValue = _packedSpecs[_tokenId];
-    //if (_packedValue == 0) revert JBErrors.NON_EXISTENT_TOKEN();
+    if (_packedValue == 0) revert NON_EXISTENT_TOKEN();
 
     // amount in the bits 0-151.
     amount = uint256(uint152(_packedValue));
@@ -434,6 +440,42 @@ contract JBveBanny is ERC721Votes, ERC721Enumerable, Ownable, ReentrancyGuard, J
     lockedUntil = uint256(uint48(_packedValue >> 200));
     // useJbToken in the bits 248.
     useJbToken = (_packedValue >> 248) & 1 == 1;
+  }
+
+  //*********************************************************************//
+  // --------------------- private helper functions -------------------- //
+  //*********************************************************************//
+
+  /**
+    @notice
+    Set the specs for a tokenId
+
+    @param _tokenId to set the specs for
+    @param _amount Locked token count.
+    @param _duration Locked duration.
+    @param _lockedUntil Locked until this timestamp.
+    @param _useJbToken If the locked tokens are JBTokens. 
+
+    @return packedValue the specs packed into a single uint256
+  */
+  function _setSpecs(
+    uint256 _tokenId,
+    uint256 _amount,
+    uint256 _duration,
+    uint256 _lockedUntil,
+    bool _useJbToken
+  ) private returns (uint256 packedValue) {
+    // fetch the stored packed value.
+    packedValue = _amount;
+    // _duration in the bits 152-199.
+    packedValue |= _duration << 152;
+    // _lockedUntil in the bits 200-247.
+    packedValue |= _lockedUntil << 200;
+    // _useJbToken in bit 248.
+    if (_useJbToken) packedValue |= 1 << 248;
+
+    _packedSpecs[_tokenId] = packedValue;
+    return packedValue;
   }
 
   /**
@@ -472,19 +514,6 @@ contract JBveBanny is ERC721Votes, ERC721Enumerable, Ownable, ReentrancyGuard, J
     for (uint256 _i; _i < _lockDurationOptions.length; _i++)
       if (_lockDurationOptions[_i] == _duration) return true;
     return false;
-  }
-
-  /**
-    @dev Requires override. Calls super.
-  */
-  function supportsInterface(bytes4 _interfaceId)
-    public
-    view
-    virtual
-    override(ERC721, ERC721Enumerable)
-    returns (bool)
-  {
-    return super.supportsInterface(_interfaceId);
   }
 
   /**
