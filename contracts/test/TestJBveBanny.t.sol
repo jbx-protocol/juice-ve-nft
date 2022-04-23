@@ -56,7 +56,7 @@ contract JBveBannyTests is TestBaseWorkflow {
     assertEq(address(_jbTokenStore.tokenOf(_projectId)), address(_jbveBanny.token()));
     assertEq(address(_jbveTokenUriResolver), address(_jbveBanny.uriResolver()));
     assertEq(_projectId, _jbveBanny.projectId());
-    assertEq(_lockDurationOptions[0], _jbveBanny.lockDurationOptions(0));
+    assertEq(_lockDurationOptions[0], _jbveBanny.lockDurationOptions()[0]);
   }
 
   function mintIJBTokens() public returns (IJBToken) {
@@ -90,12 +90,12 @@ contract JBveBannyTests is TestBaseWorkflow {
 
   function testExtendLock() public {
     mintIJBTokens();
-    _jbveBanny.lock(_projectOwner, 10 ether, 864000, _projectOwner, true);
-    (, uint256 d, uint256 lockedUntil, ) = _jbveBanny.getSpecs(1);
+    uint256 _tokenId = _jbveBanny.lock(_projectOwner, 10 ether, 864000, _projectOwner, true);
+    (, uint256 d, uint256 lockedUntil, ) = _jbveBanny.getSpecs(_tokenId);
     assertEq(d, 864000);
     evm.warp(lockedUntil * 2);
-    _jbveBanny.extendLock(1, 8640000);
-    (, uint256 duration, , ) = _jbveBanny.getSpecs(1);
+    _tokenId = _jbveBanny.extendLock(_tokenId, 8640000);
+    (, uint256 duration, , ) = _jbveBanny.getSpecs(_tokenId);
     assertEq(duration, 8640000);
   }
 
@@ -121,7 +121,7 @@ contract JBveBannyTests is TestBaseWorkflow {
     _jbveBanny.unlock(1, _projectOwner);
   }
 
-  function testScenarioWithInvalidLockDurationWhenExtendingDuration () public {
+  function testScenarioWithInvalidLockDurationWhenExtendingDuration() public {
     mintIJBTokens();
     _jbveBanny.lock(_projectOwner, 10 ether, 864000, _projectOwner, true);
     (, uint256 d, uint256 lockedUntil, ) = _jbveBanny.getSpecs(1);
@@ -146,14 +146,13 @@ contract JBveBannyTests is TestBaseWorkflow {
     evm.startPrank(_projectOwner);
     _jbController.mintTokensOf(_projectId, 100 ether, _projectOwner, 'Test Memo', false, true);
     uint256[] memory _permissionIndexes = new uint256[](1);
-    _permissionIndexes[0] = 11;
-    JBOperatorData memory _operatorData = JBOperatorData(address(_jbveBanny), _projectId, _permissionIndexes);
-    bytes memory data = abi.encodeWithSignature('setOperator((address,uint256,uint256[]))', _operatorData); 
-    (bool success, ) = address(_jbOperatorStore).call(data);
-    require(success);
+    _permissionIndexes[0] = JBOperations.TRANSFER;
+    jbOperatorStore().setOperator(
+      JBOperatorData(address(_jbveBanny), _projectId, _permissionIndexes)
+    );
     _jbveBanny.lock(_projectOwner, 10 ether, 864000, _projectOwner, false);
     assertEq(_jbveBanny.ownerOf(1), _projectOwner);
-    (uint256 amount, uint256 duration, ,) = _jbveBanny.getSpecs(1);
+    (uint256 amount, uint256 duration, , ) = _jbveBanny.getSpecs(1);
     assertEq(amount, 10 ether);
     assertEq(duration, 864000);
   }

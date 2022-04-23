@@ -14,16 +14,6 @@ import './interfaces/IJBVeTokenUriResolver.sol';
 import './libraries/JBStakingOperations.sol';
 import './libraries/JBErrors.sol';
 
-//*********************************************************************//
-// --------------------------- custom errors ------------------------- //
-//*********************************************************************//
-error INVALID_ACCOUNT();
-
-error INSUFFICIENT_ALLOWANCE();
-error LOCK_PERIOD_NOT_OVER();
-error TOKEN_MISMATCH();
-error INVALID_LOCK_EXTENSION();
-
 /**
   @notice
   Allows any JBToken holders to stake their tokens and receive a Banny based on their stake and lock in period.
@@ -37,6 +27,16 @@ error INVALID_LOCK_EXTENSION();
   ReentrancyGuard - for protection against external calls.
 */
 contract JBveBanny is ERC721Votes, ERC721Enumerable, Ownable, ReentrancyGuard, JBOperatable {
+  //*********************************************************************//
+  // --------------------------- custom errors ------------------------- //
+  //*********************************************************************//
+  error INVALID_ACCOUNT();
+
+  error INSUFFICIENT_ALLOWANCE();
+  error LOCK_PERIOD_NOT_OVER();
+  error TOKEN_MISMATCH();
+  error INVALID_LOCK_EXTENSION();
+
   event Lock(
     uint256 indexed tokenId,
     address indexed account,
@@ -50,7 +50,8 @@ contract JBveBanny is ERC721Votes, ERC721Enumerable, Ownable, ReentrancyGuard, J
   event Unlock(uint256 indexed tokenId, address beneficiary, uint256 amount, address caller);
 
   event ExtendLock(
-    uint256 indexed tokenId,
+    uint256 indexed oldTokenID,
+    uint256 indexed newTokenID,
     uint256 updatedDuration,
     uint256 updatedLockedUntil,
     address caller
@@ -296,6 +297,7 @@ contract JBveBanny is ERC721Votes, ERC721Enumerable, Ownable, ReentrancyGuard, J
     external
     nonReentrant
     requirePermission(ownerOf(_tokenId), projectId, JBStakingOperations.EXTEND_LOCK)
+    returns (uint256 newTokenId)
   {
     // Duration must match.
     if (!_isLockDurationAcceptable(_updatedDuration)) revert JBErrors.INVALID_LOCK_DURATION();
@@ -318,9 +320,16 @@ contract JBveBanny is ERC721Votes, ERC721Enumerable, Ownable, ReentrancyGuard, J
     // _useJbToken in bit 248.
     if (_useJbToken) packedValue |= 1 << 248;
 
-    _packedSpecs[_tokenId] = packedValue;
+    // // Burn the old NFT
+    address _ownerOf = ownerOf(_tokenId);
+    _burn(_tokenId);
 
-    emit ExtendLock(_tokenId, _updatedDuration, _updatedLockedUntil, msg.sender);
+    // // Mint the new NFT
+    newTokenId = ++count;
+    _packedSpecs[newTokenId] = packedValue;
+    _safeMint(_ownerOf, newTokenId);
+
+    emit ExtendLock(_tokenId, newTokenId, _updatedDuration, _updatedLockedUntil, msg.sender);
   }
 
   /**
@@ -358,6 +367,7 @@ contract JBveBanny is ERC721Votes, ERC721Enumerable, Ownable, ReentrancyGuard, J
       _owner,
       projectId,
       _count,
+      address(token),
       _minReturnedTokens,
       _beneficiary,
       _memo,
@@ -414,6 +424,8 @@ contract JBveBanny is ERC721Votes, ERC721Enumerable, Ownable, ReentrancyGuard, J
     )
   {
     uint256 _packedValue = _packedSpecs[_tokenId];
+    //if (_packedValue == 0) revert JBErrors.NON_EXISTENT_TOKEN();
+
     // amount in the bits 0-151.
     amount = uint256(uint152(_packedValue));
     // duration in the bits 152-199.
@@ -495,5 +507,18 @@ contract JBveBanny is ERC721Votes, ERC721Enumerable, Ownable, ReentrancyGuard, J
     uint256 _tokenId
   ) internal virtual override(ERC721, ERC721Enumerable) {
     return super._beforeTokenTransfer(_from, _to, _tokenId);
+  }
+
+  /**
+    @notice
+    Deletes the storage related to the _tokenId and burns the token
+
+    @param _tokenId The token to burn
+   */
+  function _burn(uint256 _tokenId) internal virtual override {
+    // Delete the storage related to the TokenID
+    delete _packedSpecs[_tokenId];
+    // Delete the TokenID
+    super._burn(_tokenId);
   }
 }

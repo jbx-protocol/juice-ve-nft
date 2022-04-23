@@ -7,7 +7,10 @@ import '../../JBveBanny.sol';
 import '../../JBVeTokenUriResolver.sol';
 
 import '@jbx-protocol/contracts-v2/contracts/JBDirectory.sol';
+import '@jbx-protocol/contracts-v2/contracts/JBETHPaymentTerminal.sol';
+import '@jbx-protocol/contracts-v2/contracts/JBSingleTokenPaymentTerminalStore.sol';
 import '@jbx-protocol/contracts-v2/contracts/JBOperatorStore.sol';
+import '@jbx-protocol/contracts-v2/contracts/JBPrices.sol';
 import '@jbx-protocol/contracts-v2/contracts/JBProjects.sol';
 import '@jbx-protocol/contracts-v2/contracts/JBTokenStore.sol';
 import '@jbx-protocol/contracts-v2/contracts/JBFundingCycleStore.sol';
@@ -27,6 +30,8 @@ import '@jbx-protocol/contracts-v2/contracts/interfaces/IJBToken.sol';
 import '@jbx-protocol/contracts-v2/contracts/interfaces/IJBTokenStore.sol';
 import '@jbx-protocol/contracts-v2/contracts/abstract/JBOperatable.sol';
 
+import '@jbx-protocol/contracts-v2/contracts/libraries/JBCurrencies.sol';
+
 // Base contract for JBX Banny system tests.
 //
 // Provides common functionality, such as deploying contracts on test setup.
@@ -45,6 +50,8 @@ abstract contract TestBaseWorkflow is DSTest {
   JBOperatorStore private _jbOperatorStore;
   // JBProjects
   JBProjects private _jbProjects;
+  // JBPrices
+  JBPrices private _jbPrices;
   // JBDirectory
   JBDirectory private _jbDirectory;
   // JBFundingCycleStore
@@ -67,13 +74,14 @@ abstract contract TestBaseWorkflow is DSTest {
   JBGroupedSplits[] private _groupedSplits;
   // JBFundAccessConstraints
   JBFundAccessConstraints[] private _fundAccessConstraints;
+  // JBETHPaymentTerminalStore
+  JBSingleTokenPaymentTerminalStore private _jbPaymentTerminalStore;
   // IJBTerminal
   IJBPaymentTerminal[] private _terminals;
 
   uint256 private _projectId;
   address private _projectOwner;
   uint256 private _reservedRate = 5000;
-
 
   //*********************************************************************//
   // ------------------------- internal views -------------------------- //
@@ -111,6 +119,10 @@ abstract contract TestBaseWorkflow is DSTest {
     return _jbController;
   }
 
+  function jbPaymentTerminalStore() internal view returns (JBSingleTokenPaymentTerminalStore) {
+    return _jbPaymentTerminalStore;
+  }
+
   function jbveTokenUriResolver() internal view returns (JBVeTokenUriResolver) {
     return _jbveTokenUriResolver;
   }
@@ -129,14 +141,23 @@ abstract contract TestBaseWorkflow is DSTest {
 
   // Deploys and initializes contracts for testing.
   function setUp() public virtual {
+    _projectOwner = multisig();
     // JBOperatorStore
     _jbOperatorStore = new JBOperatorStore();
     // JBProjects
     _jbProjects = new JBProjects(_jbOperatorStore);
-    // JBDirectory
-    _jbDirectory = new JBDirectory(_jbOperatorStore, _jbProjects);
+    // JBPrices
+    _jbPrices = new JBPrices(_multisig);
     // JBFundingCycleStore
-    _jbFundingCycleStore = new JBFundingCycleStore(_jbDirectory);
+    address contractAtNoncePlusOne = addressFrom(address(this), 5);
+    _jbFundingCycleStore = new JBFundingCycleStore(IJBDirectory(contractAtNoncePlusOne));
+    // JBDirectory
+    _jbDirectory = new JBDirectory(
+      _jbOperatorStore,
+      _jbProjects,
+      _jbFundingCycleStore,
+      _projectOwner
+    );
     // JBTokenStore
     _jbTokenStore = new JBTokenStore(_jbOperatorStore, _jbProjects, _jbDirectory);
     // JBSplitsStore
@@ -150,7 +171,24 @@ abstract contract TestBaseWorkflow is DSTest {
       _jbTokenStore,
       _jbSplitsStore
     );
-    _jbDirectory.addToSetControllerAllowlist(address(_jbController));
+    evm.startPrank(_projectOwner);
+    _jbDirectory.setIsAllowedToSetFirstController(address(_jbController), true);
+
+    // JBETHPaymentTerminal
+    _terminals.push(
+      new JBETHPaymentTerminal(
+        JBCurrencies.ETH,
+        _jbOperatorStore,
+        _jbProjects,
+        _jbDirectory,
+        _jbSplitsStore,
+        _jbPrices,
+        _jbPaymentTerminalStore,
+        _multisig
+      )
+    );
+
+    evm.stopPrank();
     // JBVeTokenUriResolver
     _jbveTokenUriResolver = new JBVeTokenUriResolver();
 
@@ -171,19 +209,19 @@ abstract contract TestBaseWorkflow is DSTest {
       pausePay: false,
       pauseDistributions: false,
       pauseRedeem: false,
-      pauseMint: false,
       pauseBurn: false,
+      allowMinting: true,
       allowChangeToken: true,
       allowTerminalMigration: false,
       allowControllerMigration: false,
+      allowSetTerminals: false,
+      allowSetController: false,
       holdFees: false,
-      useLocalBalanceForRedemptions: false,
+      useTotalOverflowForRedemptions: true,
       useDataSourceForPay: false,
       useDataSourceForRedeem: false,
       dataSource: IJBFundingCycleDataSource(address(0))
     });
-
-    _projectOwner = multisig();
 
     _projectId = _jbController.launchProjectFor(
       _projectOwner,
@@ -193,12 +231,34 @@ abstract contract TestBaseWorkflow is DSTest {
       block.timestamp,
       _groupedSplits,
       _fundAccessConstraints,
-      _terminals
+      _terminals,
+      ''
     );
 
     // calls will originate from projectOwner addr
     evm.startPrank(_projectOwner);
     // issue an ERC-20 token for project
     _jbController.issueTokenFor(_projectId, 'TestName', 'TestSymbol');
+    evm.stopPrank();
+  }
+
+  //https://ethereum.stackexchange.com/questions/24248/how-to-calculate-an-ethereum-contracts-address-during-its-creation-using-the-so
+  function addressFrom(address _origin, uint256 _nonce) internal pure returns (address _address) {
+    bytes memory data;
+    if (_nonce == 0x00) data = abi.encodePacked(bytes1(0xd6), bytes1(0x94), _origin, bytes1(0x80));
+    else if (_nonce <= 0x7f)
+      data = abi.encodePacked(bytes1(0xd6), bytes1(0x94), _origin, uint8(_nonce));
+    else if (_nonce <= 0xff)
+      data = abi.encodePacked(bytes1(0xd7), bytes1(0x94), _origin, bytes1(0x81), uint8(_nonce));
+    else if (_nonce <= 0xffff)
+      data = abi.encodePacked(bytes1(0xd8), bytes1(0x94), _origin, bytes1(0x82), uint16(_nonce));
+    else if (_nonce <= 0xffffff)
+      data = abi.encodePacked(bytes1(0xd9), bytes1(0x94), _origin, bytes1(0x83), uint24(_nonce));
+    else data = abi.encodePacked(bytes1(0xda), bytes1(0x94), _origin, bytes1(0x84), uint32(_nonce));
+    bytes32 hash = keccak256(data);
+    assembly {
+      mstore(0, hash)
+      _address := mload(0)
+    }
   }
 }
