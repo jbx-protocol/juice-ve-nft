@@ -407,6 +407,7 @@ contract JBveBanny is ERC721Votes, ERC721Enumerable, Ownable, ReentrancyGuard, J
     Only an account or a designated operator can unlock its tokens.
 
     @param _tokenId Banny Id.
+    @param _token The token to be reclaimed from the redemption.
     @param _minReturnedTokens The minimum amount of terminal tokens expected in return, as a fixed point number with the same amount of decimals as the terminal.
     @param _beneficiary The address to send the terminal tokens to.
     @param _memo A memo to pass along to the emitted event.
@@ -414,11 +415,12 @@ contract JBveBanny is ERC721Votes, ERC721Enumerable, Ownable, ReentrancyGuard, J
   */
   function redeem(
     uint256 _tokenId,
+    address _token,
     uint256 _minReturnedTokens,
     address payable _beneficiary,
     string memory _memo,
     bytes memory _metadata,
-    IJBPayoutRedemptionPaymentTerminal _terminal
+    IJBRedemptionTerminal _terminal
   ) external nonReentrant {
     // Get the specs for the token ID.
     (uint256 _count, , uint256 _lockedUntil, , ) = getSpecs(_tokenId);
@@ -437,6 +439,7 @@ contract JBveBanny is ERC721Votes, ERC721Enumerable, Ownable, ReentrancyGuard, J
       _owner,
       projectId,
       _count,
+      _token,
       _minReturnedTokens,
       _beneficiary,
       _memo,
