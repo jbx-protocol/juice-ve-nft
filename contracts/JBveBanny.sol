@@ -20,10 +20,10 @@ import './libraries/JBErrors.sol';
 // --------------------------- custom errors ------------------------- //
 //*********************************************************************//
 error INVALID_ACCOUNT();
-
 error INSUFFICIENT_ALLOWANCE();
 error LOCK_PERIOD_NOT_OVER();
 error TOKEN_MISMATCH();
+error INVALID_PUBLIC_EXTENSION_FLAG_VALUE();
 error INVALID_LOCK_EXTENSION();
 
 /**
@@ -312,7 +312,7 @@ contract JBveBanny is ERC721Votes, ERC721Enumerable, Ownable, ReentrancyGuard, J
       // Get the specs for the token ID.
       (
         uint256 _count,
-        uint256 _duration,
+        ,
         uint256 _lockedUntil,
         bool _useJbToken,
         bool _allowPublicExtension
@@ -367,6 +367,9 @@ contract JBveBanny is ERC721Votes, ERC721Enumerable, Ownable, ReentrancyGuard, J
       // Get a reference to the extension being iterated.
       JBAllowPublicExtensionData memory _data = _allowPublicExtensionData[_i];
 
+      if (!_data.allowPublicExtension) {
+        revert INVALID_PUBLIC_EXTENSION_FLAG_VALUE();
+      }
       // Get the specs for the token ID.
       (uint256 _count, uint256 _duration, uint256 _lockedUntil, bool _useJbToken, ) = getSpecs(
         _data.tokenId
@@ -418,7 +421,10 @@ contract JBveBanny is ERC721Votes, ERC721Enumerable, Ownable, ReentrancyGuard, J
     IJBPayoutRedemptionPaymentTerminal _terminal
   ) external nonReentrant {
     // Get the specs for the token ID.
-    (uint256 _count, , , , ) = getSpecs(_tokenId);
+    (uint256 _count, , uint256 _lockedUntil, , ) = getSpecs(_tokenId);
+
+    // The lock must have expired.
+    if (block.timestamp <= _lockedUntil) revert LOCK_PERIOD_NOT_OVER();
 
     // Get a reference to the owner of the position.
     address _owner = ownerOf(_tokenId);
