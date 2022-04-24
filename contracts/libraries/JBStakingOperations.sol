@@ -6,4 +6,5 @@ library JBStakingOperations {
   uint256 public constant UNLOCK = 20;
   uint256 public constant EXTEND_LOCK = 21;
   uint256 public constant REDEEM = 22;
+  uint256 public constant SET_PUBLIC_EXTENSION_FLAG = 23;
 }

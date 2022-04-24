@@ -10,6 +10,8 @@ import '@jbx-protocol/contracts-v2/contracts/interfaces/IJBTokenStore.sol';
 import '@jbx-protocol/contracts-v2/contracts/interfaces/IJBPayoutRedemptionPaymentTerminal.sol';
 import '@jbx-protocol/contracts-v2/contracts/abstract/JBOperatable.sol';
 
+import './structs/JBAllowPublicExtensionData.sol';
+import './structs/JBLockExtensionData.sol';
 import './interfaces/IJBVeTokenUriResolver.sol';
 import './libraries/JBStakingOperations.sol';
 import './libraries/JBErrors.sol';
@@ -35,6 +37,7 @@ contract JBveBanny is ERC721Votes, ERC721Enumerable, Ownable, ReentrancyGuard, J
   error INSUFFICIENT_ALLOWANCE();
   error LOCK_PERIOD_NOT_OVER();
   error TOKEN_MISMATCH();
+  error INVALID_PUBLIC_EXTENSION_FLAG_VALUE();
   error INVALID_LOCK_EXTENSION();
 
   event Lock(
@@ -56,6 +59,8 @@ contract JBveBanny is ERC721Votes, ERC721Enumerable, Ownable, ReentrancyGuard, J
     uint256 updatedLockedUntil,
     address caller
   );
+
+  event SetAllowPublicExtension(uint256 indexed tokenId, bool allowPublicExtension, address caller);
 
   event Redeem(
     uint256 indexed tokenId,
@@ -201,6 +206,7 @@ contract JBveBanny is ERC721Votes, ERC721Enumerable, Ownable, ReentrancyGuard, J
     @param _duration Lock time in seconds.
     @param _beneficiary Address to mint the banny.
     @param _useJbToken A flag indicating if JBtokens are being locked. If false, unclaimed project tokens from the JBTokenStore will be locked.
+    @param _allowPublicExtension A flag indicating if the locked position can be extended by anyone.
 
     @return tokenId The tokenId for the new ve position.
   */
@@ -209,7 +215,8 @@ contract JBveBanny is ERC721Votes, ERC721Enumerable, Ownable, ReentrancyGuard, J
     uint256 _count,
     uint256 _duration,
     address _beneficiary,
-    bool _useJbToken
+    bool _useJbToken,
+    bool _allowPublicExtension
   )
     external
     nonReentrant
@@ -238,8 +245,7 @@ contract JBveBanny is ERC721Votes, ERC721Enumerable, Ownable, ReentrancyGuard, J
 
     // Calculate the time when this lock will end (in seconds).
     uint256 _lockedUntil = block.timestamp + _duration;
-    _setSpecs(tokenId, _count, _duration, _lockedUntil, _useJbToken);
-
+    _setSpecs(tokenId, _count, _duration, _lockedUntil, _useJbToken, _allowPublicExtension);
     // Mint the position for the beneficiary.
     _safeMint(_beneficiary, tokenId);
 
@@ -271,7 +277,7 @@ contract JBveBanny is ERC721Votes, ERC721Enumerable, Ownable, ReentrancyGuard, J
     requirePermission(ownerOf(_tokenId), projectId, JBStakingOperations.UNLOCK)
   {
     // Get the specs for the token ID.
-    (uint256 _count, , uint256 _lockedUntil, bool _useJbToken) = getSpecs(_tokenId);
+    (uint256 _count, , uint256 _lockedUntil, bool _useJbToken, ) = getSpecs(_tokenId);
 
     // The lock must have expired.
     if (block.timestamp <= _lockedUntil) revert LOCK_PERIOD_NOT_OVER();
@@ -291,46 +297,115 @@ contract JBveBanny is ERC721Votes, ERC721Enumerable, Ownable, ReentrancyGuard, J
 
   /**
     @notice
-    Allows banny holders to extend their token lock-in duration
+    Allows banny holders to extend their token lock-in durations.
 
     @dev
-    Only an account or a designated operator can extend the lock of its tokens.
+    If the position being extended isn't set to allow public extension, only an operator account or a designated operator can extend the lock of its tokens.
 
-    @param _tokenId Banny Id.
-    @param _updatedDuration New lock-in duration.
+    @param _lockExtensionData An array of locks to extend.
   */
-  function extendLock(uint256 _tokenId, uint256 _updatedDuration)
+  function extendLock(JBLockExtensionData[] calldata _lockExtensionData) external nonReentrant returns(uint256[] memory newTokenIds) {
+    newTokenIds = new uint256[](_lockExtensionData.length);
+
+    for (uint256 _i; _i < _lockExtensionData.length; _i++) {
+      // Get a reference to the extension being iterated.
+      JBLockExtensionData memory _data = _lockExtensionData[_i];
+
+      // Duration must match.
+      if (!_isLockDurationAcceptable(_data.updatedDuration))
+        revert JBErrors.INVALID_LOCK_DURATION();
+
+      // Get the specs for the token ID.
+      (
+        uint256 _count,
+        ,
+        uint256 _lockedUntil,
+        bool _useJbToken,
+        bool _allowPublicExtension
+      ) = getSpecs(_data.tokenId);
+
+      // Get the current owner
+      address _ownerOf = ownerOf(_data.tokenId);
+
+      if (!_allowPublicExtension)
+        // If the operation isn't allowed publicly, check if the msg.sender is either the position owner or is an operator.
+        _requirePermission(_ownerOf, projectId, JBStakingOperations.EXTEND_LOCK);
+
+      // No time remaining if the lock has expired.
+      uint256 _timeRemaining = (block.timestamp >= _lockedUntil)
+        ? 0
+        : _lockedUntil - block.timestamp;
+
+      // Calculate the updated time when this lock will end (in seconds).
+      uint256 _updatedLockedUntil = block.timestamp + _data.updatedDuration - _timeRemaining;
+
+      // The new lock must be greater than the current lock.
+      if (_lockedUntil > _updatedLockedUntil) revert INVALID_LOCK_EXTENSION();
+
+      // Burn the old NFT
+      _burn(_data.tokenId);
+
+      // Increment the number of ve positions that have been minted.
+      uint256 newTokenId = ++count;
+      newTokenIds[_i] = newTokenId;
+
+      // Set the specifications of the new lock
+      _setSpecs(newTokenId, _count, _data.updatedDuration, _updatedLockedUntil, _useJbToken, _allowPublicExtension);
+
+      // Mint the new NFT
+      _safeMint(_ownerOf, newTokenId);
+
+      emit ExtendLock(_data.tokenId, newTokenId, _data.updatedDuration, _updatedLockedUntil, msg.sender);
+    }
+  }
+
+  /**
+    @notice
+    Allows banny holders to set whether or not anyone in the public can extend their locked position.
+
+    @dev
+    Only an owner account or a designated operator can extend the lock of its tokens.
+
+    @param _allowPublicExtensionData An array of locks to extend.
+  */
+  function setAllowPublicExtension(JBAllowPublicExtensionData[] calldata _allowPublicExtensionData)
     external
     nonReentrant
-    requirePermission(ownerOf(_tokenId), projectId, JBStakingOperations.EXTEND_LOCK)
-    returns (uint256 newTokenId)
   {
-    // Duration must match.
-    if (!_isLockDurationAcceptable(_updatedDuration)) revert JBErrors.INVALID_LOCK_DURATION();
+    for (uint256 _i; _i < _allowPublicExtensionData.length; _i++) {
+      // Get a reference to the extension being iterated.
+      JBAllowPublicExtensionData memory _data = _allowPublicExtensionData[_i];
 
-    // Get the specs for the token ID.
-    (uint256 _count, , uint256 _lockedUntil, bool _useJbToken) = getSpecs(_tokenId);
+      if (!_data.allowPublicExtension) {
+        revert INVALID_PUBLIC_EXTENSION_FLAG_VALUE();
+      }
+      // Get the specs for the token ID.
+      (uint256 _count, uint256 _duration, uint256 _lockedUntil, bool _useJbToken, ) = getSpecs(
+        _data.tokenId
+      );
 
-    // Calculate the updated time when this lock will end (in seconds).
-    uint256 _updatedLockedUntil = block.timestamp + _updatedDuration;
+      // Check if the msg.sender is either the position owner or is an operator.
+      _requirePermission(
+        ownerOf(_data.tokenId),
+        projectId,
+        JBStakingOperations.SET_PUBLIC_EXTENSION_FLAG
+      );
 
-    // The new lock must be greater than the current lock.
-    if (_lockedUntil > _updatedLockedUntil) revert INVALID_LOCK_EXTENSION();
+      // fetch the stored packed value.
+      uint256 packedValue = _count;
+      // _duration in the bits 152-199.
+      packedValue |= _duration << 152;
+      // _lockedUntil in the bits 200-247.
+      packedValue |= _lockedUntil << 200;
+      // _useJbToken in bit 248.
+      if (_useJbToken) packedValue |= 1 << 248;
+      // _allowPublicExtension in bit 249.
+      if (_data.allowPublicExtension) packedValue |= 1 << 249;
 
-    // Burn the old NFT
-    address _ownerOf = ownerOf(_tokenId);
-    _burn(_tokenId);
+      _packedSpecs[_data.tokenId] = packedValue;
 
-    // Increment the number of ve positions that have been minted.
-    newTokenId = ++count;
-
-    // Set the specifications of the new lock
-    _setSpecs(newTokenId, _count, _updatedDuration, _lockedUntil, _useJbToken);
-
-    // Mint the new NFT
-    _safeMint(_ownerOf, newTokenId);
-
-    emit ExtendLock(_tokenId, newTokenId, _updatedDuration, _updatedLockedUntil, msg.sender);
+      emit SetAllowPublicExtension(_data.tokenId, _data.allowPublicExtension, msg.sender);
+    }
   }
 
   /**
@@ -341,6 +416,7 @@ contract JBveBanny is ERC721Votes, ERC721Enumerable, Ownable, ReentrancyGuard, J
     Only an account or a designated operator can unlock its tokens.
 
     @param _tokenId Banny Id.
+    @param _token The token to be reclaimed from the redemption.
     @param _minReturnedTokens The minimum amount of terminal tokens expected in return, as a fixed point number with the same amount of decimals as the terminal.
     @param _beneficiary The address to send the terminal tokens to.
     @param _memo A memo to pass along to the emitted event.
@@ -348,11 +424,12 @@ contract JBveBanny is ERC721Votes, ERC721Enumerable, Ownable, ReentrancyGuard, J
   */
   function redeem(
     uint256 _tokenId,
+    address _token,
     uint256 _minReturnedTokens,
     address payable _beneficiary,
     string memory _memo,
     bytes memory _metadata,
-    IJBPayoutRedemptionPaymentTerminal _terminal
+    IJBRedemptionTerminal _terminal
   ) external nonReentrant {
     {
       // Check the permissions scoped to prevent stack too deep
@@ -360,7 +437,10 @@ contract JBveBanny is ERC721Votes, ERC721Enumerable, Ownable, ReentrancyGuard, J
     }
 
     // Get the specs for the token ID.
-    (uint256 _count, , , ) = getSpecs(_tokenId);
+    (uint256 _count, , uint256 _lockedUntil, , ) = getSpecs(_tokenId);
+
+    // The lock must have expired.
+    if (block.timestamp <= _lockedUntil) revert LOCK_PERIOD_NOT_OVER();
 
     // Get a reference to the owner of the position.
     address _owner = ownerOf(_tokenId);
@@ -373,7 +453,7 @@ contract JBveBanny is ERC721Votes, ERC721Enumerable, Ownable, ReentrancyGuard, J
       address(this),
       projectId,
       _count,
-      address(token),
+      _token,
       _minReturnedTokens,
       _beneficiary,
       _memo,
@@ -404,7 +484,7 @@ contract JBveBanny is ERC721Votes, ERC721Enumerable, Ownable, ReentrancyGuard, J
      @return dynamic uri based on the svg logic for that particular banny
   */
   function tokenURI(uint256 _tokenId) public view override returns (string memory) {
-    (uint256 _count, uint256 _duration, uint256 _lockedUntil, ) = getSpecs(_tokenId);
+    (uint256 _count, uint256 _duration, uint256 _lockedUntil, , ) = getSpecs(_tokenId);
     return uriResolver.tokenURI(_tokenId, _count, _duration, _lockedUntil, _lockDurationOptions);
   }
 
@@ -418,6 +498,7 @@ contract JBveBanny is ERC721Votes, ERC721Enumerable, Ownable, ReentrancyGuard, J
     @return duration Locked duration.
     @return lockedUntil Locked until this timestamp.
     @return useJbToken If the locked tokens are JBTokens. 
+    @return allowPublicExtension If the locked position can be extended by anyone. 
   */
   function getSpecs(uint256 _tokenId)
     public
@@ -426,7 +507,8 @@ contract JBveBanny is ERC721Votes, ERC721Enumerable, Ownable, ReentrancyGuard, J
       uint256 amount,
       uint256 duration,
       uint256 lockedUntil,
-      bool useJbToken
+      bool useJbToken,
+      bool allowPublicExtension
     )
   {
     uint256 _packedValue = _packedSpecs[_tokenId];
@@ -440,6 +522,8 @@ contract JBveBanny is ERC721Votes, ERC721Enumerable, Ownable, ReentrancyGuard, J
     lockedUntil = uint256(uint48(_packedValue >> 200));
     // useJbToken in the bits 248.
     useJbToken = (_packedValue >> 248) & 1 == 1;
+    // allowPublicExtension in the bits 249.
+    allowPublicExtension = (_packedValue >> 249) & 1 == 1;
   }
 
   //*********************************************************************//
@@ -455,6 +539,7 @@ contract JBveBanny is ERC721Votes, ERC721Enumerable, Ownable, ReentrancyGuard, J
     @param _duration Locked duration.
     @param _lockedUntil Locked until this timestamp.
     @param _useJbToken If the locked tokens are JBTokens. 
+    @param _allowPublicExtension If the locked position can be extended by anyone. 
 
     @return packedValue the specs packed into a single uint256
   */
@@ -463,9 +548,11 @@ contract JBveBanny is ERC721Votes, ERC721Enumerable, Ownable, ReentrancyGuard, J
     uint256 _amount,
     uint256 _duration,
     uint256 _lockedUntil,
-    bool _useJbToken
+    bool _useJbToken,
+    bool _allowPublicExtension
   ) private returns (uint256 packedValue) {
-    // fetch the stored packed value.
+    // Store packed specification values for the ve position.
+    // _amount in the bits 0-151.
     packedValue = _amount;
     // _duration in the bits 152-199.
     packedValue |= _duration << 152;
@@ -473,6 +560,8 @@ contract JBveBanny is ERC721Votes, ERC721Enumerable, Ownable, ReentrancyGuard, J
     packedValue |= _lockedUntil << 200;
     // _useJbToken in bit 248.
     if (_useJbToken) packedValue |= 1 << 248;
+    // _allowPublicExtension in bit 249.
+    if (_allowPublicExtension) packedValue |= 1 << 249;
 
     _packedSpecs[_tokenId] = packedValue;
     return packedValue;
@@ -492,7 +581,7 @@ contract JBveBanny is ERC721Votes, ERC721Enumerable, Ownable, ReentrancyGuard, J
       // Get the token represented a positioned owned by the account.
       uint256 _tokenId = tokenOfOwnerByIndex(_account, _i);
 
-      (uint256 _count, , uint256 _lockedUntil, ) = getSpecs(_tokenId);
+      (uint256 _count, , uint256 _lockedUntil, , ) = getSpecs(_tokenId);
 
       // No voting units if the lock has expired.
       if (block.timestamp >= _lockedUntil) continue;
