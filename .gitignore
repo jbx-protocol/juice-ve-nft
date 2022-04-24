@@ -5,6 +5,7 @@ node_modules
 cache
 artifacts
 deployments/localhost/**
+out/
 
 # Mac OSX
 .DS_Store
