@@ -84,7 +84,11 @@ contract JBveBannyTests is TestBaseWorkflow {
     (, , uint256 lockedUntil, ,) = _jbveBanny.getSpecs(1);
     evm.warp(lockedUntil * 2);
     _jbveBanny.approve(address(_jbveBanny), 1);
-    _jbveBanny.unlock(1, _projectOwner);
+    JBUnlockData[] memory unlocks = new JBUnlockData[](1);
+    unlocks[0] = JBUnlockData(
+      1, _projectOwner
+    );
+    _jbveBanny.unlock(unlocks);
     assertEq(_token.balanceOf(address(_jbveBanny), _projectId), 0);
   }
 
@@ -124,7 +128,11 @@ contract JBveBannyTests is TestBaseWorkflow {
     evm.warp(lockedUntil / 2);
     _jbveBanny.approve(address(_jbveBanny), 1);
     evm.expectRevert(abi.encodeWithSignature('LOCK_PERIOD_NOT_OVER()'));
-    _jbveBanny.unlock(1, _projectOwner);
+    JBUnlockData[] memory unlocks = new JBUnlockData[](1);
+    unlocks[0] = JBUnlockData(
+      1, _projectOwner
+    );
+    _jbveBanny.unlock(unlocks);
   }
 
   function testScenarioWithInvalidLockDurationWhenExtendingDuration() public {
