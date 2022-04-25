@@ -12,6 +12,7 @@ import '@jbx-protocol/contracts-v2/contracts/abstract/JBOperatable.sol';
 
 import './structs/JBAllowPublicExtensionData.sol';
 import './structs/JBLockExtensionData.sol';
+import './structs/JBUnlockData.sol';
 import './interfaces/IJBVeTokenUriResolver.sol';
 import './libraries/JBStakingOperations.sol';
 import './libraries/JBErrors.sol';
@@ -268,31 +269,31 @@ contract JBveBanny is ERC721Votes, ERC721Enumerable, Ownable, ReentrancyGuard, J
     @dev
     Only an account or a designated operator can unlock its tokens.
 
-    @param _tokenId Banny Id.
-    @param _beneficiary Address to transfer the locked amount to.
+    @param _unlockData An array of banny tokens to be burnt in exchange of the locked tokens.
   */
-  function unlock(uint256 _tokenId, address _beneficiary)
-    external
-    nonReentrant
-    requirePermission(ownerOf(_tokenId), projectId, JBStakingOperations.UNLOCK)
-  {
-    // Get the specs for the token ID.
-    (uint256 _count, , uint256 _lockedUntil, bool _useJbToken, ) = getSpecs(_tokenId);
+  function unlock(JBUnlockData[] calldata _unlockData) external nonReentrant {
+    for (uint256 _i; _i < _unlockData.length; _i++) {
+      _requirePermission(ownerOf(_unlockData[_i].tokenId), projectId, JBStakingOperations.UNLOCK);
+      // Get the specs for the token ID.
+      (uint256 _count, , uint256 _lockedUntil, bool _useJbToken, ) = getSpecs(
+        _unlockData[_i].tokenId
+      );
 
-    // The lock must have expired.
-    if (block.timestamp <= _lockedUntil) revert LOCK_PERIOD_NOT_OVER();
+      // The lock must have expired.
+      if (block.timestamp <= _lockedUntil) revert LOCK_PERIOD_NOT_OVER();
 
-    // Burn the token.
-    _burn(_tokenId);
+      // Burn the token.
+      _burn(_unlockData[_i].tokenId);
 
-    if (_useJbToken)
-      // Transfer the amount of locked tokens to beneficiary.
-      token.transfer(projectId, _beneficiary, _count);
-      // Transfer the tokens from this contract.
-    else tokenStore.transferFrom(_beneficiary, projectId, address(this), _count);
+      if (_useJbToken)
+        // Transfer the amount of locked tokens to beneficiary.
+        token.transfer(projectId, _unlockData[_i].beneficiary, _count);
+        // Transfer the tokens from this contract.
+      else tokenStore.transferFrom(_unlockData[_i].beneficiary, projectId, address(this), _count);
 
-    // Emit event.
-    emit Unlock(_tokenId, _beneficiary, _count, msg.sender);
+      // Emit event.
+      emit Unlock(_unlockData[_i].tokenId, _unlockData[_i].beneficiary, _count, msg.sender);
+    }
   }
 
   /**
@@ -304,7 +305,11 @@ contract JBveBanny is ERC721Votes, ERC721Enumerable, Ownable, ReentrancyGuard, J
 
     @param _lockExtensionData An array of locks to extend.
   */
-  function extendLock(JBLockExtensionData[] calldata _lockExtensionData) external nonReentrant returns(uint256[] memory newTokenIds) {
+  function extendLock(JBLockExtensionData[] calldata _lockExtensionData)
+    external
+    nonReentrant
+    returns (uint256[] memory newTokenIds)
+  {
     newTokenIds = new uint256[](_lockExtensionData.length);
 
     for (uint256 _i; _i < _lockExtensionData.length; _i++) {
@@ -350,12 +355,25 @@ contract JBveBanny is ERC721Votes, ERC721Enumerable, Ownable, ReentrancyGuard, J
       newTokenIds[_i] = newTokenId;
 
       // Set the specifications of the new lock
-      _setSpecs(newTokenId, _count, _data.updatedDuration, _updatedLockedUntil, _useJbToken, _allowPublicExtension);
+      _setSpecs(
+        newTokenId,
+        _count,
+        _data.updatedDuration,
+        _updatedLockedUntil,
+        _useJbToken,
+        _allowPublicExtension
+      );
 
       // Mint the new NFT
       _safeMint(_ownerOf, newTokenId);
 
-      emit ExtendLock(_data.tokenId, newTokenId, _data.updatedDuration, _updatedLockedUntil, msg.sender);
+      emit ExtendLock(
+        _data.tokenId,
+        newTokenId,
+        _data.updatedDuration,
+        _updatedLockedUntil,
+        msg.sender
+      );
     }
   }
 
