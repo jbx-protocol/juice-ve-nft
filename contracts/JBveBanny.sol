@@ -7,12 +7,12 @@ import '@openzeppelin/contracts/access/Ownable.sol';
 import '@openzeppelin/contracts/security/ReentrancyGuard.sol';
 import '@paulrberg/contracts/math/PRBMath.sol';
 import '@jbx-protocol/contracts-v2/contracts/interfaces/IJBTokenStore.sol';
-import '@jbx-protocol/contracts-v2/contracts/interfaces/IJBPayoutRedemptionPaymentTerminal.sol';
 import '@jbx-protocol/contracts-v2/contracts/abstract/JBOperatable.sol';
 
 import './structs/JBAllowPublicExtensionData.sol';
 import './structs/JBLockExtensionData.sol';
 import './structs/JBUnlockData.sol';
+import './structs/JBRedeemData.sol';
 import './interfaces/IJBVeTokenUriResolver.sol';
 import './libraries/JBStakingOperations.sol';
 import './libraries/JBErrors.sol';
@@ -142,6 +142,19 @@ contract JBveBanny is ERC721Votes, ERC721Enumerable, Ownable, ReentrancyGuard, J
   */
   function lockDurationOptions() external view returns (uint256[] memory) {
     return _lockDurationOptions;
+  }
+
+  /**
+    @notice 
+    Computes the metadata url based on the id.
+
+    @param _tokenId TokenId of the Banny
+
+    @return dynamic uri based on the svg logic for that particular banny
+  */
+  function tokenURI(uint256 _tokenId) public view override returns (string memory) {
+    (uint256 _count, uint256 _duration, uint256 _lockedUntil, , ) = getSpecs(_tokenId);
+    return uriResolver.tokenURI(_tokenId, _count, _duration, _lockedUntil, _lockDurationOptions);
   }
 
   /**
@@ -304,6 +317,8 @@ contract JBveBanny is ERC721Votes, ERC721Enumerable, Ownable, ReentrancyGuard, J
     If the position being extended isn't set to allow public extension, only an operator account or a designated operator can extend the lock of its tokens.
 
     @param _lockExtensionData An array of locks to extend.
+
+    @return newTokenIds An array of the new token ids (in the same order as _lockExtensionData)
   */
   function extendLock(JBLockExtensionData[] calldata _lockExtensionData)
     external
@@ -409,18 +424,15 @@ contract JBveBanny is ERC721Votes, ERC721Enumerable, Ownable, ReentrancyGuard, J
         JBStakingOperations.SET_PUBLIC_EXTENSION_FLAG
       );
 
-      // fetch the stored packed value.
-      uint256 packedValue = _count;
-      // _duration in the bits 152-199.
-      packedValue |= _duration << 152;
-      // _lockedUntil in the bits 200-247.
-      packedValue |= _lockedUntil << 200;
-      // _useJbToken in bit 248.
-      if (_useJbToken) packedValue |= 1 << 248;
-      // _allowPublicExtension in bit 249.
-      if (_data.allowPublicExtension) packedValue |= 1 << 249;
-
-      _packedSpecs[_data.tokenId] = packedValue;
+      // Update the specs
+      _setSpecs(
+        _data.tokenId,
+        _count,
+        _duration,
+        _lockedUntil,
+        _useJbToken,
+        _data.allowPublicExtension
+      );
 
       emit SetAllowPublicExtension(_data.tokenId, _data.allowPublicExtension, msg.sender);
     }
@@ -433,53 +445,50 @@ contract JBveBanny is ERC721Votes, ERC721Enumerable, Ownable, ReentrancyGuard, J
     @dev
     Only an account or a designated operator can unlock its tokens.
 
-    @param _tokenId Banny Id.
-    @param _token The token to be reclaimed from the redemption.
-    @param _minReturnedTokens The minimum amount of terminal tokens expected in return, as a fixed point number with the same amount of decimals as the terminal.
-    @param _beneficiary The address to send the terminal tokens to.
-    @param _memo A memo to pass along to the emitted event.
-    @param _metadata Bytes to send along to the data source and delegate, if provided.
+    @param _redeemData An array of NFTs to redeem.
   */
-  function redeem(
-    uint256 _tokenId,
-    address _token,
-    uint256 _minReturnedTokens,
-    address payable _beneficiary,
-    string memory _memo,
-    bytes memory _metadata,
-    IJBRedemptionTerminal _terminal
-  ) external nonReentrant {
-    {
-      // Check the permissions scoped to prevent stack too deep
-      _requirePermission(ownerOf(_tokenId), projectId, JBStakingOperations.REDEEM);
+  function redeem(JBRedeemData[] calldata _redeemData) external nonReentrant {
+    for (uint256 _i; _i < _redeemData.length; _i++) {
+      // Get a reference to the redeemItem being iterated.
+      JBRedeemData memory _data = _redeemData[_i];
+
+      // Get a reference to the owner of the position.
+      address _owner = ownerOf(_data.tokenId);
+      // Check if the msg.sender is either the position owner or is an operator.
+      _requirePermission(_owner, projectId, JBStakingOperations.REDEEM);
+
+      // Get the specs for the token ID.
+      (uint256 _count, , uint256 _lockedUntil, , ) = getSpecs(_data.tokenId);
+
+      // The lock must have expired.
+      if (block.timestamp <= _lockedUntil) revert LOCK_PERIOD_NOT_OVER();
+
+      // Burn the token.
+      _burn(_data.tokenId);
+
+      // Redeem the locked tokens to reclaim treasury funds.
+      uint256 _reclaimedAmount = _data.terminal.redeemTokensOf(
+        address(this),
+        projectId,
+        _count,
+        _data.token,
+        _data.minReturnedTokens,
+        _data.beneficiary,
+        _data.memo,
+        _data.metadata
+      );
+
+      // Emit event.
+      emit Redeem(
+        _data.tokenId,
+        _owner,
+        _data.beneficiary,
+        _count,
+        _reclaimedAmount,
+        _data.memo,
+        msg.sender
+      );
     }
-
-    // Get the specs for the token ID.
-    (uint256 _count, , uint256 _lockedUntil, , ) = getSpecs(_tokenId);
-
-    // The lock must have expired.
-    if (block.timestamp <= _lockedUntil) revert LOCK_PERIOD_NOT_OVER();
-
-    // Get a reference to the owner of the position.
-    address _owner = ownerOf(_tokenId);
-
-    // Burn the token.
-    _burn(_tokenId);
-
-    // Redeem the locked tokens to reclaim treasury funds.
-    uint256 _reclaimedAmount = _terminal.redeemTokensOf(
-      address(this),
-      projectId,
-      _count,
-      _token,
-      _minReturnedTokens,
-      _beneficiary,
-      _memo,
-      _metadata
-    );
-
-    // Emit event.
-    emit Redeem(_tokenId, _owner, _beneficiary, _count, _reclaimedAmount, _memo, msg.sender);
   }
 
   /**
@@ -491,19 +500,6 @@ contract JBveBanny is ERC721Votes, ERC721Enumerable, Ownable, ReentrancyGuard, J
   function setUriResolver(IJBVeTokenUriResolver _resolver) external onlyOwner {
     uriResolver = _resolver;
     emit SetUriResolver(_resolver, msg.sender);
-  }
-
-  /**
-     @notice 
-     Computes the metadata url based on the id.
-
-     @param _tokenId TokenId of the Banny
-
-     @return dynamic uri based on the svg logic for that particular banny
-  */
-  function tokenURI(uint256 _tokenId) public view override returns (string memory) {
-    (uint256 _count, uint256 _duration, uint256 _lockedUntil, , ) = getSpecs(_tokenId);
-    return uriResolver.tokenURI(_tokenId, _count, _duration, _lockedUntil, _lockDurationOptions);
   }
 
   /**
