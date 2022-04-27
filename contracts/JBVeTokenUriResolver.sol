@@ -28,119 +28,119 @@ contract JBVeTokenUriResolver {
       tokenRange = 2;
     } else if (_amount >= 201 && _amount <= 300) {
       tokenRange = 3;
-    } else if (_amount >= 401 && _amount <= 500) {
+    } else if (_amount >= 301 && _amount <= 400) {
       tokenRange = 4;
-    } else if (_amount >= 501 && _amount <= 600) {
+    } else if (_amount >= 401 && _amount <= 500) {
       tokenRange = 5;
-    } else if (_amount >= 601 && _amount <= 700) {
+    } else if (_amount >= 501 && _amount <= 600) {
       tokenRange = 6;
-    } else if (_amount >= 701 && _amount <= 800) {
+    } else if (_amount >= 601 && _amount <= 700) {
       tokenRange = 7;
-    } else if (_amount >= 801 && _amount <= 900) {
+    } else if (_amount >= 701 && _amount <= 800) {
       tokenRange = 8;
-    } else if (_amount >= 901 && _amount <= 1000) {
+    } else if (_amount >= 801 && _amount <= 900) {
       tokenRange = 9;
-    } else if (_amount >= 1001 && _amount <= 2000) {
+    } else if (_amount >= 901 && _amount <= 1_000) {
       tokenRange = 10;
-    } else if (_amount >= 2001 && _amount <= 3000) {
+    } else if (_amount >= 1_001 && _amount <= 2_000) {
       tokenRange = 11;
-    } else if (_amount >= 3001 && _amount <= 4000) {
+    } else if (_amount >= 2_001 && _amount <= 3_000) {
       tokenRange = 12;
-    } else if (_amount >= 4001 && _amount <= 5000) {
+    } else if (_amount >= 3_001 && _amount <= 4_000) {
       tokenRange = 13;
-    } else if (_amount >= 5001 && _amount <= 6000) {
+    } else if (_amount >= 4_001 && _amount <= 5_000) {
       tokenRange = 14;
-    } else if (_amount >= 6001 && _amount <= 7000) {
+    } else if (_amount >= 5_001 && _amount <= 6_000) {
       tokenRange = 15;
-    } else if (_amount >= 7001 && _amount <= 8000) {
+    } else if (_amount >= 6_001 && _amount <= 7_000) {
       tokenRange = 16;
-    } else if (_amount >= 8001 && _amount <= 9000) {
+    } else if (_amount >= 7_001 && _amount <= 8_000) {
       tokenRange = 17;
-    } else if (_amount >= 9001 && _amount <= 10000) {
+    } else if (_amount >= 8_001 && _amount <= 9_000) {
       tokenRange = 18;
-    } else if (_amount >= 10001 && _amount <= 12000) {
+    } else if (_amount >= 9_001 && _amount <= 10_000) {
       tokenRange = 19;
-    } else if (_amount >= 12001 && _amount <= 14000) {
+    } else if (_amount >= 10_001 && _amount <= 12_000) {
       tokenRange = 20;
-    } else if (_amount >= 14001 && _amount <= 16000) {
+    } else if (_amount >= 12_001 && _amount <= 14_000) {
       tokenRange = 21;
-    } else if (_amount >= 16001 && _amount <= 18000) {
+    } else if (_amount >= 14_001 && _amount <= 16_000) {
       tokenRange = 22;
-    } else if (_amount >= 18001 && _amount <= 20000) {
+    } else if (_amount >= 16_001 && _amount <= 18_000) {
       tokenRange = 23;
-    } else if (_amount >= 20001 && _amount <= 22000) {
+    } else if (_amount >= 18_001 && _amount <= 20_000) {
       tokenRange = 24;
-    } else if (_amount >= 22001 && _amount <= 24000) {
+    } else if (_amount >= 20_001 && _amount <= 22_000) {
       tokenRange = 25;
-    } else if (_amount >= 24001 && _amount <= 26000) {
+    } else if (_amount >= 22_001 && _amount <= 24_000) {
       tokenRange = 26;
-    } else if (_amount >= 26001 && _amount <= 28000) {
+    } else if (_amount >= 24_001 && _amount <= 26_000) {
       tokenRange = 27;
-    } else if (_amount >= 28001 && _amount <= 30000) {
+    } else if (_amount >= 26_001 && _amount <= 28_000) {
       tokenRange = 28;
-    } else if (_amount >= 30001 && _amount <= 40000) {
+    } else if (_amount >= 28_001 && _amount <= 30_000) {
       tokenRange = 29;
-    } else if (_amount >= 40001 && _amount <= 50000) {
+    } else if (_amount >= 30_001 && _amount <= 40_000) {
       tokenRange = 30;
-    } else if (_amount >= 50001 && _amount <= 60000) {
+    } else if (_amount >= 40_001 && _amount <= 50_000) {
       tokenRange = 31;
-    } else if (_amount >= 60001 && _amount <= 70000) {
+    } else if (_amount >= 50_001 && _amount <= 60_000) {
       tokenRange = 32;
-    } else if (_amount >= 70001 && _amount <= 80000) {
+    } else if (_amount >= 60_001 && _amount <= 70_000) {
       tokenRange = 33;
-    } else if (_amount >= 80001 && _amount <= 90000) {
+    } else if (_amount >= 70_001 && _amount <= 80_000) {
       tokenRange = 34;
-    } else if (_amount >= 90001 && _amount <= 100000) {
+    } else if (_amount >= 80_001 && _amount <= 90_000) {
       tokenRange = 35;
-    } else if (_amount >= 100001 && _amount <= 200000) {
+    } else if (_amount >= 90_001 && _amount <= 100_000) {
       tokenRange = 36;
-    } else if (_amount >= 200001 && _amount <= 300000) {
+    } else if (_amount >= 100_001 && _amount <= 200_000) {
       tokenRange = 37;
-    } else if (_amount >= 300001 && _amount <= 400000) {
+    } else if (_amount >= 200_001 && _amount <= 300_000) {
       tokenRange = 38;
-    } else if (_amount >= 400001 && _amount <= 500000) {
+    } else if (_amount >= 300_001 && _amount <= 400_000) {
       tokenRange = 39;
-    } else if (_amount >= 500001 && _amount <= 600000) {
+    } else if (_amount >= 400_001 && _amount <= 500_000) {
       tokenRange = 40;
-    } else if (_amount >= 600001 && _amount <= 700000) {
+    } else if (_amount >= 500_001 && _amount <= 600_000) {
       tokenRange = 41;
-    } else if (_amount >= 700001 && _amount <= 800000) {
+    } else if (_amount >= 600_001 && _amount <= 700_000) {
       tokenRange = 42;
-    } else if (_amount >= 800001 && _amount <= 900000) {
+    } else if (_amount >= 700_001 && _amount <= 800_000) {
       tokenRange = 43;
-    } else if (_amount >= 900001 && _amount <= 1000000) {
+    } else if (_amount >= 800_001 && _amount <= 900_000) {
       tokenRange = 44;
-    } else if (_amount >= 1000001 && _amount <= 2000000) {
+    } else if (_amount >= 900_001 && _amount <= 1_000_000) {
       tokenRange = 45;
-    } else if (_amount >= 2000001 && _amount <= 3000000) {
+    } else if (_amount >= 1_000_001 && _amount <= 2_000_000) {
       tokenRange = 46;
-    } else if (_amount >= 3000001 && _amount <= 4000000) {
+    } else if (_amount >= 2_000_001 && _amount <= 3_000_000) {
       tokenRange = 47;
-    } else if (_amount >= 4000001 && _amount <= 5000000) {
+    } else if (_amount >= 3_000_001 && _amount <= 4_000_000) {
       tokenRange = 48;
-    } else if (_amount >= 5000001 && _amount <= 6000000) {
+    } else if (_amount >= 4_000_001 && _amount <= 5_000_000) {
       tokenRange = 49;
-    } else if (_amount >= 6000001 && _amount <= 7000000) {
+    } else if (_amount >= 5_000_001 && _amount <= 6_000_000) {
       tokenRange = 50;
-    } else if (_amount >= 7000001 && _amount <= 8000000) {
+    } else if (_amount >= 6_000_001 && _amount <= 7_000_000) {
       tokenRange = 51;
-    } else if (_amount >= 8000001 && _amount <= 9000000) {
+    } else if (_amount >= 7_000_001 && _amount <= 8_000_000) {
       tokenRange = 52;
-    } else if (_amount >= 9000001 && _amount <= 10000000) {
+    } else if (_amount >= 8_000_001 && _amount <= 9_000_000) {
       tokenRange = 53;
-    } else if (_amount >= 10000001 && _amount <= 20000000) {
+    } else if (_amount >= 9_000_001 && _amount <= 10_000_000) {
       tokenRange = 54;
-    } else if (_amount >= 20000001 && _amount <= 40000000) {
+    } else if (_amount >= 10_000_001 && _amount <= 20_000_000) {
       tokenRange = 55;
-    } else if (_amount >= 40000001 && _amount <= 50000000) {
+    } else if (_amount >= 20000001 && _amount <= 40000000) {
       tokenRange = 56;
-    } else if (_amount >= 50000001 && _amount <= 100000000) {
+    } else if (_amount >= 40_000_001 && _amount <= 60_000_000) {
       tokenRange = 57;
-    } else if (_amount >= 100000001 && _amount <= 500000000) {
+    } else if (_amount >= 60_000_001 && _amount <= 100_000_000) {
       tokenRange = 58;
-    } else if (_amount >= 500000001 && _amount <= 700000000) {
+    } else if (_amount >= 100_000_001 && _amount <= 600_000_000) {
       tokenRange = 59;
-    } else if (_amount >= 700000001) {
+    } else if (_amount >= 600_000_001) {
       tokenRange = 60;
     } else {
       revert INSUFFICIENT_BALANCE();
@@ -198,7 +198,7 @@ contract JBVeTokenUriResolver {
     return
       string(
         abi.encodePacked(
-          'ipfs://QmauKpZU5NyDWJBkcFZGLCcbXLXZV4z86k2Mhi3sPHvuUZ/',
+          'ipfs://QmWSL7jMuEkkk9798eWVMY9WYurAPRfPDVkHF1e7wJqzdX/',
           Strings.toString(_tokenRange * 5 - 5 + _stakeDuration)
         )
       );

@@ -85,6 +85,12 @@ contract JBveBanny is ERC721Votes, ERC721Enumerable, Ownable, ReentrancyGuard, J
 
   /** 
     @notice 
+    Opensea Store Metadata.
+  */
+  string public openseaStoreMetadata;
+  
+  /** 
+    @notice 
     JBProject id.
   */
   uint256 public immutable projectId;
@@ -146,6 +152,31 @@ contract JBveBanny is ERC721Votes, ERC721Enumerable, Ownable, ReentrancyGuard, J
       if (_lockDurationOptions[_i] > _max) _max = _lockDurationOptions[_i];
     _maxLockDuration = _max;
   }
+
+  /**
+     @notice
+     Sets metadata for OpenSea to display with the token collection.
+     
+     @dev 
+     Sets OpenSea Store metadata per https://docs.opensea.io/docs/contract-level-metadata.
+     
+     @param _contractMetadataURI The OpenSea contract metadata URI.
+  */
+    function setContractURI(string memory _contractMetadataURI) public onlyOwner {
+        openseaStoreMetadata = _contractMetadataURI;
+    }
+
+  /**
+     @notice
+    Gets Opensea Store metadata to display with the token collection.
+     
+     @dev 
+     OpenSea Store metadata per https://docs.opensea.io/docs/contract-level-metadata          
+  */
+    function contractURI() public view returns (string memory) {
+        return openseaStoreMetadata;
+    }
+
 
   /**
     @notice
