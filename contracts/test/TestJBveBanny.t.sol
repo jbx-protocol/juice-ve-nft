@@ -109,6 +109,49 @@ contract JBveBannyTests is TestBaseWorkflow {
     assertEq(duration, 8640000);
   }
 
+  function testsetAllowPublicExtension() public {
+    mintIJBTokens();
+    uint256 _tokenId = _jbveBanny.lock(_projectOwner, 10 ether, 864000, _projectOwner, true, false);
+    (, , uint256 lockedUntil, ,) = _jbveBanny.getSpecs(_tokenId);
+    evm.warp(lockedUntil * 2);
+
+    uint256[] memory _permissionIndexes = new uint256[](1);
+    _permissionIndexes[0] = JBStakingOperations.SET_PUBLIC_EXTENSION_FLAG;
+    jbOperatorStore().setOperator(
+    JBOperatorData(address(this), _projectId, _permissionIndexes)
+    );
+    evm.stopPrank();
+    evm.startPrank(address(this));
+    JBAllowPublicExtensionData[] memory extends = new JBAllowPublicExtensionData[](1);
+    extends[0] = JBAllowPublicExtensionData(
+      _tokenId, true
+    );
+    _jbveBanny.setAllowPublicExtension(extends);
+    (, , , ,bool allowPublicExtension) = _jbveBanny.getSpecs(_tokenId);
+    assert(allowPublicExtension);
+  }
+
+  function testScenarioWithInvalidFlagForPublicExtension() public {
+    mintIJBTokens();
+    uint256 _tokenId = _jbveBanny.lock(_projectOwner, 10 ether, 864000, _projectOwner, true, false);
+    (, , uint256 lockedUntil, ,) = _jbveBanny.getSpecs(_tokenId);
+    evm.warp(lockedUntil * 2);
+
+    uint256[] memory _permissionIndexes = new uint256[](1);
+    _permissionIndexes[0] = JBStakingOperations.SET_PUBLIC_EXTENSION_FLAG;
+    jbOperatorStore().setOperator(
+    JBOperatorData(address(this), _projectId, _permissionIndexes)
+    );
+    evm.stopPrank();
+    evm.startPrank(address(this));
+    JBAllowPublicExtensionData[] memory extends = new JBAllowPublicExtensionData[](1);
+    extends[0] = JBAllowPublicExtensionData(
+      _tokenId, false
+    );
+    evm.expectRevert(abi.encodeWithSignature('INVALID_PUBLIC_EXTENSION_FLAG_VALUE()'));
+    _jbveBanny.setAllowPublicExtension(extends);
+  }
+
   function testScenarioWithInvalidLockDuration() public {
     mintIJBTokens();
     evm.expectRevert(abi.encodeWithSignature('INVALID_LOCK_DURATION()'));
