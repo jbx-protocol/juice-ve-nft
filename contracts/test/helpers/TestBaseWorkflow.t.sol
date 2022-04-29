@@ -5,6 +5,7 @@ import './DSTest.t.sol';
 import './hevm.t.sol';
 import '../../JBveBanny.sol';
 import '../../JBVeTokenUriResolver.sol';
+import './AccessJBLib.sol';
 
 import '@jbx-protocol/contracts-v2/contracts/JBDirectory.sol';
 import '@jbx-protocol/contracts-v2/contracts/JBETHPaymentTerminal.sol';
@@ -24,12 +25,14 @@ import '@jbx-protocol/contracts-v2/contracts/structs/JBFundingCycleMetadata.sol'
 import '@jbx-protocol/contracts-v2/contracts/structs/JBGroupedSplits.sol';
 import '@jbx-protocol/contracts-v2/contracts/structs/JBFundAccessConstraints.sol';
 import '@jbx-protocol/contracts-v2/contracts/structs/JBOperatorData.sol';
+import '@jbx-protocol/contracts-v2/contracts/JBERC20PaymentTerminal.sol';
 
 import '@jbx-protocol/contracts-v2/contracts/interfaces/IJBPaymentTerminal.sol';
 import '@jbx-protocol/contracts-v2/contracts/interfaces/IJBToken.sol';
 import '@jbx-protocol/contracts-v2/contracts/interfaces/IJBTokenStore.sol';
-import '@jbx-protocol/contracts-v2/contracts/abstract/JBOperatable.sol';
+import '@jbx-protocol/contracts-v2/contracts/interfaces/IJBPayoutRedemptionPaymentTerminal.sol';
 
+import '@jbx-protocol/contracts-v2/contracts/abstract/JBOperatable.sol';
 import '@jbx-protocol/contracts-v2/contracts/libraries/JBCurrencies.sol';
 
 // Base contract for JBX Banny system tests.
@@ -76,8 +79,14 @@ abstract contract TestBaseWorkflow is DSTest {
   JBFundAccessConstraints[] private _fundAccessConstraints;
   // JBETHPaymentTerminalStore
   JBSingleTokenPaymentTerminalStore private _jbPaymentTerminalStore;
+  // JBERC20PaymentTerminal
+  JBERC20PaymentTerminal _jbERC20PaymentTerminal;
+  // JBToken
+  JBToken private _jbToken;
   // IJBTerminal
   IJBPaymentTerminal[] private _terminals;
+  // AccessJBLib
+  AccessJBLib private _accessJBLib;
 
   uint256 private _projectId;
   address private _projectOwner;
@@ -135,6 +144,10 @@ abstract contract TestBaseWorkflow is DSTest {
     return _projectOwner;
   }
 
+  function jbERC20PaymentTerminal() internal view returns (address) {
+    return address(_jbERC20PaymentTerminal);
+  }
+
   //*********************************************************************//
   // --------------------------- test setup ---------------------------- //
   //*********************************************************************//
@@ -171,6 +184,29 @@ abstract contract TestBaseWorkflow is DSTest {
       _jbTokenStore,
       _jbSplitsStore
     );
+
+    _jbPaymentTerminalStore = new JBSingleTokenPaymentTerminalStore(
+      _jbDirectory,
+      _jbFundingCycleStore,
+      _jbPrices
+    );
+
+    _jbToken = new JBToken('MyToken', 'MT');
+
+    _jbERC20PaymentTerminal = new JBERC20PaymentTerminal(
+      _jbToken,
+      _accessJBLib.ETH(), // currency
+      _accessJBLib.ETH(), // base weight currency
+      1, // JBSplitsGroupe
+      _jbOperatorStore,
+      _jbProjects,
+      _jbDirectory,
+      _jbSplitsStore,
+      _jbPrices,
+      _jbPaymentTerminalStore,
+      _multisig
+    );
+  
     evm.startPrank(_projectOwner);
     _jbDirectory.setIsAllowedToSetFirstController(address(_jbController), true);
 

@@ -13,6 +13,7 @@ contract JBveBannyTests is TestBaseWorkflow {
   JBTokenStore private _jbTokenStore;
   JBController private _jbController;
   JBOperatorStore private _jbOperatorStore;
+  address private _redemptionTerminal;
   uint256 private _projectId;
   address private _projectOwner;
 
@@ -28,6 +29,7 @@ contract JBveBannyTests is TestBaseWorkflow {
     _jbOperatorStore = jbOperatorStore();
     _jbveTokenUriResolver = jbveTokenUriResolver();
     _jbController = jbController();
+    _redemptionTerminal = jbERC20PaymentTerminal();
 
     // lock duration options array to be used for mock deployment
     uint256[] memory _lockDurationOptions = new uint256[](3);
@@ -122,13 +124,25 @@ contract JBveBannyTests is TestBaseWorkflow {
     );
     evm.stopPrank();
     evm.startPrank(address(this));
-    JBAllowPublicExtensionData[] memory extends = new JBAllowPublicExtensionData[](1);
-    extends[0] = JBAllowPublicExtensionData(
+    JBAllowPublicExtensionData[] memory publicExtensions = new JBAllowPublicExtensionData[](1);
+    publicExtensions[0] = JBAllowPublicExtensionData(
       _tokenId, true
     );
-    _jbveBanny.setAllowPublicExtension(extends);
+    _jbveBanny.setAllowPublicExtension(publicExtensions);
     (, , , ,bool allowPublicExtension) = _jbveBanny.getSpecs(_tokenId);
     assert(allowPublicExtension);
+  }
+
+  function testRedeem() public {
+    mintIJBTokens();
+    uint256 _tokenId = _jbveBanny.lock(_projectOwner, 10 ether, 864000, _projectOwner, true, false);
+    (, , uint256 lockedUntil, ,) = _jbveBanny.getSpecs(_tokenId);
+    evm.warp(lockedUntil * 2);
+    JBRedeemData[] memory redeems = new JBRedeemData[](1);
+    redeems[0] = JBRedeemData(
+      _tokenId, address(0), 300, payable(_projectOwner), 'test memo', '0x69', IJBRedemptionTerminal(_redemptionTerminal)
+    );
+    _jbveBanny.redeem(redeems);
   }
 
   function testScenarioWithInvalidFlagForPublicExtension() public {

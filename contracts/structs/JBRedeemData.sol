@@ -10,6 +10,7 @@ import '@jbx-protocol/contracts-v2/contracts/interfaces/IJBPayoutRedemptionPayme
   @member beneficiary The address to send the terminal tokens to.
   @member memo A memo to pass along to the emitted event.
   @member metadata Bytes to send along to the data source and delegate, if provided.
+  @member terminal Redemption Terminal Address
 */
 struct JBRedeemData {
   uint256 tokenId;
