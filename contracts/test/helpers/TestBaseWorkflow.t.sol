@@ -213,7 +213,7 @@ abstract contract TestBaseWorkflow is DSTest {
       _jbPaymentTerminalStore,
       _multisig
     );
-  
+
     evm.startPrank(_projectOwner);
     _jbDirectory.setIsAllowedToSetFirstController(address(_jbController), true);
 

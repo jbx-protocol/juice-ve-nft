@@ -220,6 +220,33 @@ contract JBveBannyTests is TestBaseWorkflow {
     _jbveBanny.extendLock(extends);
   }
 
+  function testScenarioWhenRedeemCalledBeforeDuarationGetsOver() public {
+    mintIJBTokens();
+    uint256 _tokenId = _jbveBanny.lock(_projectOwner, 10 ether, 864000, _projectOwner, true, false);
+    (, , uint256 lockedUntil, , ) = _jbveBanny.getSpecs(_tokenId);
+    evm.stopPrank();
+    evm.startPrank(address(_jbveBanny));
+    uint256[] memory _permissionIndexes = new uint256[](1);
+    _permissionIndexes[0] = JBOperations.BURN;
+    jbOperatorStore().setOperator(
+      JBOperatorData(address(_redemptionTerminal), _projectId, _permissionIndexes)
+    );
+    evm.stopPrank();
+    evm.startPrank(_projectOwner);
+    JBRedeemData[] memory redeems = new JBRedeemData[](1);
+    redeems[0] = JBRedeemData(
+      _tokenId,
+      address(0),
+      0,
+      payable(_projectOwner),
+      'test memo',
+      '0x69',
+      IJBRedemptionTerminal(_redemptionTerminal)
+    );
+    evm.expectRevert(abi.encodeWithSignature('LOCK_PERIOD_NOT_OVER()'));
+    _jbveBanny.redeem(redeems);
+  }
+
   function testLockWithNonJbToken() public {
     _projectOwner = projectOwner();
     evm.startPrank(_projectOwner);
