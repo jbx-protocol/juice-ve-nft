@@ -18,6 +18,7 @@ import '@jbx-protocol/contracts-v2/contracts/JBFundingCycleStore.sol';
 import '@jbx-protocol/contracts-v2/contracts/JBSplitsStore.sol';
 import '@jbx-protocol/contracts-v2/contracts/JBController.sol';
 import '@jbx-protocol/contracts-v2/contracts/JBToken.sol';
+import '@jbx-protocol/contracts-v2/contracts/JBERC20PaymentTerminal.sol';
 
 import '@jbx-protocol/contracts-v2/contracts/structs/JBProjectMetadata.sol';
 import '@jbx-protocol/contracts-v2/contracts/structs/JBFundingCycleData.sol';
@@ -25,7 +26,6 @@ import '@jbx-protocol/contracts-v2/contracts/structs/JBFundingCycleMetadata.sol'
 import '@jbx-protocol/contracts-v2/contracts/structs/JBGroupedSplits.sol';
 import '@jbx-protocol/contracts-v2/contracts/structs/JBFundAccessConstraints.sol';
 import '@jbx-protocol/contracts-v2/contracts/structs/JBOperatorData.sol';
-import '@jbx-protocol/contracts-v2/contracts/JBERC20PaymentTerminal.sol';
 
 import '@jbx-protocol/contracts-v2/contracts/interfaces/IJBPaymentTerminal.sol';
 import '@jbx-protocol/contracts-v2/contracts/interfaces/IJBToken.sol';
@@ -80,7 +80,7 @@ abstract contract TestBaseWorkflow is DSTest {
   // JBETHPaymentTerminalStore
   JBSingleTokenPaymentTerminalStore private _jbPaymentTerminalStore;
   // JBERC20PaymentTerminal
-  JBERC20PaymentTerminal _jbERC20PaymentTerminal;
+  JBERC20PaymentTerminal private _jbERC20PaymentTerminal;
   // JBToken
   JBToken private _jbToken;
   // IJBTerminal
@@ -191,7 +191,14 @@ abstract contract TestBaseWorkflow is DSTest {
       _jbPrices
     );
 
+    evm.prank(_multisig);
     _jbToken = new JBToken('MyToken', 'MT');
+
+    evm.prank(_multisig);
+    _jbToken.mint(0, _multisig, 100 * 10**18);
+
+    // AccessJBLib
+    _accessJBLib = new AccessJBLib();
 
     _jbERC20PaymentTerminal = new JBERC20PaymentTerminal(
       _jbToken,

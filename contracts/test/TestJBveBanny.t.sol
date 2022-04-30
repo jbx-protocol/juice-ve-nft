@@ -74,7 +74,7 @@ contract JBveBannyTests is TestBaseWorkflow {
     mintIJBTokens();
     _jbveBanny.lock(_projectOwner, 10 ether, 864000, _projectOwner, true, false);
     assertEq(_jbveBanny.ownerOf(1), _projectOwner);
-    (uint256 amount, uint256 duration, , bool isJbToken,) = _jbveBanny.getSpecs(1);
+    (uint256 amount, uint256 duration, , bool isJbToken, ) = _jbveBanny.getSpecs(1);
     assertEq(amount, 10 ether);
     assertEq(duration, 864000);
     assert(isJbToken);
@@ -83,13 +83,11 @@ contract JBveBannyTests is TestBaseWorkflow {
   function testUnlockingTokens() public {
     IJBToken _token = mintIJBTokens();
     _jbveBanny.lock(_projectOwner, 10 ether, 864000, _projectOwner, true, false);
-    (, , uint256 lockedUntil, ,) = _jbveBanny.getSpecs(1);
+    (, , uint256 lockedUntil, , ) = _jbveBanny.getSpecs(1);
     evm.warp(lockedUntil * 2);
     _jbveBanny.approve(address(_jbveBanny), 1);
     JBUnlockData[] memory unlocks = new JBUnlockData[](1);
-    unlocks[0] = JBUnlockData(
-      1, _projectOwner
-    );
+    unlocks[0] = JBUnlockData(1, _projectOwner);
     _jbveBanny.unlock(unlocks);
     assertEq(_token.balanceOf(address(_jbveBanny), _projectId), 0);
   }
@@ -97,71 +95,77 @@ contract JBveBannyTests is TestBaseWorkflow {
   function testExtendLock() public {
     mintIJBTokens();
     uint256 _tokenId = _jbveBanny.lock(_projectOwner, 10 ether, 864000, _projectOwner, true, false);
-    (, uint256 d, uint256 lockedUntil, ,) = _jbveBanny.getSpecs(_tokenId);
+    (, uint256 d, uint256 lockedUntil, , ) = _jbveBanny.getSpecs(_tokenId);
     assertEq(d, 864000);
     evm.warp(lockedUntil * 2);
 
     JBLockExtensionData[] memory extends = new JBLockExtensionData[](1);
-    extends[0] = JBLockExtensionData(
-      1, 8640000
-    );
+    extends[0] = JBLockExtensionData(1, 8640000);
     _tokenId = _jbveBanny.extendLock(extends)[0];
 
-    (, uint256 duration, , ,) = _jbveBanny.getSpecs(_tokenId);
+    (, uint256 duration, , , ) = _jbveBanny.getSpecs(_tokenId);
     assertEq(duration, 8640000);
   }
 
   function testsetAllowPublicExtension() public {
     mintIJBTokens();
     uint256 _tokenId = _jbveBanny.lock(_projectOwner, 10 ether, 864000, _projectOwner, true, false);
-    (, , uint256 lockedUntil, ,) = _jbveBanny.getSpecs(_tokenId);
+    (, , uint256 lockedUntil, , ) = _jbveBanny.getSpecs(_tokenId);
     evm.warp(lockedUntil * 2);
 
     uint256[] memory _permissionIndexes = new uint256[](1);
     _permissionIndexes[0] = JBStakingOperations.SET_PUBLIC_EXTENSION_FLAG;
-    jbOperatorStore().setOperator(
-    JBOperatorData(address(this), _projectId, _permissionIndexes)
-    );
+    jbOperatorStore().setOperator(JBOperatorData(address(this), _projectId, _permissionIndexes));
     evm.stopPrank();
     evm.startPrank(address(this));
     JBAllowPublicExtensionData[] memory publicExtensions = new JBAllowPublicExtensionData[](1);
-    publicExtensions[0] = JBAllowPublicExtensionData(
-      _tokenId, true
-    );
+    publicExtensions[0] = JBAllowPublicExtensionData(_tokenId, true);
     _jbveBanny.setAllowPublicExtension(publicExtensions);
-    (, , , ,bool allowPublicExtension) = _jbveBanny.getSpecs(_tokenId);
+    (, , , , bool allowPublicExtension) = _jbveBanny.getSpecs(_tokenId);
     assert(allowPublicExtension);
   }
 
   function testRedeem() public {
-    mintIJBTokens();
+    IJBToken _token = mintIJBTokens();
     uint256 _tokenId = _jbveBanny.lock(_projectOwner, 10 ether, 864000, _projectOwner, true, false);
-    (, , uint256 lockedUntil, ,) = _jbveBanny.getSpecs(_tokenId);
+    (, , uint256 lockedUntil, , ) = _jbveBanny.getSpecs(_tokenId);
     evm.warp(lockedUntil * 2);
+    evm.stopPrank();
+    evm.startPrank(address(_jbveBanny));
+    uint256[] memory _permissionIndexes = new uint256[](1);
+    _permissionIndexes[0] = JBOperations.BURN;
+    jbOperatorStore().setOperator(
+      JBOperatorData(address(_redemptionTerminal), _projectId, _permissionIndexes)
+    );
+    evm.stopPrank();
+    evm.startPrank(_projectOwner);
     JBRedeemData[] memory redeems = new JBRedeemData[](1);
     redeems[0] = JBRedeemData(
-      _tokenId, address(0), 300, payable(_projectOwner), 'test memo', '0x69', IJBRedemptionTerminal(_redemptionTerminal)
+      _tokenId,
+      address(0),
+      0,
+      payable(_projectOwner),
+      'test memo',
+      '0x69',
+      IJBRedemptionTerminal(_redemptionTerminal)
     );
     _jbveBanny.redeem(redeems);
+    assertEq(_token.balanceOf(address(_jbveBanny), _projectId), 0);
   }
 
   function testScenarioWithInvalidFlagForPublicExtension() public {
     mintIJBTokens();
     uint256 _tokenId = _jbveBanny.lock(_projectOwner, 10 ether, 864000, _projectOwner, true, false);
-    (, , uint256 lockedUntil, ,) = _jbveBanny.getSpecs(_tokenId);
+    (, , uint256 lockedUntil, , ) = _jbveBanny.getSpecs(_tokenId);
     evm.warp(lockedUntil * 2);
 
     uint256[] memory _permissionIndexes = new uint256[](1);
     _permissionIndexes[0] = JBStakingOperations.SET_PUBLIC_EXTENSION_FLAG;
-    jbOperatorStore().setOperator(
-    JBOperatorData(address(this), _projectId, _permissionIndexes)
-    );
+    jbOperatorStore().setOperator(JBOperatorData(address(this), _projectId, _permissionIndexes));
     evm.stopPrank();
     evm.startPrank(address(this));
     JBAllowPublicExtensionData[] memory extends = new JBAllowPublicExtensionData[](1);
-    extends[0] = JBAllowPublicExtensionData(
-      _tokenId, false
-    );
+    extends[0] = JBAllowPublicExtensionData(_tokenId, false);
     evm.expectRevert(abi.encodeWithSignature('INVALID_PUBLIC_EXTENSION_FLAG_VALUE()'));
     _jbveBanny.setAllowPublicExtension(extends);
   }
@@ -181,44 +185,38 @@ contract JBveBannyTests is TestBaseWorkflow {
   function testScenarioWhenLockPeriodIsNotOver() public {
     mintIJBTokens();
     _jbveBanny.lock(_projectOwner, 10 ether, 864000, _projectOwner, true, false);
-    (, , uint256 lockedUntil,,) = _jbveBanny.getSpecs(1);
+    (, , uint256 lockedUntil, , ) = _jbveBanny.getSpecs(1);
     evm.warp(lockedUntil / 2);
     _jbveBanny.approve(address(_jbveBanny), 1);
     evm.expectRevert(abi.encodeWithSignature('LOCK_PERIOD_NOT_OVER()'));
     JBUnlockData[] memory unlocks = new JBUnlockData[](1);
-    unlocks[0] = JBUnlockData(
-      1, _projectOwner
-    );
+    unlocks[0] = JBUnlockData(1, _projectOwner);
     _jbveBanny.unlock(unlocks);
   }
 
   function testScenarioWithInvalidLockDurationWhenExtendingDuration() public {
     mintIJBTokens();
     _jbveBanny.lock(_projectOwner, 10 ether, 864000, _projectOwner, true, false);
-    (, uint256 d, uint256 lockedUntil,,) = _jbveBanny.getSpecs(1);
+    (, uint256 d, uint256 lockedUntil, , ) = _jbveBanny.getSpecs(1);
     assertEq(d, 864000);
     evm.warp(lockedUntil * 2);
     evm.expectRevert(abi.encodeWithSignature('INVALID_LOCK_DURATION()'));
 
     JBLockExtensionData[] memory extends = new JBLockExtensionData[](1);
-    extends[0] = JBLockExtensionData(
-      1, 8640001
-    );
+    extends[0] = JBLockExtensionData(1, 8640001);
     _jbveBanny.extendLock(extends);
   }
 
   function testScenarioWithInvalidLockExtension() public {
     mintIJBTokens();
     _jbveBanny.lock(_projectOwner, 10 ether, 864000, _projectOwner, true, false);
-    (, uint256 d, uint256 lockedUntil,,) = _jbveBanny.getSpecs(1);
+    (, uint256 d, uint256 lockedUntil, , ) = _jbveBanny.getSpecs(1);
     assertEq(d, 864000);
     evm.warp(lockedUntil / 2);
     evm.expectRevert(abi.encodeWithSignature('INVALID_LOCK_EXTENSION()'));
 
     JBLockExtensionData[] memory extends = new JBLockExtensionData[](1);
-    extends[0] = JBLockExtensionData(
-      1, 8640000
-    );
+    extends[0] = JBLockExtensionData(1, 8640000);
     _jbveBanny.extendLock(extends);
   }
 
@@ -233,7 +231,7 @@ contract JBveBannyTests is TestBaseWorkflow {
     );
     _jbveBanny.lock(_projectOwner, 10 ether, 864000, _projectOwner, false, false);
     assertEq(_jbveBanny.ownerOf(1), _projectOwner);
-    (uint256 amount, uint256 duration, , ,) = _jbveBanny.getSpecs(1);
+    (uint256 amount, uint256 duration, , , ) = _jbveBanny.getSpecs(1);
     assertEq(amount, 10 ether);
     assertEq(duration, 864000);
   }
