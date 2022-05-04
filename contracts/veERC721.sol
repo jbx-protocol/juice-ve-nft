@@ -88,6 +88,7 @@ abstract contract veERC721 is ERC721Enumerable, IVotes {
   struct LockedBalance {
     int128 amount;
     uint256 end;
+    uint256 duration;
     bool useJbToken;
     bool allowPublicExtension;
   }
@@ -117,7 +118,14 @@ abstract contract veERC721 is ERC721Enumerable, IVotes {
 
   // Constant structs not allowed yet, so this will have to do
   function EMPTY_LOCKED_BALANCE_FACTORY() internal pure returns (LockedBalance memory) {
-    return LockedBalance({amount: 0, end: 0, useJbToken: false, allowPublicExtension: false});
+    return
+      LockedBalance({
+        amount: 0,
+        end: 0,
+        duration: 0,
+        useJbToken: false,
+        allowPublicExtension: false
+      });
   }
 
   /**
@@ -490,6 +498,63 @@ abstract contract veERC721 is ERC721Enumerable, IVotes {
       ts: block.timestamp,
       blk: block.number
     });
+  }
+
+  /**
+    @notice extends an existing lock
+    @param _tokenId The tokenID to lock for
+    @param _duration the duration of the lock (for the UI and uriresolver, not actually used)
+    @param _end the new end time
+  */
+  function _extendLock(
+    uint256 _tokenId,
+    uint256 _duration,
+    uint256 _end
+  ) internal {
+    // Round end date down to week
+    _end = (_end / WEEK) * WEEK;
+    // Get the current lock info
+    LockedBalance memory _currentLock = locked[_tokenId];
+    // Make sure the end date does not become earlier than the current one
+    require(_end > _currentLock.end);
+    // Update the duration for the UI and uriresolver
+    _currentLock.duration = _duration;
+    // Checkpoint the lock and calculate new slope and bias
+    _modifyLock(_tokenId, 0, _end, _currentLock, INCREASE_UNLOCK_TIME);
+  }
+
+  /**
+    @notice modifies an existing lock
+    @dev modified implementation of `_deposit_for` that does not perform the token transfer
+    @param _tokenId The tokenID to lock for
+    @param _value Amount to deposit
+    @param unlock_time New time when to unlock the tokens, or 0 if unchanged
+    @param locked_balance Previous locked amount / timestamp
+  */
+  function _modifyLock(
+    uint256 _tokenId,
+    uint256 _value,
+    uint256 unlock_time,
+    LockedBalance memory locked_balance,
+    int128 _type
+  ) private {
+    LockedBalance memory _locked = locked_balance;
+    uint256 supply_before = supply;
+
+    supply = supply_before + _value;
+    LockedBalance memory old_locked = _locked;
+    // Adding to existing lock, or if a lock is expired - creating a new one
+    _locked.amount += int128(int256(_value));
+    if (unlock_time != 0) {
+      _locked.end = unlock_time;
+    }
+    locked[_tokenId] = _locked;
+
+    // Possibilities:
+    // Both old_locked.end could be current or expired (>/< block.timestamp)
+    // value == 0 (extend lock) or value > 0 (add to lock or extend lock)
+    // _locked.end > block.timestamp (always)
+    _checkpoint(_tokenId, old_locked, _locked);
   }
 
   /**

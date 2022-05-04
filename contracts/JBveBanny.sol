@@ -253,6 +253,7 @@ contract JBveBanny is veERC721, Ownable, ReentrancyGuard, JBOperatable {
       LockedBalance(
         int128(int256(_count)),
         block.timestamp + _duration,
+        _duration,
         _useJbToken,
         _allowPublicExtension
       )
@@ -344,23 +345,14 @@ contract JBveBanny is veERC721, Ownable, ReentrancyGuard, JBOperatable {
         _requirePermission(_ownerOf, projectId, JBStakingOperations.EXTEND_LOCK);
 
       // Calculate the new unlock date
-      uint256 _newEndDate = ((block.timestamp + _data.updatedDuration));
-      if (_newEndDate < _lock.end) revert JBErrors.INVALID_LOCK_DURATION();
+      uint256 _newEndDate = (block.timestamp + _data.updatedDuration);
+      if (_newEndDate < _lock.end) revert INVALID_LOCK_EXTENSION();
 
-      // Set the new end date
-      _lock.end = _newEndDate;
+      // TODO: Add back in the changing tokenId, temporarily removed to improve gas usage
+      _extendLock(_data.tokenId, _data.updatedDuration, _newEndDate);
+      newTokenIds[_i] = _data.tokenId;
 
-      // Burn the old NFT
-      _burn(_data.tokenId);
-
-      // Increment the number of ve positions that have been minted.
-      uint256 newTokenId = ++count;
-
-      // Mint the new NFT
-      _newLock(newTokenId, _lock);
-      _safeMint(_ownerOf, newTokenId);
-
-      emit ExtendLock(_data.tokenId, newTokenId, _data.updatedDuration, _lock.end, msg.sender);
+      emit ExtendLock(_data.tokenId, _data.tokenId, _data.updatedDuration, _lock.end, msg.sender);
     }
   }
 
@@ -493,10 +485,7 @@ contract JBveBanny is veERC721, Ownable, ReentrancyGuard, JBOperatable {
     lockedUntil = _lock.end;
     useJbToken = _lock.useJbToken;
     allowPublicExtension = _lock.allowPublicExtension;
-
-    // First epoch is 1 (every token has this epoch)
-    Point storage _firstPoint = token_point_history[_tokenId][1];
-    duration = _lock.end - _firstPoint.ts;
+    duration = _lock.duration;
   }
 
   //*********************************************************************//
