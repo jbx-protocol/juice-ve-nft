@@ -162,26 +162,7 @@ abstract contract veERC721 is ERC721Enumerable, IVotes {
     @param _account account to calculate
   */
   function getVotes(address _account) public view override returns (uint256 votingPower) {
-    for (uint256 _i; _i < balanceOf(_account); _i++) {
-      // TODO: should we make the mapping 'internal' so we can access it directly?
-      uint256 _tokenId = tokenOfOwnerByIndex(_account, _i);
-      uint256 _epoch = token_point_epoch[_tokenId];
-
-      // Every initialised token should have an epoch of 1
-      if (_epoch == 0) {
-        continue;
-      } else {
-        Point memory last_point = token_point_history[_tokenId][_epoch];
-        last_point.bias -=
-          last_point.slope *
-          (int128(int256(block.timestamp)) - int128(int256(last_point.ts)));
-        if (last_point.bias < 0) {
-          last_point.bias = 0;
-        }
-
-        votingPower += uint256(uint128(last_point.bias));
-      }
-    }
+    return getPastVotes(_account, block.number);
   }
 
   /**
@@ -200,6 +181,7 @@ abstract contract veERC721 is ERC721Enumerable, IVotes {
       uint256 _tokenId = _receivedVotingPower[_account][_i];
       uint256 _count = _historicVotingPower[_tokenId].length;
 
+      // TODO: replace with binary search(?)
       for (uint256 _j = _count; _j >= 1; _j--) {
         HistoricVotingPower storage _voting_power = _historicVotingPower[_tokenId][_j - 1];
         if (_voting_power.receivedAtBlock > _block) {
@@ -317,6 +299,7 @@ abstract contract veERC721 is ERC721Enumerable, IVotes {
       // This is a transfer, disable voting power (if active)
       uint256 _historyLength = _historicVotingPower[_tokenId].length;
       if (_historyLength > 0) {
+        // Get the latest assignment of the voting power
         HistoricVotingPower memory _latestVotingPower = _historicVotingPower[_tokenId][
           _historyLength - 1
         ];
@@ -727,37 +710,59 @@ abstract contract veERC721 is ERC721Enumerable, IVotes {
    */
   function activateVotingPower(uint256 _tokenId) external {
     require(msg.sender == ownerOf(_tokenId));
+    _activateVotingPower(_tokenId, msg.sender, false, false);
+  }
 
+  function _activateVotingPower(
+    uint256 _tokenId,
+    address _account,
+    bool _forceRegister,
+    bool _forceHistoryAddition
+  ) internal {
     // We track all the tokens a user has received voting power over at some point
-    // To lower gas usage we check if
+    // To lower gas usage we check if this token has already been owned by the user at some point
     bool _alreadyRegistered;
-    for (uint256 _i; _i < _receivedVotingPower[msg.sender].length; _i++) {
-      uint256 _currentTokenId = _receivedVotingPower[msg.sender][_i];
-      if (_tokenId == _currentTokenId) {
-        _alreadyRegistered = true;
-        break;
+    if (!_forceRegister) {
+      for (uint256 _i; _i < _receivedVotingPower[msg.sender].length; _i++) {
+        uint256 _currentTokenId = _receivedVotingPower[_account][_i];
+        if (_tokenId == _currentTokenId) {
+          _alreadyRegistered = true;
+          break;
+        }
       }
     }
+
     // If the token has not been registerd for this user, register it
-    if (!_alreadyRegistered) {
-      _receivedVotingPower[msg.sender].push(_tokenId);
+    if (_forceRegister || !_alreadyRegistered) {
+      _receivedVotingPower[_account].push(_tokenId);
     }
 
-    uint256 _historicVotingPowerLength = _historicVotingPower[_tokenId].length;
-    if (_historicVotingPowerLength > 0) {
-      HistoricVotingPower memory _latestVotingPower = _historicVotingPower[_tokenId][
-        _historicVotingPowerLength - 1
-      ];
-      // Prevents multiple activations of the same token in 1 block
-      require(
-        _latestVotingPower.receivedAtBlock < block.number,
-        'Voting power already enabled this block'
-      );
-      require(_latestVotingPower.account != msg.sender, 'Voting power is already enabled');
+    // Prevent multiple activations of the same token in 1 block
+    // and the user activating voting power of a token that is already activated for them
+    bool _alreadyActivated;
+    if (!_forceHistoryAddition) {
+      uint256 _historicVotingPowerLength = _historicVotingPower[_tokenId].length;
+      if (_historicVotingPowerLength > 0) {
+        // Get the latest change in voting power assignment for this token
+        HistoricVotingPower memory _latestVotingPower = _historicVotingPower[_tokenId][
+          _historicVotingPowerLength - 1
+        ];
+        // Prevents multiple activations of the same token in 1 block
+        require(
+          _latestVotingPower.receivedAtBlock < block.number,
+          'Voting power already enabled this block'
+        );
+        // Check if the current activated user is the
+        if (_latestVotingPower.account != _account) {
+          _alreadyActivated = true;
+        }
+      }
     }
 
-    // Activate the voting power
-    _historicVotingPower[_tokenId].push(HistoricVotingPower(block.number, msg.sender));
+    if (_forceHistoryAddition || !_alreadyActivated) {
+      // Activate the voting power
+      _historicVotingPower[_tokenId].push(HistoricVotingPower(block.number, _account));
+    }
   }
 
   /**

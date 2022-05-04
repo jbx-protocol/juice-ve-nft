@@ -41,6 +41,7 @@ contract JBveBanny is veERC721, Ownable, ReentrancyGuard, JBOperatable {
   error TOKEN_MISMATCH();
   error INVALID_PUBLIC_EXTENSION_FLAG_VALUE();
   error INVALID_LOCK_EXTENSION();
+  error EXCEEDS_MAX_LOCK_DURATION();
 
   event Lock(
     uint256 indexed tokenId,
@@ -79,17 +80,6 @@ contract JBveBanny is veERC721, Ownable, ReentrancyGuard, JBOperatable {
   //*********************************************************************//
   // --------------------- private stored properties ------------------- //
   //*********************************************************************//
-  /**
-    @notice
-    Tracks the specs of each tokenId which are basically locked amount, lock-in duration and total lock-in period.
-  */
-  mapping(uint256 => uint256) private _packedSpecs;
-
-  /** 
-    @notice 
-    The maximum lock duration.
-  */
-  uint256 private immutable _maxLockDuration;
 
   /** 
     @notice 
@@ -186,11 +176,9 @@ contract JBveBanny is veERC721, Ownable, ReentrancyGuard, JBOperatable {
     tokenStore = _tokenStore;
     _lockDurationOptions = __lockDurationOptions;
 
-    // Save the max lock duration.
-    uint256 _max = 0;
+    // Make sure no durationOption is longer than the max time
     for (uint256 _i; _i < _lockDurationOptions.length; _i++)
-      if (_lockDurationOptions[_i] > _max) _max = _lockDurationOptions[_i];
-    _maxLockDuration = _max;
+      if (_lockDurationOptions[_i] > MAXTIME) revert EXCEEDS_MAX_LOCK_DURATION();
   }
 
   //*********************************************************************//
@@ -261,6 +249,13 @@ contract JBveBanny is veERC721, Ownable, ReentrancyGuard, JBOperatable {
 
     // Mint the position for the beneficiary.
     _safeMint(_beneficiary, tokenId);
+
+    // Enable the voting power if the user is minting for themselves
+    // otherwise the `_beneficiary` has to enable it manually afterwards
+    // TODO: make optional to allow the user to save some gas?
+    if (msg.sender == _beneficiary) {
+      _activateVotingPower(tokenId, _beneficiary, true, true);
+    }
 
     if (_useJbToken)
       // Transfer the token to this contract where they'll be locked.
