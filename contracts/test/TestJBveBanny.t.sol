@@ -2,6 +2,7 @@
 pragma solidity 0.8.6;
 
 import './helpers/TestBaseWorkflow.t.sol';
+import '../veERC721.sol';
 import '../interfaces/IJBVeTokenUriResolver.sol';
 
 contract JBveBannyTests is TestBaseWorkflow {
@@ -73,6 +74,11 @@ contract JBveBannyTests is TestBaseWorkflow {
   function testLockWithJBToken() public {
     mintIJBTokens();
     _jbveBanny.lock(_projectOwner, 10 ether, 604800, _projectOwner, true, false);
+    (int128 _amount, , uint256 _duration, bool _useJbToken,  bool _allowPublicExtension) = _jbveBanny.locked(1);
+    assertEq(_amount, 10 ether);
+    assertEq(_duration, 604800);
+    assert(_useJbToken);
+    assert(!_allowPublicExtension);
     assertEq(_jbveBanny.ownerOf(1), _projectOwner);
     (uint256 amount, uint256 duration, , bool isJbToken, ) = _jbveBanny.getSpecs(1);
     assertEq(amount, 10 ether);
@@ -167,6 +173,11 @@ contract JBveBannyTests is TestBaseWorkflow {
       JBOperatorData(address(_jbveBanny), _projectId, _permissionIndexes)
     );
     _jbveBanny.lock(_projectOwner, 10 ether, 604800, _projectOwner, false, false);
+    (int128 _amount, , uint256 _duration, bool _useJbToken,  bool _allowPublicExtension) = _jbveBanny.locked(1);
+    assertEq(_amount, 10 ether);
+    assertEq(_duration, 604800);
+    assert(!_useJbToken);
+    assert(!_allowPublicExtension);
     assertEq(_jbveBanny.ownerOf(1), _projectOwner);
     (uint256 amount, uint256 duration, , , ) = _jbveBanny.getSpecs(1);
     assertEq(amount, 10 ether);
