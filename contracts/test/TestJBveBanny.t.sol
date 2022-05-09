@@ -74,8 +74,8 @@ contract JBveBannyTests is TestBaseWorkflow {
   function testLockWithJBToken() public {
     mintIJBTokens();
     _jbveBanny.lock(_projectOwner, 10 ether, 604800, _projectOwner, true, false);
-    (int128 _amount, , uint256 _duration, bool _useJbToken, bool _allowPublicExtension) = _jbveBanny
-      .locked(1);
+    (int128 _amount, , uint256 _duration, bool _useJbToken, bool _allowPublicExtension) = _jbveBanny.locked(1);
+    assert(_jbveBanny.tokenVotingPowerAt(1, block.number) > 0);
     assertEq(_amount, 10 ether);
     assertEq(_duration, 604800);
     assert(_useJbToken);
@@ -177,8 +177,8 @@ contract JBveBannyTests is TestBaseWorkflow {
       JBOperatorData(address(_jbveBanny), _projectId, _permissionIndexes)
     );
     _jbveBanny.lock(_projectOwner, 10 ether, 604800, _projectOwner, false, false);
-    (int128 _amount, , uint256 _duration, bool _useJbToken, bool _allowPublicExtension) = _jbveBanny
-      .locked(1);
+    assert(_jbveBanny.tokenVotingPowerAt(1, block.number) > 0);
+    (int128 _amount, , uint256 _duration, bool _useJbToken, bool _allowPublicExtension) = _jbveBanny.locked(1);
     assertEq(_amount, 10 ether);
     assertEq(_duration, 604800);
     assert(!_useJbToken);
