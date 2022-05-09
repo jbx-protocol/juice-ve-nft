@@ -41,8 +41,15 @@ import '@openzeppelin/contracts/governance/utils/IVotes.sol';
 import '@openzeppelin/contracts/token/ERC721/ERC721.sol';
 import '@openzeppelin/contracts/security/ReentrancyGuard.sol';
 import '@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol';
-
 import '@openzeppelin/contracts/token/ERC721/extensions/ERC721Enumerable.sol';
+
+  //*********************************************************************//
+  // --------------------------- custom errors ------------------------- //
+  //*********************************************************************//
+  error INVALID_BLOCK();
+  error NOT_OWNER();
+  error LOCK_DURATION_NOT_OVER();
+  error VOTING_POWER_ALREADY_ENABLED();
 
 abstract contract veERC721 is ERC721Enumerable, IVotes {
   using SafeERC20 for IERC20;
@@ -207,7 +214,9 @@ abstract contract veERC721 is ERC721Enumerable, IVotes {
   function tokenVotingPowerAt(uint256 _tokenId, uint256 _block) public view returns (uint256) {
     // Copying and pasting totalSupply code because Vyper cannot pass by
     // reference yet
-    require(_block <= block.number);
+    if(_block > block.number) {
+      revert INVALID_BLOCK();
+    }
 
     // Binary search
     uint256 _min = 0;
@@ -262,7 +271,9 @@ abstract contract veERC721 is ERC721Enumerable, IVotes {
     @return Total voting power at `_block`
   */
   function getPastTotalSupply(uint256 _block) external view override returns (uint256) {
-    require(_block <= block.number);
+    if (_block > block.number) {
+      revert INVALID_BLOCK();
+    }
     uint256 _epoch = epoch;
     uint256 target_epoch = find_block_epoch(_block, _epoch);
 
@@ -499,7 +510,9 @@ abstract contract veERC721 is ERC721Enumerable, IVotes {
     // Get the current lock info
     LockedBalance memory _currentLock = locked[_tokenId];
     // Make sure the end date does not become earlier than the current one
-    require(_end > _currentLock.end);
+  if (_end <= _currentLock.end) {
+      revert LOCK_DURATION_NOT_OVER();
+    }
     // Update the duration for the UI and uriresolver
     _currentLock.duration = _duration;
     // Checkpoint the lock and calculate new slope and bias
@@ -709,7 +722,9 @@ abstract contract veERC721 is ERC721Enumerable, IVotes {
    * @param _tokenId The token to activate
    */
   function activateVotingPower(uint256 _tokenId) external {
-    require(msg.sender == ownerOf(_tokenId));
+    if (msg.sender != ownerOf(_tokenId)) {
+       revert NOT_OWNER();
+    }
     _activateVotingPower(_tokenId, msg.sender, false, false);
   }
 
@@ -748,10 +763,9 @@ abstract contract veERC721 is ERC721Enumerable, IVotes {
           _historicVotingPowerLength - 1
         ];
         // Prevents multiple activations of the same token in 1 block
-        require(
-          _latestVotingPower.receivedAtBlock < block.number,
-          'Voting power already enabled this block'
-        );
+        if (_latestVotingPower.receivedAtBlock >= block.number) {
+           revert VOTING_POWER_ALREADY_ENABLED();
+        }
         // Check if the current activated user is the
         if (_latestVotingPower.account != _account) {
           _alreadyActivated = true;
