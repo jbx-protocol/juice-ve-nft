@@ -43,13 +43,13 @@ import '@openzeppelin/contracts/security/ReentrancyGuard.sol';
 import '@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol';
 import '@openzeppelin/contracts/token/ERC721/extensions/ERC721Enumerable.sol';
 
-  //*********************************************************************//
-  // --------------------------- custom errors ------------------------- //
-  //*********************************************************************//
-  error INVALID_BLOCK();
-  error NOT_OWNER();
-  error LOCK_DURATION_NOT_OVER();
-  error VOTING_POWER_ALREADY_ENABLED();
+//*********************************************************************//
+// --------------------------- custom errors ------------------------- //
+//*********************************************************************//
+error INVALID_BLOCK();
+error NOT_OWNER();
+error LOCK_DURATION_NOT_OVER();
+error VOTING_POWER_ALREADY_ENABLED();
 
 abstract contract veERC721 is ERC721Enumerable, IVotes {
   using SafeERC20 for IERC20;
@@ -214,7 +214,7 @@ abstract contract veERC721 is ERC721Enumerable, IVotes {
   function tokenVotingPowerAt(uint256 _tokenId, uint256 _block) public view returns (uint256) {
     // Copying and pasting totalSupply code because Vyper cannot pass by
     // reference yet
-    if(_block > block.number) {
+    if (_block > block.number) {
       revert INVALID_BLOCK();
     }
 
@@ -510,7 +510,7 @@ abstract contract veERC721 is ERC721Enumerable, IVotes {
     // Get the current lock info
     LockedBalance memory _currentLock = locked[_tokenId];
     // Make sure the end date does not become earlier than the current one
-  if (_end <= _currentLock.end) {
+    if (_end <= _currentLock.end) {
       revert LOCK_DURATION_NOT_OVER();
     }
     // Update the duration for the UI and uriresolver
@@ -723,7 +723,7 @@ abstract contract veERC721 is ERC721Enumerable, IVotes {
    */
   function activateVotingPower(uint256 _tokenId) external {
     if (msg.sender != ownerOf(_tokenId)) {
-       revert NOT_OWNER();
+      revert NOT_OWNER();
     }
     _activateVotingPower(_tokenId, msg.sender, false, false);
   }
@@ -764,7 +764,7 @@ abstract contract veERC721 is ERC721Enumerable, IVotes {
         ];
         // Prevents multiple activations of the same token in 1 block
         if (_latestVotingPower.receivedAtBlock >= block.number) {
-           revert VOTING_POWER_ALREADY_ENABLED();
+          revert VOTING_POWER_ALREADY_ENABLED();
         }
         // Check if the current activated user is the
         if (_latestVotingPower.account != _account) {

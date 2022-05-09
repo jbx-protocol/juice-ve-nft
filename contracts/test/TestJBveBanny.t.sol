@@ -74,7 +74,8 @@ contract JBveBannyTests is TestBaseWorkflow {
   function testLockWithJBToken() public {
     mintIJBTokens();
     _jbveBanny.lock(_projectOwner, 10 ether, 604800, _projectOwner, true, false);
-    (int128 _amount, , uint256 _duration, bool _useJbToken, bool _allowPublicExtension) = _jbveBanny.locked(1);
+    (int128 _amount, , uint256 _duration, bool _useJbToken, bool _allowPublicExtension) = _jbveBanny
+      .locked(1);
     assert(_jbveBanny.tokenVotingPowerAt(1, block.number) > 0);
     assertEq(_amount, 10 ether);
     assertEq(_duration, 604800);
@@ -179,7 +180,8 @@ contract JBveBannyTests is TestBaseWorkflow {
     );
     _jbveBanny.lock(_projectOwner, 10 ether, 604800, _projectOwner, false, false);
     assert(_jbveBanny.tokenVotingPowerAt(1, block.number) > 0);
-    (int128 _amount, , uint256 _duration, bool _useJbToken, bool _allowPublicExtension) = _jbveBanny.locked(1);
+    (int128 _amount, , uint256 _duration, bool _useJbToken, bool _allowPublicExtension) = _jbveBanny
+      .locked(1);
     assertEq(_amount, 10 ether);
     assertEq(_duration, 604800);
     assert(!_useJbToken);
@@ -188,5 +190,115 @@ contract JBveBannyTests is TestBaseWorkflow {
     (uint256 amount, uint256 duration, , , ) = _jbveBanny.getSpecs(1);
     assertEq(amount, 10 ether);
     assertEq(duration, 604800);
+  }
+
+  function testLockVotingPowerIncreasesIfLockedLonger() public {
+    mintIJBTokens();
+
+    _jbveBanny.lock(_projectOwner, 5 ether, 604800, _projectOwner, true, false);
+    assert(_jbveBanny.tokenVotingPowerAt(1, block.number) > 0);
+
+    _jbveBanny.lock(_projectOwner, 5 ether, 2419200, _projectOwner, true, false);
+    assert(_jbveBanny.tokenVotingPowerAt(2, block.number) > 0);
+
+    // Since lock-2 is 4x as long as lock-1, it should have x4 the voting power
+    // (might be slightly more or less due to rounding to nearest week)
+    assertGt(
+      _jbveBanny.tokenVotingPowerAt(2, block.number),
+      _jbveBanny.tokenVotingPowerAt(1, block.number) * 4
+    );
+  }
+
+  function testLockVotingPowerDecreasesOverTime() public {
+    mintIJBTokens();
+
+    uint256 _steps = 4;
+    uint256 _secondsPerBlock = 1;
+    uint256 _lastVotingPower = 0;
+    uint256 _tokenId = _jbveBanny.lock(_projectOwner, 10 ether, 604800, _projectOwner, true, false);
+    (, uint256 _end, , , ) = _jbveBanny.locked(_tokenId);
+
+    uint256 _timePerStep = (_end - block.timestamp) / _steps + 1;
+    uint256 _blocksPerStep = _timePerStep / _secondsPerBlock;
+
+    // Increase the current timestamp and verify that the voting power keeps decreasing
+    uint256 _currentTime = block.timestamp;
+    uint256 _currentBlock = block.number;
+
+    for (uint256 _i; _i < _steps; _i++) {
+      uint256 _currentVotingPower = _jbveBanny.tokenVotingPowerAt(_tokenId, _currentBlock);
+
+      if (_lastVotingPower != 0) {
+        assertLt(_currentVotingPower, _lastVotingPower);
+      }
+      assertTrue(_currentVotingPower > 0);
+
+      _lastVotingPower = _currentVotingPower;
+
+      _currentTime += _timePerStep;
+      _currentBlock += _blocksPerStep; // Assuming 15 second block times
+
+      evm.warp(_currentTime);
+      evm.roll(_currentBlock);
+    }
+
+    // After the lock has expired it should be 0
+    assert(_jbveBanny.tokenVotingPowerAt(_tokenId, _currentBlock) == 0);
+  }
+
+  function testLockVotingPowerHistoricLookupIsCorrect() public {
+    mintIJBTokens();
+
+    uint256 _steps = 4;
+    uint256 _secondsPerBlock = 1;
+    uint256 _lastVotingPower = 0;
+    uint256 _tokenId = _jbveBanny.lock(_projectOwner, 10 ether, 604800, _projectOwner, true, false);
+    (, uint256 _end, , , ) = _jbveBanny.locked(_tokenId);
+
+    uint256[] memory _historicVotingPower = new uint256[](_steps);
+    uint256[] memory _historicVotingPowerBlocks = new uint256[](_steps);
+
+    uint256 _timePerStep = (_end - block.timestamp) / _steps + 1;
+    uint256 _blocksPerStep = _timePerStep / _secondsPerBlock;
+
+    // Increase the current timestamp and verify that the voting power keeps decreasing
+    uint256 _currentTime = block.timestamp;
+    uint256 _currentBlock = block.number;
+
+    // Check the voting power and check if it decreases in comparison with the previous check
+    // Store the `_currentVotingPower`
+    for (uint256 _i; _i < _steps; _i++) {
+      uint256 _currentVotingPower = _jbveBanny.tokenVotingPowerAt(_tokenId, _currentBlock);
+
+      if (_lastVotingPower != 0) {
+        assertLt(_currentVotingPower, _lastVotingPower);
+      }
+      assertTrue(_currentVotingPower > 0);
+
+      _historicVotingPower[_i] = _currentVotingPower;
+      _historicVotingPowerBlocks[_i] = _currentBlock;
+      _lastVotingPower = _currentVotingPower;
+
+      _currentTime += _timePerStep;
+      _currentBlock += _blocksPerStep; // Assuming 15 second block times
+
+      evm.warp(_currentTime);
+      evm.roll(_currentBlock);
+    }
+
+    // After the lock has expired it should be 0
+    assert(_jbveBanny.tokenVotingPowerAt(_tokenId, _currentBlock) == 0);
+
+    // Use the stored `_currentVotingPower` and `_currentBlock` and perform historic lookups for each
+    // Make sure the historic lookup and (at the time) current values are the same
+    for (uint256 _i = 0; _i < _historicVotingPower.length; _i++) {
+      uint256 _votingPowerAtBlock = _jbveBanny.tokenVotingPowerAt(
+        _tokenId,
+        _historicVotingPowerBlocks[_i]
+      );
+
+      assertEq(_historicVotingPower[_i], _votingPowerAtBlock);
+      assert(_historicVotingPower[_i] > 0 && _votingPowerAtBlock > 0);
+    }
   }
 }
