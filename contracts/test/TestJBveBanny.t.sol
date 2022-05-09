@@ -96,6 +96,7 @@ contract JBveBannyTests is TestBaseWorkflow {
     JBUnlockData[] memory unlocks = new JBUnlockData[](1);
     unlocks[0] = JBUnlockData(1, _projectOwner);
     _jbveBanny.unlock(unlocks);
+    assert(_jbveBanny.tokenVotingPowerAt(1, block.number) == 0);
     (int128 _amount, uint256 end, , , ) = _jbveBanny.locked(1);
     assertEq(_amount, 0);
     assertEq(end, 0);
