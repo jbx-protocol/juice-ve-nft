@@ -71,6 +71,24 @@ contract JBveBannyTests is TestBaseWorkflow {
     return _token;
   }
 
+  function mintIJBTokensFor(address _account, uint256 _amount) public returns (IJBToken) {
+    IJBToken _token = _jbTokenStore.tokenOf(_projectId);
+    _projectOwner = projectOwner();
+
+    evm.startPrank(_projectOwner);
+    // Mint tokens for project owner
+    _jbController.mintTokensOf(_projectId, _amount * 10, _projectOwner, 'Test Memo', true, true);
+    // Transfer tokens to account
+    _token.transfer(_projectId, _account, _amount);
+    evm.stopPrank();
+
+    // Approve accounts tokens for jbveBanny
+    evm.prank(_account);
+    _token.approve(_projectId, address(_jbveBanny), _amount);
+
+    return _token;
+  }
+
   function testLockWithJBToken() public {
     mintIJBTokens();
     _jbveBanny.lock(_projectOwner, 10 ether, 604800, _projectOwner, true, false);
@@ -300,5 +318,57 @@ contract JBveBannyTests is TestBaseWorkflow {
       assertEq(_historicVotingPower[_i], _votingPowerAtBlock);
       assert(_historicVotingPower[_i] > 0 && _votingPowerAtBlock > 0);
     }
+  }
+
+  function testVotingPowerGetsActivatedIfMintedForSelf() public {
+    address _user = address(0xf00ba6);
+    mintIJBTokensFor(_user, 5 ether);
+
+    // Check the users voting power before creating the new lock
+    uint256 _initialVotingPower = _jbveBanny.getVotes(_user);
+
+    // Lock the tokens
+    evm.prank(_user);
+    uint256 _tokenId = _jbveBanny.lock(_user, 5 ether, 604800, _user, true, false);
+
+    // Did the user receive the voting power
+    assert(_jbveBanny.getVotes(_user) - _initialVotingPower > 0);
+  }
+
+  function testVotingPowerDoesNotGetActivatedIfMintedForOtherUser() public {
+    address _user = address(0xf00ba6);
+    mintIJBTokensFor(_user, 5 ether);
+
+    // Check the users voting power before creating the new lock
+    uint256 _initialVotingPower = _jbveBanny.getVotes(_projectOwner);
+
+    // Lock the tokens
+    evm.prank(_user);
+    uint256 _tokenId = _jbveBanny.lock(_user, 5 ether, 604800, _projectOwner, true, false);
+
+    // The user should now have an increased voting power
+    assert(_jbveBanny.getVotes(_projectOwner) - _initialVotingPower == 0);
+  }
+
+  function testActivatingVotingPower() public {
+    address _user = address(0xf00ba6);
+    mintIJBTokensFor(_user, 5 ether);
+
+    // Check the users voting power before creating the new lock
+    uint256 _initialVotingPower = _jbveBanny.getVotes(_projectOwner);
+
+    // Lock the tokens
+    evm.prank(_user);
+    uint256 _tokenId = _jbveBanny.lock(_user, 5 ether, 604800, _projectOwner, true, false);
+
+    // There should be no change
+    assert(_jbveBanny.getVotes(_projectOwner) - _initialVotingPower == 0);
+
+    // As the benificiary enable the voting power of the token
+    evm.prank(_projectOwner);
+    _jbveBanny.activateVotingPower(_tokenId);
+
+    // Should now be higher
+    assert(_jbveBanny.getVotes(_projectOwner) - _initialVotingPower > 0);
   }
 }
