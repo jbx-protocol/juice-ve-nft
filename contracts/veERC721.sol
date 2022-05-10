@@ -59,7 +59,6 @@ abstract contract veERC721 is ERC721Enumerable, IVotes {
 
   /* ========== STATE VARIABLES ========== */
   address public token;
-  uint256 public supply;
 
   // The owners of a specific tokenId ordered by Time (old to new)
   mapping(uint256 => HistoricVotingPower[]) internal _historicVotingPower;
@@ -535,9 +534,6 @@ abstract contract veERC721 is ERC721Enumerable, IVotes {
     int128 _type
   ) private {
     LockedBalance memory _locked = locked_balance;
-    uint256 supply_before = supply;
-
-    supply = supply_before + _value;
     LockedBalance memory old_locked = _locked;
     // Adding to existing lock, or if a lock is expired - creating a new one
     _locked.amount += int128(int256(_value));
@@ -551,48 +547,6 @@ abstract contract veERC721 is ERC721Enumerable, IVotes {
     // value == 0 (extend lock) or value > 0 (add to lock or extend lock)
     // _locked.end > block.timestamp (always)
     _checkpoint(_tokenId, old_locked, _locked);
-  }
-
-  /**
-   * @notice Deposit and lock tokens
-   * @param _depositFrom The user to withdraw tokens from
-   * @param _tokenId The tokenID to lock for
-   * @param _value Amount to deposit
-   * @param unlock_time New time when to unlock the tokens, or 0 if unchanged
-   * @param locked_balance Previous locked amount / timestamp
-   */
-  function _deposit_for(
-    address _depositFrom,
-    uint256 _tokenId,
-    uint256 _value,
-    uint256 unlock_time,
-    LockedBalance memory locked_balance,
-    int128 _type
-  ) internal {
-    LockedBalance memory _locked = locked_balance;
-    uint256 supply_before = supply;
-
-    supply = supply_before + _value;
-    LockedBalance memory old_locked = _locked;
-    // Adding to existing lock, or if a lock is expired - creating a new one
-    _locked.amount += int128(int256(_value));
-    if (unlock_time != 0) {
-      _locked.end = unlock_time;
-    }
-    locked[_tokenId] = _locked;
-
-    // Possibilities:
-    // Both old_locked.end could be current or expired (>/< block.timestamp)
-    // value == 0 (extend lock) or value > 0 (add to lock or extend lock)
-    // _locked.end > block.timestamp (always)
-    _checkpoint(_tokenId, old_locked, _locked);
-
-    if (_value != 0) {
-      assert(IERC20(token).transferFrom(_depositFrom, address(this), _value));
-    }
-
-    emit Deposit(_depositFrom, _value, _locked.end, _type, block.timestamp);
-    emit Supply(supply_before, supply_before + _value);
   }
 
   // /**
@@ -789,14 +743,14 @@ abstract contract veERC721 is ERC721Enumerable, IVotes {
   /**
    * @dev Not supported by this contract, required for interface
    */
-  function delegates(address) external view override returns (address) {
+  function delegates(address) external pure override returns (address) {
     revert DelegationNotSupported();
   }
 
   /**
    * @dev Not supported by this contract, required for interface
    */
-  function delegate(address) external override {
+  function delegate(address) external pure override {
     revert DelegationNotSupported();
   }
 
@@ -810,20 +764,7 @@ abstract contract veERC721 is ERC721Enumerable, IVotes {
     uint8,
     bytes32,
     bytes32
-  ) external override {
+  ) external pure override {
     revert DelegationNotSupported();
   }
-
-  /* ========== EVENTS ========== */
-
-  event Recovered(address token, uint256 amount);
-  event Deposit(
-    address indexed provider,
-    uint256 value,
-    uint256 indexed locktime,
-    int128 _type,
-    uint256 ts
-  );
-  event Withdraw(address indexed provider, uint256 value, uint256 ts);
-  event Supply(uint256 prevSupply, uint256 supply);
 }
