@@ -549,33 +549,6 @@ abstract contract veERC721 is ERC721Enumerable, IVotes {
     _checkpoint(_tokenId, old_locked, _locked);
   }
 
-  // /**
-  //  * @notice Withdraw all tokens for a TokenId
-  //  * @dev Only possible if the lock has expired
-  //  */
-  // function _withdraw(uint256 _tokenId, address _recipient) internal {
-  //   LockedBalance memory _locked = locked[_tokenId];
-  //   require(block.timestamp >= _locked.end, 'The lock did not expire');
-  //   uint256 value = uint256(uint128(_locked.amount));
-
-  //   LockedBalance memory old_locked = _locked;
-  //   _locked.end = 0;
-  //   _locked.amount = 0;
-  //   locked[_tokenId] = _locked;
-  //   uint256 supply_before = supply;
-  //   supply = supply_before - value;
-
-  //   // old_locked can have either expired <= timestamp or zero end
-  //   // _locked has only 0 end
-  //   // Both can have >= 0 amount
-  //   _checkpoint(_tokenId, old_locked, _locked);
-
-  //   require(IERC20(token).transfer(_recipient, value));
-
-  //   emit Withdraw(_recipient, value, block.timestamp);
-  //   emit Supply(supply_before, supply_before - value);
-  // }
-
   function _newLock(uint256 _tokenId, LockedBalance memory _lock) internal {
     // round end date to nearest week
     _lock.end = (_lock.end / WEEK) * WEEK;

@@ -128,12 +128,12 @@ contract JBveBannyTests is TestBaseWorkflow {
     (, uint256 d, uint256 lockedUntil, , ) = _jbveBanny.getSpecs(_tokenId);
     assertEq(d, 604800);
     evm.warp(lockedUntil + 2);
-    uint votingPowerBeforeExtending = _jbveBanny.tokenVotingPowerAt(1, block.number);
+    uint256 votingPowerBeforeExtending = _jbveBanny.tokenVotingPowerAt(1, block.number);
 
     JBLockExtensionData[] memory extends = new JBLockExtensionData[](1);
     extends[0] = JBLockExtensionData(1, 2419200);
     _tokenId = _jbveBanny.extendLock(extends)[0];
-    uint votingPowerAfterExtending = _jbveBanny.tokenVotingPowerAt(1, block.number);
+    uint256 votingPowerAfterExtending = _jbveBanny.tokenVotingPowerAt(1, block.number);
     assert(votingPowerAfterExtending > votingPowerBeforeExtending);
     (, uint256 duration, , , ) = _jbveBanny.getSpecs(_tokenId);
     assertEq(duration, 2419200);
@@ -331,7 +331,7 @@ contract JBveBannyTests is TestBaseWorkflow {
 
     // Lock the tokens
     evm.prank(_user);
-    uint256 _tokenId = _jbveBanny.lock(_user, 5 ether, 604800, _user, true, false);
+    _jbveBanny.lock(_user, 5 ether, 604800, _user, true, false);
 
     // Did the user receive the voting power
     assert(_jbveBanny.getVotes(_user) - _initialVotingPower > 0);
@@ -346,7 +346,7 @@ contract JBveBannyTests is TestBaseWorkflow {
 
     // Lock the tokens
     evm.prank(_user);
-    uint256 _tokenId = _jbveBanny.lock(_user, 5 ether, 604800, _projectOwner, true, false);
+    _jbveBanny.lock(_user, 5 ether, 604800, _projectOwner, true, false);
 
     // The user should now have an increased voting power
     assert(_jbveBanny.getVotes(_projectOwner) - _initialVotingPower == 0);
