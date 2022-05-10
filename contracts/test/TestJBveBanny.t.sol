@@ -128,11 +128,13 @@ contract JBveBannyTests is TestBaseWorkflow {
     (, uint256 d, uint256 lockedUntil, , ) = _jbveBanny.getSpecs(_tokenId);
     assertEq(d, 604800);
     evm.warp(lockedUntil + 2);
+    uint votingPowerBeforeExtending = _jbveBanny.tokenVotingPowerAt(1, block.number);
 
     JBLockExtensionData[] memory extends = new JBLockExtensionData[](1);
     extends[0] = JBLockExtensionData(1, 2419200);
     _tokenId = _jbveBanny.extendLock(extends)[0];
-
+    uint votingPowerAfterExtending = _jbveBanny.tokenVotingPowerAt(1, block.number);
+    assert(votingPowerAfterExtending > votingPowerBeforeExtending);
     (, uint256 duration, , , ) = _jbveBanny.getSpecs(_tokenId);
     assertEq(duration, 2419200);
   }
