@@ -373,4 +373,39 @@ contract JBveBannyTests is TestBaseWorkflow {
     // Should now be higher
     assert(_jbveBanny.getVotes(_projectOwner) - _initialVotingPower > 0);
   }
+
+  function testVotingPowerGetsDisabledOnTransfer() public {
+    address _userA = address(0xf00);
+    address _userB = address(0xba6);
+    mintIJBTokensFor(_userA, 5 ether);
+
+    // Check the users voting power before creating the new lock
+    uint256 _initialVotingPower = _jbveBanny.getVotes(_userA);
+
+    // Lock the tokens and mint new NFT for user A
+    evm.prank(_userA);
+    uint256 _tokenId = _jbveBanny.lock(_userA, 5 ether, 604800, _userA, true, false);
+
+    // Get the new voting power of the user
+    uint256 _afterMintVotingPower = _jbveBanny.getVotes(_userA);
+
+    // UserA should have received voting power
+    assert(_afterMintVotingPower - _initialVotingPower > 0);
+
+    // Get the voting power of user B
+    uint256 _userBVotingPowerBeforeTransfer = _jbveBanny.getVotes(_userB);
+
+    // Have user A tranfer the token to user B
+    evm.prank(_userA);
+    _jbveBanny.safeTransferFrom(_userA, _userB, _tokenId);
+
+    // Get the updated voting powers for both users
+    uint256 _userAVotingPowerAfterTransfer = _jbveBanny.getVotes(_userA);
+    uint256 _userBVotingPowerAfterTransfer = _jbveBanny.getVotes(_userB);
+
+    // User A should now be back to the same voting power as before the mint
+    assertEq(_userAVotingPowerAfterTransfer, _initialVotingPower);
+    // User B's voting power should not have changed (since it needs to be activated manually)
+    assertEq(_userBVotingPowerAfterTransfer, _userBVotingPowerBeforeTransfer);
+  }
 }

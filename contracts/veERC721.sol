@@ -187,18 +187,33 @@ abstract contract veERC721 is ERC721Enumerable, IVotes {
       uint256 _tokenId = _receivedVotingPower[_account][_i];
       uint256 _count = _historicVotingPower[_tokenId].length;
 
-      // TODO: replace with binary search(?)
-      for (uint256 _j = _count; _j >= 1; _j--) {
-        HistoricVotingPower storage _voting_power = _historicVotingPower[_tokenId][_j - 1];
-        if (_voting_power.receivedAtBlock > _block) {
-          continue;
-        }
+      // Should never happen, but just in case
+      if (_count == 0) {
+        continue;
+      }
 
-        if (_voting_power.receivedAtBlock <= _block && _voting_power.account == _account) {
-          votingPower += tokenVotingPowerAt(_tokenId, _block);
+      // Use binary search to find the element
+      uint256 _min = 0;
+      uint256 _max = _count - 1;
+      for (uint256 i = 0; i < 128; i++) {
+        if (_min >= _max) {
+          break;
         }
+        uint256 _mid = (_min + _max + 1) / 2;
+        if (_historicVotingPower[_tokenId][_mid].receivedAtBlock <= _block) {
+          _min = _mid;
+        } else {
+          _max = _mid - 1;
+        }
+      }
 
-        break;
+      HistoricVotingPower storage _voting_power = _historicVotingPower[_tokenId][_min];
+      if (_voting_power.receivedAtBlock > _block) {
+        continue;
+      }
+
+      if (_voting_power.receivedAtBlock <= _block && _voting_power.account == _account) {
+        votingPower += tokenVotingPowerAt(_tokenId, _block);
       }
     }
   }
@@ -568,8 +583,6 @@ abstract contract veERC721 is ERC721Enumerable, IVotes {
     _locked.end = 0;
     _locked.amount = 0;
     locked[_tokenId] = _locked;
-
-    // TODO: Should we update supply?
 
     // old_locked can have either expired <= timestamp or zero end
     // _locked has only 0 end

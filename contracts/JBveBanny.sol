@@ -280,26 +280,27 @@ contract JBveBanny is veERC721, Ownable, ReentrancyGuard, JBOperatable {
   */
   function unlock(JBUnlockData[] calldata _unlockData) external nonReentrant {
     for (uint256 _i; _i < _unlockData.length; _i++) {
+      // Verify that the sender has permission to unlock this tokenId
       _requirePermission(ownerOf(_unlockData[_i].tokenId), projectId, JBStakingOperations.UNLOCK);
+
       // Get the specs for the token ID.
-      (uint256 _count, , uint256 _lockedUntil, bool _useJbToken, ) = getSpecs(
-        _unlockData[_i].tokenId
-      );
+      LockedBalance memory _lock = locked[_unlockData[_i].tokenId];
+      uint256 _amount = uint128(_lock.amount);
 
       // The lock must have expired.
-      if (block.timestamp <= _lockedUntil) revert LOCK_PERIOD_NOT_OVER();
+      if (block.timestamp <= _lock.end) revert LOCK_PERIOD_NOT_OVER();
 
       // Burn the token.
       _burn(_unlockData[_i].tokenId);
 
-      if (_useJbToken)
+      if (_lock.useJbToken)
         // Transfer the amount of locked tokens to beneficiary.
-        IJBToken(token).transfer(projectId, _unlockData[_i].beneficiary, _count);
+        IJBToken(token).transfer(projectId, _unlockData[_i].beneficiary, _amount);
         // Transfer the tokens from this contract.
-      else tokenStore.transferFrom(_unlockData[_i].beneficiary, projectId, address(this), _count);
+      else tokenStore.transferFrom(_unlockData[_i].beneficiary, projectId, address(this), _amount);
 
       // Emit event.
-      emit Unlock(_unlockData[_i].tokenId, _unlockData[_i].beneficiary, _count, msg.sender);
+      emit Unlock(_unlockData[_i].tokenId, _unlockData[_i].beneficiary, _amount, msg.sender);
     }
   }
 
@@ -399,7 +400,6 @@ contract JBveBanny is veERC721, Ownable, ReentrancyGuard, JBOperatable {
     for (uint256 _i; _i < _redeemData.length; _i++) {
       // Get a reference to the redeemItem being iterated.
       JBRedeemData memory _data = _redeemData[_i];
-
       // Get a reference to the owner of the position.
       address _owner = ownerOf(_data.tokenId);
       // Check if the msg.sender is either the position owner or is an operator.
