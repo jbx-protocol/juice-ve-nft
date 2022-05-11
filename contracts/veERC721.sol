@@ -35,27 +35,16 @@ pragma solidity 0.8.6;
 // 0 +--------+------> time
 //       maxtime (3 years?)
 
-import '@openzeppelin/contracts/token/ERC20/IERC20.sol';
-import '@openzeppelin/contracts/utils/Counters.sol';
 import '@openzeppelin/contracts/governance/utils/IVotes.sol';
-import '@openzeppelin/contracts/token/ERC721/ERC721.sol';
-import '@openzeppelin/contracts/security/ReentrancyGuard.sol';
-import '@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol';
 import '@openzeppelin/contracts/token/ERC721/extensions/ERC721Enumerable.sol';
 
-//*********************************************************************//
-// --------------------------- custom errors ------------------------- //
-//*********************************************************************//
-error INVALID_BLOCK();
-error NOT_OWNER();
-error LOCK_DURATION_NOT_OVER();
-error VOTING_POWER_ALREADY_ENABLED();
-
 abstract contract veERC721 is ERC721Enumerable, IVotes {
-  using SafeERC20 for IERC20;
-
   /* ========== CUSTOM ERRORS ========== */
-  error DelegationNotSupported();
+  error DELEGATION_NOT_SUPPORTED();
+  error INVALID_BLOCK();
+  error NOT_OWNER();
+  error LOCK_DURATION_NOT_OVER();
+  error VOTING_POWER_ALREADY_ENABLED();
 
   /* ========== STATE VARIABLES ========== */
   address public token;
@@ -67,15 +56,10 @@ abstract contract veERC721 is ERC721Enumerable, IVotes {
 
   uint256 public epoch;
   mapping(uint256 => LockedBalance) public locked;
-  Point[100000000000000000000000000000] public point_history; // epoch -> unsigned point
-  mapping(uint256 => Point[1000000000]) public token_point_history;
-  mapping(uint256 => uint256) public token_point_epoch;
-  mapping(uint256 => int128) public slope_changes; // time -> signed slope change
-
-  int128 public constant DEPOSIT_FOR_TYPE = 0;
-  int128 public constant CREATE_LOCK_TYPE = 1;
-  int128 public constant INCREASE_LOCK_AMOUNT = 2;
-  int128 public constant INCREASE_UNLOCK_TIME = 3;
+  Point[100000000000000000000000000000] public pointHistory; // epoch -> unsigned point
+  mapping(uint256 => Point[1000000000]) public tokenPointHistory;
+  mapping(uint256 => uint256) public tokenPointEpoch;
+  mapping(uint256 => int128) public slopeChanges; // time -> signed slope change
 
   uint256 public constant WEEK = 7 * 86400; // all future times are rounded by week
   uint256 public constant MAXTIME = 3 * 365 * 86400; // 3 years
@@ -111,57 +95,11 @@ abstract contract veERC721 is ERC721Enumerable, IVotes {
    * @param _symbol Nft symbol.
    */
   constructor(string memory _name, string memory _symbol) ERC721(_name, _symbol) {
-    point_history[0].blk = block.number;
-    point_history[0].ts = block.timestamp;
+    pointHistory[0].blk = block.number;
+    pointHistory[0].ts = block.timestamp;
   }
 
   /* ========== VIEWS ========== */
-
-  // Constant structs not allowed yet, so this will have to do
-  function EMPTY_POINT_FACTORY() internal pure returns (Point memory) {
-    return Point({bias: 0, slope: 0, ts: 0, blk: 0});
-  }
-
-  // Constant structs not allowed yet, so this will have to do
-  function EMPTY_LOCKED_BALANCE_FACTORY() internal pure returns (LockedBalance memory) {
-    return
-      LockedBalance({
-        amount: 0,
-        end: 0,
-        duration: 0,
-        useJbToken: false,
-        allowPublicExtension: false
-      });
-  }
-
-  /**
-   * @notice Get the most recently recorded rate of voting power decrease for `addr`
-   * @param _tokenId The token ID
-   * @return Value of the slope
-   */
-  function get_last_token_slope(uint256 _tokenId) external view returns (int128) {
-    uint256 tepoch = token_point_epoch[_tokenId];
-    return token_point_history[_tokenId][tepoch].slope;
-  }
-
-  /**
-   * @notice Get the timestamp for checkpoint `_idx` for `_addr`
-   * @param _tokenId The token ID
-   * @param _idx Tokens epoch number
-   * @return Epoch time of the checkpoint
-   */
-  function user_point_history__ts(uint256 _tokenId, uint256 _idx) external view returns (uint256) {
-    return token_point_history[_tokenId][_idx].ts;
-  }
-
-  /**
-   * @notice Get timestamp when `_addr`'s lock finishes
-   * @param _tokenId The token ID
-   * @return Epoch time of the lock end
-   */
-  function locked__end(uint256 _tokenId) external view returns (uint256) {
-    return locked[_tokenId].end;
-  }
 
   /**
     @notice Calculate the current voting power of an address
@@ -207,11 +145,8 @@ abstract contract veERC721 is ERC721Enumerable, IVotes {
         }
       }
 
+      // Check if `_account` owned the token at `_block`, if so calculate the voting power
       HistoricVotingPower storage _voting_power = _historicVotingPower[_tokenId][_min];
-      if (_voting_power.receivedAtBlock > _block) {
-        continue;
-      }
-
       if (_voting_power.receivedAtBlock <= _block && _voting_power.account == _account) {
         votingPower += tokenVotingPowerAt(_tokenId, _block);
       }
@@ -234,7 +169,7 @@ abstract contract veERC721 is ERC721Enumerable, IVotes {
 
     // Binary search
     uint256 _min = 0;
-    uint256 _max = token_point_epoch[_tokenId];
+    uint256 _max = tokenPointEpoch[_tokenId];
 
     // Will be always enough for 128-bit numbers
     for (uint256 i = 0; i < 128; i++) {
@@ -242,23 +177,23 @@ abstract contract veERC721 is ERC721Enumerable, IVotes {
         break;
       }
       uint256 _mid = (_min + _max + 1) / 2;
-      if (token_point_history[_tokenId][_mid].blk <= _block) {
+      if (tokenPointHistory[_tokenId][_mid].blk <= _block) {
         _min = _mid;
       } else {
         _max = _mid - 1;
       }
     }
 
-    Point memory upoint = token_point_history[_tokenId][_min];
+    Point memory upoint = tokenPointHistory[_tokenId][_min];
 
     uint256 max_epoch = epoch;
-    uint256 _epoch = find_block_epoch(_block, max_epoch);
-    Point memory point_0 = point_history[_epoch];
+    uint256 _epoch = _findBlockEpoch(_block, max_epoch);
+    Point memory point_0 = pointHistory[_epoch];
     uint256 d_block = 0;
     uint256 d_t = 0;
 
     if (_epoch < max_epoch) {
-      Point memory point_1 = point_history[_epoch + 1];
+      Point memory point_1 = pointHistory[_epoch + 1];
       d_block = point_1.blk - point_0.blk;
       d_t = point_1.ts - point_0.ts;
     } else {
@@ -289,13 +224,13 @@ abstract contract veERC721 is ERC721Enumerable, IVotes {
       revert INVALID_BLOCK();
     }
     uint256 _epoch = epoch;
-    uint256 target_epoch = find_block_epoch(_block, _epoch);
+    uint256 target_epoch = _findBlockEpoch(_block, _epoch);
 
-    Point memory point = point_history[target_epoch];
+    Point memory point = pointHistory[target_epoch];
     uint256 dt = 0;
 
     if (target_epoch < _epoch) {
-      Point memory point_next = point_history[target_epoch + 1];
+      Point memory point_next = pointHistory[target_epoch + 1];
       if (point.blk != point_next.blk) {
         dt = ((_block - point.blk) * (point_next.ts - point.ts)) / (point_next.blk - point.blk);
       }
@@ -306,7 +241,7 @@ abstract contract veERC721 is ERC721Enumerable, IVotes {
     }
 
     // Now dt contains info on how far are we beyond point
-    return supply_at(point, point.ts + dt);
+    return _supplyAt(point, point.ts + dt);
   }
 
   /* ========== INTERNAL FUNCTIONS ========== */
@@ -349,8 +284,8 @@ abstract contract veERC721 is ERC721Enumerable, IVotes {
     LockedBalance memory old_locked,
     LockedBalance memory new_locked
   ) internal {
-    Point memory u_old = EMPTY_POINT_FACTORY();
-    Point memory u_new = EMPTY_POINT_FACTORY();
+    Point memory u_old = _newEmptyPoint();
+    Point memory u_new = _newEmptyPoint();
     int128 old_dslope = 0;
     int128 new_dslope = 0;
     uint256 _epoch = epoch;
@@ -375,19 +310,19 @@ abstract contract veERC721 is ERC721Enumerable, IVotes {
       // Read values of scheduled changes in the slope
       // old_locked.end can be in the past and in the future
       // new_locked.end can ONLY by in the FUTURE unless everything expired: than zeros
-      old_dslope = slope_changes[old_locked.end];
+      old_dslope = slopeChanges[old_locked.end];
       if (new_locked.end != 0) {
         if (new_locked.end == old_locked.end) {
           new_dslope = old_dslope;
         } else {
-          new_dslope = slope_changes[new_locked.end];
+          new_dslope = slopeChanges[new_locked.end];
         }
       }
     }
 
     Point memory last_point = Point({bias: 0, slope: 0, ts: block.timestamp, blk: block.number});
     if (_epoch > 0) {
-      last_point = point_history[_epoch];
+      last_point = pointHistory[_epoch];
     }
     uint256 last_checkpoint = last_point.ts;
 
@@ -415,7 +350,7 @@ abstract contract veERC721 is ERC721Enumerable, IVotes {
       if (t_i > block.timestamp) {
         t_i = block.timestamp;
       } else {
-        d_slope = slope_changes[t_i];
+        d_slope = slopeChanges[t_i];
       }
       last_point.bias -= last_point.slope * (int128(int256(t_i)) - int128(int256(last_checkpoint)));
       last_point.slope += d_slope;
@@ -436,12 +371,12 @@ abstract contract veERC721 is ERC721Enumerable, IVotes {
         last_point.blk = block.number;
         break;
       } else {
-        point_history[_epoch] = last_point;
+        pointHistory[_epoch] = last_point;
       }
     }
 
     epoch = _epoch;
-    // Now point_history is filled until t=now
+    // Now pointHistory is filled until t=now
 
     if (_tokenId != 0) {
       // If last point was in this block, the slope change has been applied already
@@ -457,7 +392,7 @@ abstract contract veERC721 is ERC721Enumerable, IVotes {
     }
 
     // Record the changed point into history
-    point_history[_epoch] = last_point;
+    pointHistory[_epoch] = last_point;
 
     if (_tokenId != 0) {
       // Schedule the slope changes (slope is going down)
@@ -469,20 +404,20 @@ abstract contract veERC721 is ERC721Enumerable, IVotes {
         if (new_locked.end == old_locked.end) {
           old_dslope -= u_new.slope; // It was a new deposit, not extension
         }
-        slope_changes[old_locked.end] = old_dslope;
+        slopeChanges[old_locked.end] = old_dslope;
       }
 
       if (new_locked.end > block.timestamp) {
         if (new_locked.end > old_locked.end) {
           new_dslope -= u_new.slope; // old slope disappeared at this point
-          slope_changes[new_locked.end] = new_dslope;
+          slopeChanges[new_locked.end] = new_dslope;
         }
         // else: we recorded it already in old_dslope
       }
 
       // Now handle user history
       // Second function needed for 'stack too deep' issues
-      _checkpoint_part_two(_tokenId, u_new.bias, u_new.slope);
+      _checkpointPartTwo(_tokenId, u_new.bias, u_new.slope);
     }
   }
 
@@ -492,15 +427,15 @@ abstract contract veERC721 is ERC721Enumerable, IVotes {
    * @param _bias from unew
    * @param _slope from unew
    */
-  function _checkpoint_part_two(
+  function _checkpointPartTwo(
     uint256 _tokenId,
     int128 _bias,
     int128 _slope
   ) internal {
-    uint256 token_epoch = token_point_epoch[_tokenId] + 1;
+    uint256 token_epoch = tokenPointEpoch[_tokenId] + 1;
 
-    token_point_epoch[_tokenId] = token_epoch;
-    token_point_history[_tokenId][token_epoch] = Point({
+    tokenPointEpoch[_tokenId] = token_epoch;
+    tokenPointHistory[_tokenId][token_epoch] = Point({
       bias: _bias,
       slope: _slope,
       ts: block.timestamp,
@@ -530,7 +465,7 @@ abstract contract veERC721 is ERC721Enumerable, IVotes {
     // Update the duration for the UI and uriresolver
     _currentLock.duration = _duration;
     // Checkpoint the lock and calculate new slope and bias
-    _modifyLock(_tokenId, 0, _end, _currentLock, INCREASE_UNLOCK_TIME);
+    _modifyLock(_tokenId, 0, _end, _currentLock);
   }
 
   /**
@@ -545,8 +480,7 @@ abstract contract veERC721 is ERC721Enumerable, IVotes {
     uint256 _tokenId,
     uint256 _value,
     uint256 unlock_time,
-    LockedBalance memory locked_balance,
-    int128 _type
+    LockedBalance memory locked_balance
   ) private {
     LockedBalance memory _locked = locked_balance;
     LockedBalance memory old_locked = _locked;
@@ -564,10 +498,29 @@ abstract contract veERC721 is ERC721Enumerable, IVotes {
     _checkpoint(_tokenId, old_locked, _locked);
   }
 
+  // Constant structs not allowed yet, so this will have to do
+  function _newEmptyPoint() internal pure returns (Point memory) {
+    return Point({bias: 0, slope: 0, ts: 0, blk: 0});
+  }
+
+  // Constant structs not allowed yet, so this will have to do
+  function _newEmptyLockedBalance() internal pure returns (LockedBalance memory) {
+    return
+      LockedBalance({
+        amount: 0,
+        end: 0,
+        duration: 0,
+        useJbToken: false,
+        allowPublicExtension: false
+      });
+  }
+
   function _newLock(uint256 _tokenId, LockedBalance memory _lock) internal {
     // round end date to nearest week
     _lock.end = (_lock.end / WEEK) * WEEK;
 
+    // Should be a zeroed struct,
+    // but if it (somehow) exists checkpoint will update the lock
     LockedBalance memory _old_lock = locked[_tokenId];
     locked[_tokenId] = _lock;
 
@@ -601,7 +554,7 @@ abstract contract veERC721 is ERC721Enumerable, IVotes {
    * @param max_epoch Don't go beyond this epoch
    * @return Approximate timestamp for block
    */
-  function find_block_epoch(uint256 _block, uint256 max_epoch) internal view returns (uint256) {
+  function _findBlockEpoch(uint256 _block, uint256 max_epoch) internal view returns (uint256) {
     // Binary search
     uint256 _min = 0;
     uint256 _max = max_epoch;
@@ -612,7 +565,7 @@ abstract contract veERC721 is ERC721Enumerable, IVotes {
         break;
       }
       uint256 _mid = (_min + _max + 1) / 2;
-      if (point_history[_mid].blk <= _block) {
+      if (pointHistory[_mid].blk <= _block) {
         _min = _mid;
       } else {
         _max = _mid - 1;
@@ -628,7 +581,7 @@ abstract contract veERC721 is ERC721Enumerable, IVotes {
    * @param t Time to calculate the total voting power at
    * @return Total voting power at that time
    */
-  function supply_at(Point memory point, uint256 t) internal view returns (uint256) {
+  function _supplyAt(Point memory point, uint256 t) internal view returns (uint256) {
     Point memory last_point = point;
     uint256 t_i = (last_point.ts / WEEK) * WEEK;
 
@@ -638,7 +591,7 @@ abstract contract veERC721 is ERC721Enumerable, IVotes {
       if (t_i > t) {
         t_i = t;
       } else {
-        d_slope = slope_changes[t_i];
+        d_slope = slopeChanges[t_i];
       }
       last_point.bias -= last_point.slope * (int128(int256(t_i)) - int128(int256(last_point.ts)));
       if (t_i == t) {
@@ -723,21 +676,21 @@ abstract contract veERC721 is ERC721Enumerable, IVotes {
    * @notice Record global data to checkpoint
    */
   function checkpoint() external {
-    _checkpoint(0, EMPTY_LOCKED_BALANCE_FACTORY(), EMPTY_LOCKED_BALANCE_FACTORY());
+    _checkpoint(0, _newEmptyLockedBalance(), _newEmptyLockedBalance());
   }
 
   /**
    * @dev Not supported by this contract, required for interface
    */
   function delegates(address) external pure override returns (address) {
-    revert DelegationNotSupported();
+    revert DELEGATION_NOT_SUPPORTED();
   }
 
   /**
    * @dev Not supported by this contract, required for interface
    */
   function delegate(address) external pure override {
-    revert DelegationNotSupported();
+    revert DELEGATION_NOT_SUPPORTED();
   }
 
   /**
@@ -751,6 +704,6 @@ abstract contract veERC721 is ERC721Enumerable, IVotes {
     bytes32,
     bytes32
   ) external pure override {
-    revert DelegationNotSupported();
+    revert DELEGATION_NOT_SUPPORTED();
   }
 }

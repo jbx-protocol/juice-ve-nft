@@ -232,6 +232,7 @@ contract JBveBanny is veERC721, Ownable, ReentrancyGuard, JBOperatable {
       revert JBErrors.INSUFFICIENT_BALANCE();
 
     // Increment the number of ve positions that have been minted.
+    // Has to start at 1, since 0 is the id for non-token global checkpoints
     tokenId = ++count;
 
     // Calculate the time when this lock will end (in seconds).
