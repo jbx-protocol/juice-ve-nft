@@ -138,8 +138,8 @@ contract JBveBanny is veERC721, Ownable, ReentrancyGuard, JBOperatable {
     @return dynamic uri based on the svg logic for that particular banny
   */
   function tokenURI(uint256 _tokenId) public view override returns (string memory) {
-    (uint256 _count, uint256 _duration, uint256 _lockedUntil, , ) = getSpecs(_tokenId);
-    return uriResolver.tokenURI(_tokenId, _count, _duration, _lockedUntil, _lockDurationOptions);
+    (uint256 _amount, uint256 _duration, uint256 _lockedUntil, , ) = getSpecs(_tokenId);
+    return uriResolver.tokenURI(_tokenId, _amount, _duration, _lockedUntil, _lockDurationOptions);
   }
 
   /**
@@ -193,7 +193,7 @@ contract JBveBanny is veERC721, Ownable, ReentrancyGuard, JBOperatable {
     Only an account or a designated operator can lock its tokens.
     
     @param _account JBToken Holder.
-    @param _count Lock Amount.
+    @param _amount Lock Amount.
     @param _duration Lock time in seconds.
     @param _beneficiary Address to mint the banny.
     @param _useJbToken A flag indicating if JBtokens are being locked. If false, unclaimed project tokens from the JBTokenStore will be locked.
@@ -203,7 +203,7 @@ contract JBveBanny is veERC721, Ownable, ReentrancyGuard, JBOperatable {
   */
   function lock(
     address _account,
-    uint256 _count,
+    uint256 _amount,
     uint256 _duration,
     address _beneficiary,
     bool _useJbToken,
@@ -225,12 +225,6 @@ contract JBveBanny is veERC721, Ownable, ReentrancyGuard, JBOperatable {
     // Duration must match.
     if (!_isLockDurationAcceptable(_duration)) revert JBErrors.INVALID_LOCK_DURATION();
 
-    // Make sure the token balance of the account is enough to lock the specified _count of tokens.
-    if (_useJbToken && IJBToken(token).balanceOf(_account, projectId) < _count)
-      revert JBErrors.INSUFFICIENT_BALANCE();
-    else if (!_useJbToken && tokenStore.unclaimedBalanceOf(_account, projectId) < _count)
-      revert JBErrors.INSUFFICIENT_BALANCE();
-
     // Increment the number of ve positions that have been minted.
     // Has to start at 1, since 0 is the id for non-token global checkpoints
     tokenId = ++count;
@@ -240,7 +234,7 @@ contract JBveBanny is veERC721, Ownable, ReentrancyGuard, JBOperatable {
     _newLock(
       tokenId,
       LockedBalance(
-        int128(int256(_count)),
+        int128(int256(_amount)),
         block.timestamp + _duration,
         _duration,
         _useJbToken,
@@ -261,13 +255,13 @@ contract JBveBanny is veERC721, Ownable, ReentrancyGuard, JBOperatable {
     if (_useJbToken)
       // Transfer the token to this contract where they'll be locked.
       // Will revert if not enough allowance.
-      IJBToken(token).transferFrom(projectId, msg.sender, address(this), _count);
+      IJBToken(token).transferFrom(projectId, msg.sender, address(this), _amount);
       // Transfer the token to this contract where they'll be locked.
       // Will revert if this contract isn't an opperator.
-    else tokenStore.transferFrom(msg.sender, projectId, address(this), _count);
+    else tokenStore.transferFrom(msg.sender, projectId, address(this), _amount);
 
     // Emit event.
-    emit Lock(tokenId, _account, _count, _duration, _beneficiary, _lockedUntil, msg.sender);
+    emit Lock(tokenId, _account, _amount, _duration, _beneficiary, _lockedUntil, msg.sender);
   }
 
   /**

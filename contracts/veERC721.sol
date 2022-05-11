@@ -47,8 +47,11 @@ abstract contract veERC721 is ERC721Enumerable, IVotes {
   error VOTING_POWER_ALREADY_ENABLED();
 
   /* ========== STATE VARIABLES ========== */
+  /** 
+    @notice 
+    jbx token address
+  */
   address public token;
-
   // The owners of a specific tokenId ordered by Time (old to new)
   mapping(uint256 => HistoricVotingPower[]) internal _historicVotingPower;
   // All the tokens an address has received voting power from at some point in time
