@@ -147,7 +147,7 @@ contract JBveBannyTests is TestBaseWorkflow {
 
   function testScenarioWithInsufficientBalance() public {
     mintIJBTokens();
-    evm.expectRevert(abi.encodeWithSignature('INSUFFICIENT_BALANCE()'));
+    evm.expectRevert('ERC20: transfer amount exceeds allowance');
     _jbveBanny.lock(_projectOwner, 101 ether, 604800, _projectOwner, true, false);
   }
 
