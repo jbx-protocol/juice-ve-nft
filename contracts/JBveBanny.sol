@@ -99,15 +99,15 @@ contract JBveBanny is veERC721, Ownable, ReentrancyGuard, JBOperatable {
 
   /** 
     @notice 
-    Token URI Resolver Instance
+    The JBTokenStore where unclaimed tokens are accounted for.
   */
-  IJBVeTokenUriResolver public uriResolver;
+  IJBTokenStore public immutable tokenStore;
 
   /** 
     @notice 
-    The JBTokenStore where unclaimed tokens are accounted for.
+    Token URI Resolver Instance
   */
-  IJBTokenStore public tokenStore;
+  IJBVeTokenUriResolver public uriResolver;
 
   /** 
     @notice 
