@@ -1,5 +1,7 @@
 const { ethers } = require('hardhat');
 
+const DAY = 864000; // Day in seconds
+
 /**
  * Deploys the JBX STaking Contracts.
  *
@@ -51,11 +53,13 @@ module.exports = async ({ getNamedAccounts, deployments, getChainId }) => {
       tokenStore,  // token store
       operatorStore,  // operator store
 
-      // Durations (currently placeholders)
+      // Durations
       [
-        604800,
-        2419200,
-        7257600,
+        DAY * 10,
+        DAY * 50,
+        DAY * 100,
+        DAY * 500,
+        DAY * 1000,
       ]
     ],
   });
