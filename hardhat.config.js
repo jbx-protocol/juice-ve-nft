@@ -29,6 +29,15 @@ const infuraId = process.env.INFURA_ID;
 module.exports = {
   defaultNetwork,
   networks: {
+    hardhat: {
+      forking: {
+        url: "https://rinkeby.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161",
+      },
+      allowUnlimitedContractSize: true,
+      blockGasLimit: 0x1fffffffffffff,
+      gasPrice: 50000000000,
+      chainId: 4,
+    },
     localhost: {
       url: 'http://localhost:8545',
       blockGasLimit: 0x1fffffffffffff,

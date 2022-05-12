@@ -65,7 +65,7 @@ abstract contract veERC721 is ERC721Enumerable, IVotes {
   mapping(uint256 => int128) public slopeChanges; // time -> signed slope change
 
   uint256 public constant WEEK = 7 * 86400; // all future times are rounded by week
-  uint256 public constant MAXTIME = 3 * 365 * 86400; // 3 years
+  int128 public constant MAXTIME = 3 * 365 * 86400; // 3 years
   uint256 public constant MULTIPLIER = 10**18;
 
   // We cannot really do block numbers per se b/c slope is per time, not per block
@@ -297,14 +297,14 @@ abstract contract veERC721 is ERC721Enumerable, IVotes {
       // Calculate slopes and biases
       // Kept at zero when they have to
       if ((old_locked.end > block.timestamp) && (old_locked.amount > 0)) {
-        u_old.slope = old_locked.amount / int128(int256(MAXTIME));
+        u_old.slope = old_locked.amount / MAXTIME;
         u_old.bias =
           u_old.slope *
           (int128(int256(old_locked.end)) - int128(int256(block.timestamp)));
       }
 
       if ((new_locked.end > block.timestamp) && (new_locked.amount > 0)) {
-        u_new.slope = new_locked.amount / int128(int256(MAXTIME));
+        u_new.slope = new_locked.amount / MAXTIME;
         u_new.bias =
           u_new.slope *
           (int128(int256(new_locked.end)) - int128(int256(block.timestamp)));

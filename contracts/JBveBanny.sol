@@ -177,8 +177,9 @@ contract JBveBanny is veERC721, Ownable, ReentrancyGuard, JBOperatable {
     _lockDurationOptions = __lockDurationOptions;
 
     // Make sure no durationOption is longer than the max time
+    uint256 _maxTime = uint256(uint128(MAXTIME));
     for (uint256 _i; _i < _lockDurationOptions.length; _i++)
-      if (_lockDurationOptions[_i] > MAXTIME) revert EXCEEDS_MAX_LOCK_DURATION();
+      if (_lockDurationOptions[_i] > _maxTime) revert EXCEEDS_MAX_LOCK_DURATION();
   }
 
   //*********************************************************************//
