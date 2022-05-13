@@ -1,6 +1,6 @@
 const { ethers } = require('hardhat');
 
-const DAY = 864000; // Day in seconds
+const DAY = 86400; // Day in seconds
 
 /**
  * Deploys the JBX STaking Contracts.
@@ -43,27 +43,45 @@ module.exports = async ({ getNamedAccounts, deployments, getChainId }) => {
 
   const uriResolver = await deploy('JBVeTokenUriResolver', baseDeployArgs)
 
+  const veBannyArgs = [
+    1, // project id
+    'veBanny', // name
+    'veJBX',  // symbol
+    uriResolver.address,  // uri resolver
+    tokenStore,  // token store
+    operatorStore,  // operator store
+
+    // Durations
+    [
+      DAY * 10,
+      DAY * 50,
+      DAY * 100,
+      DAY * 500,
+      DAY * 1000,
+    ]
+  ];
+
   const veBanny = await deploy('JBveBanny', {
     ...baseDeployArgs,
-    args: [
-      1, // project id
-      'veBanny', // name
-      'veJBX',  // symbol
-      uriResolver.address,  // uri resolver
-      tokenStore,  // token store
-      operatorStore,  // operator store
-
-      // Durations
-      [
-        DAY * 10,
-        DAY * 50,
-        DAY * 100,
-        DAY * 500,
-        DAY * 1000,
-      ]
-    ],
+    args: veBannyArgs,
   });
 
   console.log({ veBanny: veBanny.address, uriResolver: uriResolver.address });
 
+  console.log("Waiting 60 seconds before verifying contracts on Etherscan...");
+  await new Promise(r => setTimeout(r, 60000));
+
+  // Verify UriResolver
+  await hre.run("verify:verify", {
+    address: uriResolver.address,
+    constructorArguments: [],
+  });
+
+  await new Promise(r => setTimeout(r, 10000));
+
+  // Verify veBanny
+  await hre.run("verify:verify", {
+    address: veBanny.address,
+    constructorArguments: veBannyArgs,
+  });
 };
