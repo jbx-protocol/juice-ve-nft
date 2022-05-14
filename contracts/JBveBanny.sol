@@ -127,6 +127,14 @@ contract JBveBanny is veERC721, Ownable, ReentrancyGuard, JBOperatable {
   }
 
   /**
+    @notice
+    provides the metadata for the storefront
+  */
+  function contractURI() public view returns (string memory) {
+    return uriResolver.contractURI();
+  }
+
+  /**
     @notice 
     Computes the metadata url based on the id.
 

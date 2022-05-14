@@ -13,7 +13,7 @@ contract JBVeTokenUriResolver is IJBVeTokenUriResolver {
     @notice
     provides the metadata for the storefront
   */
-  function contractURI() public pure returns (string memory) {
+  function contractURI() public pure override returns (string memory) {
     return 'https://metadata-url.com/my-metadata';
   }
 
