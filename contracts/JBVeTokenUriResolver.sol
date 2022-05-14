@@ -1,15 +1,21 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.6;
 
-import '@openzeppelin/contracts/utils/math/SafeMath.sol';
 import '@openzeppelin/contracts/utils/Strings.sol';
 
 import './interfaces/IJBVeTokenUriResolver.sol';
 import './libraries/JBErrors.sol';
 
-
 contract JBVeTokenUriResolver is IJBVeTokenUriResolver {
-  using SafeMath for uint256;
+  uint8 public constant decimals = 18;
+
+  /**
+    @notice
+    provides the metadata for the storefront
+  */
+  function contractURI() public pure returns (string memory) {
+    return 'https://metadata-url.com/my-metadata';
+  }
 
   /** 
     @notice 
@@ -58,7 +64,10 @@ contract JBVeTokenUriResolver is IJBVeTokenUriResolver {
     @return The token range index or veBanny character commensurate with amount of locked Juicebox.
   */
   function _getTokenRange(uint256 _amount) private pure returns (uint256) {
-    if (_amount >= 1 && _amount <= 100) {
+    // Reduce amount to exclude decimals
+    _amount = _amount / 10**decimals;
+
+    if (_amount <= 100) {
       return 1;
     } else if (_amount >= 101 && _amount <= 200) {
       return 2;
