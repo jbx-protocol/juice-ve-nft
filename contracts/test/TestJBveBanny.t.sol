@@ -165,11 +165,8 @@ contract JBveBannyTests is TestBaseWorkflow {
 
     uint balBefore = _jbTokenStore.balanceOf(_projectOwner, _projectId);
 
-    emit log_uint(_token.balanceOf(_projectOwner, _projectId));
     evm.prank(_projectOwner);
-
     _jbveBanny.redeem(redeems);
-    emit log_uint(_token.balanceOf(_projectOwner, _projectId));
     uint balAfter = _jbTokenStore.balanceOf(_projectOwner, _projectId);
     assert(balAfter < balBefore);
     
