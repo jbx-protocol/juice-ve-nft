@@ -18,3 +18,7 @@ coverage.json
 
 # VSCode
 workspace.code-workspace
+
+# Foundry
+out
+cache

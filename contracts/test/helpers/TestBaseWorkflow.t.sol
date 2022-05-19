@@ -259,7 +259,7 @@ abstract contract TestBaseWorkflow is DSTest {
 
     _metadata = JBFundingCycleMetadata({
       reservedRate: _reservedRate,
-      redemptionRate: 5000,
+      redemptionRate: JBConstants.MAX_REDEMPTION_RATE,
       ballotRedemptionRate: 0,
       pausePay: false,
       pauseDistributions: false,
@@ -296,20 +296,20 @@ abstract contract TestBaseWorkflow is DSTest {
     evm.stopPrank();
   }
 
-  function testPay() public {
-    evm.startPrank(_projectOwner);
-    _jbERC20PaymentTerminal.pay(
-      _projectId,
-      20 * 10**18,
-      address(0),
-      _projectOwner,
-      1,
-      false,
-      'Forge test',
-      new bytes(0)
-    ); // funding target met and 10 token are now in the overflow
-    assert(_jbTokenStore.balanceOf(_projectOwner, _projectId) > 0);
-  }
+  // function testPay() public {
+  //   evm.startPrank(_projectOwner);
+  //   _jbERC20PaymentTerminal.pay(
+  //     _projectId,
+  //     20 * 10**18,
+  //     address(0),
+  //     _projectOwner,
+  //     1,
+  //     false,
+  //     'Forge test',
+  //     new bytes(0)
+  //   ); // funding target met and 10 token are now in the overflow
+  //   assert(_jbTokenStore.balanceOf(_projectOwner, _projectId) > 0);
+  // }
 
   //https://ethereum.stackexchange.com/questions/24248/how-to-calculate-an-ethereum-contracts-address-during-its-creation-using-the-so
   function addressFrom(address _origin, uint256 _nonce) internal pure returns (address _address) {
