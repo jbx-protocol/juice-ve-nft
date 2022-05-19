@@ -193,7 +193,6 @@ abstract contract TestBaseWorkflow is DSTest {
 
     evm.prank(_multisig);
     _jbToken = new JBToken('MyToken', 'MT');
-
     evm.prank(_multisig);
     _jbToken.mint(0, _multisig, 100 * 10**18);
 
@@ -213,8 +212,20 @@ abstract contract TestBaseWorkflow is DSTest {
       _jbPaymentTerminalStore,
       _multisig
     );
-
     evm.startPrank(_projectOwner);
+    _jbToken.approve(address(_jbERC20PaymentTerminal), 20 * 10**18);
+
+    _fundAccessConstraints.push(
+      JBFundAccessConstraints({
+        terminal: _jbERC20PaymentTerminal,
+        token: address(_jbToken),
+        distributionLimit: 10 * 10**18,
+        overflowAllowance: 5 * 10**18,
+        distributionLimitCurrency: _accessJBLib.ETH(),
+        overflowAllowanceCurrency: _accessJBLib.ETH()
+      })
+    );
+
     _jbDirectory.setIsAllowedToSetFirstController(address(_jbController), true);
 
     // JBETHPaymentTerminal
@@ -230,8 +241,9 @@ abstract contract TestBaseWorkflow is DSTest {
         _multisig
       )
     );
-
+    _terminals.push(_jbERC20PaymentTerminal);
     evm.stopPrank();
+
     // JBVeTokenUriResolver
     _jbveTokenUriResolver = new JBVeTokenUriResolver();
 
@@ -277,12 +289,26 @@ abstract contract TestBaseWorkflow is DSTest {
       _terminals,
       ''
     );
-
-    // calls will originate from projectOwner addr
-    evm.startPrank(_projectOwner);
     // issue an ERC-20 token for project
+    evm.startPrank(_projectOwner);
     _jbController.issueTokenFor(_projectId, 'TestName', 'TestSymbol');
+
     evm.stopPrank();
+  }
+
+  function testPay() public {
+    evm.startPrank(_projectOwner);
+    _jbERC20PaymentTerminal.pay(
+      _projectId,
+      20 * 10**18,
+      address(0),
+      _projectOwner,
+      1,
+      false,
+      'Forge test',
+      new bytes(0)
+    ); // funding target met and 10 token are now in the overflow
+    assert(_jbTokenStore.balanceOf(_projectOwner, _projectId) > 0);
   }
 
   //https://ethereum.stackexchange.com/questions/24248/how-to-calculate-an-ethereum-contracts-address-during-its-creation-using-the-so
