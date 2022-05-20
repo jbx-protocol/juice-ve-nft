@@ -20,19 +20,31 @@
               "type": "uint256"
             },
             {
-              "internalType": "address",
-              "name": "token",
-              "type": "address"
-            },
-            {
-              "internalType": "uint256",
+              "components": [
+                {
+                  "internalType": "address",
+                  "name": "token",
+                  "type": "address"
+                },
+                {
+                  "internalType": "uint256",
+                  "name": "value",
+                  "type": "uint256"
+                },
+                {
+                  "internalType": "uint256",
+                  "name": "decimals",
+                  "type": "uint256"
+                },
+                {
+                  "internalType": "uint256",
+                  "name": "currency",
+                  "type": "uint256"
+                }
+              ],
+              "internalType": "struct JBTokenAmount",
               "name": "reclaimedAmount",
-              "type": "uint256"
-            },
-            {
-              "internalType": "uint256",
-              "name": "decimals",
-              "type": "uint256"
+              "type": "tuple"
             },
             {
               "internalType": "address payable",
@@ -51,13 +63,32 @@
             }
           ],
           "internalType": "struct JBDidRedeemData",
-          "name": "_param",
+          "name": "_data",
           "type": "tuple"
         }
       ],
       "name": "didRedeem",
       "outputs": [],
       "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes4",
+          "name": "interfaceId",
+          "type": "bytes4"
+        }
+      ],
+      "name": "supportsInterface",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "view",
       "type": "function"
     }
   ],
@@ -70,5 +101,157 @@
     "object": "0x",
     "sourceMap": "",
     "linkReferences": {}
+  },
+  "ast": {
+    "absolutePath": "/Users/mark.phillips/Developer/juicebox/jbx-staking/node_modules/@jbx-protocol/contracts-v2/contracts/interfaces/IJBRedemptionDelegate.sol",
+    "id": 16950,
+    "exportedSymbols": {
+      "IERC165": [
+        23041
+      ],
+      "IJBRedemptionDelegate": [
+        16949
+      ],
+      "JBDidRedeemData": [
+        18397
+      ],
+      "JBTokenAmount": [
+        18630
+      ]
+    },
+    "nodeType": "SourceUnit",
+    "src": "32:244:47",
+    "nodes": [
+      {
+        "id": 16938,
+        "nodeType": "PragmaDirective",
+        "src": "32:22:47",
+        "literals": [
+          "solidity",
+          "0.8",
+          ".6"
+        ]
+      },
+      {
+        "id": 16939,
+        "nodeType": "ImportDirective",
+        "src": "56:65:47",
+        "absolutePath": "/Users/mark.phillips/Developer/juicebox/jbx-staking/node_modules/@openzeppelin/contracts/utils/introspection/IERC165.sol",
+        "file": "@openzeppelin/contracts/utils/introspection/IERC165.sol",
+        "nameLocation": "-1:-1:-1",
+        "scope": 16950,
+        "sourceUnit": 23042,
+        "symbolAliases": [],
+        "unitAlias": ""
+      },
+      {
+        "id": 16940,
+        "nodeType": "ImportDirective",
+        "src": "122:42:47",
+        "absolutePath": "/Users/mark.phillips/Developer/juicebox/jbx-staking/node_modules/@jbx-protocol/contracts-v2/contracts/structs/JBDidRedeemData.sol",
+        "file": "./../structs/JBDidRedeemData.sol",
+        "nameLocation": "-1:-1:-1",
+        "scope": 16950,
+        "sourceUnit": 18398,
+        "symbolAliases": [],
+        "unitAlias": ""
+      },
+      {
+        "id": 16949,
+        "nodeType": "ContractDefinition",
+        "src": "166:109:47",
+        "nodes": [
+          {
+            "id": 16948,
+            "nodeType": "FunctionDefinition",
+            "src": "213:60:47",
+            "functionSelector": "43e1db27",
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "didRedeem",
+            "nameLocation": "222:9:47",
+            "parameters": {
+              "id": 16946,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 16945,
+                  "mutability": "mutable",
+                  "name": "_data",
+                  "nameLocation": "257:5:47",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 16948,
+                  "src": "232:30:47",
+                  "stateVariable": false,
+                  "storageLocation": "calldata",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_struct$_JBDidRedeemData_$18397_calldata_ptr",
+                    "typeString": "struct JBDidRedeemData"
+                  },
+                  "typeName": {
+                    "id": 16944,
+                    "nodeType": "UserDefinedTypeName",
+                    "pathNode": {
+                      "id": 16943,
+                      "name": "JBDidRedeemData",
+                      "nodeType": "IdentifierPath",
+                      "referencedDeclaration": 18397,
+                      "src": "232:15:47"
+                    },
+                    "referencedDeclaration": 18397,
+                    "src": "232:15:47",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_struct$_JBDidRedeemData_$18397_storage_ptr",
+                      "typeString": "struct JBDidRedeemData"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "231:32:47"
+            },
+            "returnParameters": {
+              "id": 16947,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "272:0:47"
+            },
+            "scope": 16949,
+            "stateMutability": "nonpayable",
+            "virtual": false,
+            "visibility": "external"
+          }
+        ],
+        "abstract": false,
+        "baseContracts": [
+          {
+            "baseName": {
+              "id": 16941,
+              "name": "IERC165",
+              "nodeType": "IdentifierPath",
+              "referencedDeclaration": 23041,
+              "src": "201:7:47"
+            },
+            "id": 16942,
+            "nodeType": "InheritanceSpecifier",
+            "src": "201:7:47"
+          }
+        ],
+        "contractDependencies": [],
+        "contractKind": "interface",
+        "fullyImplemented": false,
+        "linearizedBaseContracts": [
+          16949,
+          23041
+        ],
+        "name": "IJBRedemptionDelegate",
+        "nameLocation": "176:21:47",
+        "scope": 16950,
+        "usedErrors": []
+      }
+    ],
+    "license": "MIT"
   }
 }

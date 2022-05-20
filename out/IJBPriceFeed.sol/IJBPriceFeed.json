@@ -8,7 +8,7 @@
           "type": "uint256"
         }
       ],
-      "name": "getPrice",
+      "name": "currentPrice",
       "outputs": [
         {
           "internalType": "uint256",
@@ -29,5 +29,131 @@
     "object": "0x",
     "sourceMap": "",
     "linkReferences": {}
+  },
+  "ast": {
+    "absolutePath": "/Users/mark.phillips/Developer/juicebox/jbx-staking/node_modules/@jbx-protocol/contracts-v2/contracts/interfaces/IJBPriceFeed.sol",
+    "id": 16814,
+    "exportedSymbols": {
+      "IJBPriceFeed": [
+        16813
+      ]
+    },
+    "nodeType": "SourceUnit",
+    "src": "32:133:44",
+    "nodes": [
+      {
+        "id": 16805,
+        "nodeType": "PragmaDirective",
+        "src": "32:22:44",
+        "literals": [
+          "solidity",
+          "0.8",
+          ".6"
+        ]
+      },
+      {
+        "id": 16813,
+        "nodeType": "ContractDefinition",
+        "src": "56:108:44",
+        "nodes": [
+          {
+            "id": 16812,
+            "nodeType": "FunctionDefinition",
+            "src": "83:79:44",
+            "functionSelector": "7a3c4c17",
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "currentPrice",
+            "nameLocation": "92:12:44",
+            "parameters": {
+              "id": 16808,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 16807,
+                  "mutability": "mutable",
+                  "name": "_targetDecimals",
+                  "nameLocation": "113:15:44",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 16812,
+                  "src": "105:23:44",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 16806,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "105:7:44",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "104:25:44"
+            },
+            "returnParameters": {
+              "id": 16811,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 16810,
+                  "mutability": "mutable",
+                  "name": "",
+                  "nameLocation": "-1:-1:-1",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 16812,
+                  "src": "153:7:44",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 16809,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "153:7:44",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "152:9:44"
+            },
+            "scope": 16813,
+            "stateMutability": "view",
+            "virtual": false,
+            "visibility": "external"
+          }
+        ],
+        "abstract": false,
+        "baseContracts": [],
+        "contractDependencies": [],
+        "contractKind": "interface",
+        "fullyImplemented": false,
+        "linearizedBaseContracts": [
+          16813
+        ],
+        "name": "IJBPriceFeed",
+        "nameLocation": "66:12:44",
+        "scope": 16814,
+        "usedErrors": []
+      }
+    ],
+    "license": "MIT"
   }
 }

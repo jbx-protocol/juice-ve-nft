@@ -12,13 +12,85 @@
     }
   ],
   "bytecode": {
-    "object": "0x60566037600b82828239805160001a607314602a57634e487b7160e01b600052600060045260246000fd5b30600052607381538281f3fe73000000000000000000000000000000000000000030146080604052600080fdfea2646970667358221220e5d886fab9de89ea79282aa21ec3e5ddf37ee8f4192c24a8d4e386c262a76c2a64736f6c63430008060033",
-    "sourceMap": "57:110:3:-:0;;;;;;;;;;;;;;;-1:-1:-1;;;57:110:3;;;;;;;;;;;;;;;;;",
+    "object": "0x60566037600b82828239805160001a607314602a57634e487b7160e01b600052600060045260246000fd5b30600052607381538281f3fe73000000000000000000000000000000000000000030146080604052600080fdfea26469706673582212201c5056622f82f9f69af77830f085602cde46fec7a7675e2c9a41a26fef4d623764736f6c63430008060033",
+    "sourceMap": "56:104:3:-:0;;;;;;;;;;;;;;;-1:-1:-1;;;56:104:3;;;;;;;;;;;;;;;;;",
     "linkReferences": {}
   },
   "deployedBytecode": {
-    "object": "0x73000000000000000000000000000000000000000030146080604052600080fdfea2646970667358221220e5d886fab9de89ea79282aa21ec3e5ddf37ee8f4192c24a8d4e386c262a76c2a64736f6c63430008060033",
-    "sourceMap": "57:110:3:-:0;;;;;;;;",
+    "object": "0x73000000000000000000000000000000000000000030146080604052600080fdfea26469706673582212201c5056622f82f9f69af77830f085602cde46fec7a7675e2c9a41a26fef4d623764736f6c63430008060033",
+    "sourceMap": "56:104:3:-:0;;;;;;;;",
     "linkReferences": {}
+  },
+  "ast": {
+    "absolutePath": "/Users/mark.phillips/Developer/juicebox/jbx-staking/contracts/libraries/JBErrors.sol",
+    "id": 2034,
+    "exportedSymbols": {
+      "JBErrors": [
+        2033
+      ]
+    },
+    "nodeType": "SourceUnit",
+    "src": "32:129:3",
+    "nodes": [
+      {
+        "id": 2028,
+        "nodeType": "PragmaDirective",
+        "src": "32:22:3",
+        "literals": [
+          "solidity",
+          "0.8",
+          ".6"
+        ]
+      },
+      {
+        "id": 2033,
+        "nodeType": "ContractDefinition",
+        "src": "56:104:3",
+        "nodes": [
+          {
+            "id": 2030,
+            "nodeType": "ErrorDefinition",
+            "src": "96:30:3",
+            "name": "INVALID_LOCK_DURATION",
+            "nameLocation": "102:21:3",
+            "parameters": {
+              "id": 2029,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "123:2:3"
+            }
+          },
+          {
+            "id": 2032,
+            "nodeType": "ErrorDefinition",
+            "src": "129:29:3",
+            "name": "INSUFFICIENT_BALANCE",
+            "nameLocation": "135:20:3",
+            "parameters": {
+              "id": 2031,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "155:2:3"
+            }
+          }
+        ],
+        "abstract": false,
+        "baseContracts": [],
+        "contractDependencies": [],
+        "contractKind": "library",
+        "fullyImplemented": true,
+        "linearizedBaseContracts": [
+          2033
+        ],
+        "name": "JBErrors",
+        "nameLocation": "64:8:3",
+        "scope": 2034,
+        "usedErrors": [
+          2030,
+          2032
+        ]
+      }
+    ],
+    "license": "MIT"
   }
 }

@@ -49,5 +49,254 @@
     "object": "0x",
     "sourceMap": "",
     "linkReferences": {}
+  },
+  "ast": {
+    "absolutePath": "/Users/mark.phillips/Developer/juicebox/jbx-staking/contracts/interfaces/IJBVeTokenUriResolver.sol",
+    "id": 2027,
+    "exportedSymbols": {
+      "IJBVeTokenUriResolver": [
+        2026
+      ]
+    },
+    "nodeType": "SourceUnit",
+    "src": "32:576:2",
+    "nodes": [
+      {
+        "id": 2008,
+        "nodeType": "PragmaDirective",
+        "src": "32:22:2",
+        "literals": [
+          "solidity",
+          "0.8",
+          ".6"
+        ]
+      },
+      {
+        "id": 2026,
+        "nodeType": "ContractDefinition",
+        "src": "56:551:2",
+        "nodes": [
+          {
+            "id": 2025,
+            "nodeType": "FunctionDefinition",
+            "src": "410:195:2",
+            "documentation": {
+              "id": 2009,
+              "nodeType": "StructuredDocumentation",
+              "src": "92:315:2",
+              "text": "@notice \nComputes the metadata url.\n@param _tokenId TokenId of the Banny\n@param _amount Lock Amount.\n@param _duration Lock time in seconds.\n@param _lockedUntil Total lock-in period.\n@param _lockDurationOptions The options that the duration can be.\n@return The metadata url."
+            },
+            "functionSelector": "08120ceb",
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "tokenURI",
+            "nameLocation": "419:8:2",
+            "parameters": {
+              "id": 2021,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 2011,
+                  "mutability": "mutable",
+                  "name": "_tokenId",
+                  "nameLocation": "441:8:2",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 2025,
+                  "src": "433:16:2",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 2010,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "433:7:2",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 2013,
+                  "mutability": "mutable",
+                  "name": "_amount",
+                  "nameLocation": "463:7:2",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 2025,
+                  "src": "455:15:2",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 2012,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "455:7:2",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 2015,
+                  "mutability": "mutable",
+                  "name": "_duration",
+                  "nameLocation": "484:9:2",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 2025,
+                  "src": "476:17:2",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 2014,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "476:7:2",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 2017,
+                  "mutability": "mutable",
+                  "name": "_lockedUntil",
+                  "nameLocation": "507:12:2",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 2025,
+                  "src": "499:20:2",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 2016,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "499:7:2",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 2020,
+                  "mutability": "mutable",
+                  "name": "_lockDurationOptions",
+                  "nameLocation": "542:20:2",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 2025,
+                  "src": "525:37:2",
+                  "stateVariable": false,
+                  "storageLocation": "memory",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_array$_t_uint256_$dyn_memory_ptr",
+                    "typeString": "uint256[]"
+                  },
+                  "typeName": {
+                    "baseType": {
+                      "id": 2018,
+                      "name": "uint256",
+                      "nodeType": "ElementaryTypeName",
+                      "src": "525:7:2",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_uint256",
+                        "typeString": "uint256"
+                      }
+                    },
+                    "id": 2019,
+                    "nodeType": "ArrayTypeName",
+                    "src": "525:9:2",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_array$_t_uint256_$dyn_storage_ptr",
+                      "typeString": "uint256[]"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "427:139:2"
+            },
+            "returnParameters": {
+              "id": 2024,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 2023,
+                  "mutability": "mutable",
+                  "name": "",
+                  "nameLocation": "-1:-1:-1",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 2025,
+                  "src": "590:13:2",
+                  "stateVariable": false,
+                  "storageLocation": "memory",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_string_memory_ptr",
+                    "typeString": "string"
+                  },
+                  "typeName": {
+                    "id": 2022,
+                    "name": "string",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "590:6:2",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_string_storage_ptr",
+                      "typeString": "string"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "589:15:2"
+            },
+            "scope": 2026,
+            "stateMutability": "view",
+            "virtual": false,
+            "visibility": "external"
+          }
+        ],
+        "abstract": false,
+        "baseContracts": [],
+        "contractDependencies": [],
+        "contractKind": "interface",
+        "fullyImplemented": false,
+        "linearizedBaseContracts": [
+          2026
+        ],
+        "name": "IJBVeTokenUriResolver",
+        "nameLocation": "66:21:2",
+        "scope": 2027,
+        "usedErrors": []
+      }
+    ],
+    "license": "MIT"
   }
 }

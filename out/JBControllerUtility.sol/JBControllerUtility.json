@@ -2,6 +2,11 @@
   "abi": [
     {
       "inputs": [],
+      "name": "CONTROLLER_UNAUTHORIZED",
+      "type": "error"
+    },
+    {
+      "inputs": [],
       "name": "directory",
       "outputs": [
         {
@@ -23,5 +28,553 @@
     "object": "0x",
     "sourceMap": "",
     "linkReferences": {}
+  },
+  "ast": {
+    "absolutePath": "/Users/mark.phillips/Developer/juicebox/jbx-staking/node_modules/@jbx-protocol/contracts-v2/contracts/abstract/JBControllerUtility.sol",
+    "id": 13013,
+    "exportedSymbols": {
+      "IERC165": [
+        23041
+      ],
+      "IERC721": [
+        21152
+      ],
+      "IJBControllerUtility": [
+        15972
+      ],
+      "IJBDirectory": [
+        16112
+      ],
+      "IJBFundingCycleBallot": [
+        16147
+      ],
+      "IJBFundingCycleStore": [
+        16280
+      ],
+      "IJBPaymentTerminal": [
+        16449
+      ],
+      "IJBProjects": [
+        16936
+      ],
+      "IJBTokenUriResolver": [
+        17583
+      ],
+      "JBBallotState": [
+        15517
+      ],
+      "JBControllerUtility": [
+        13012
+      ],
+      "JBFundingCycle": [
+        18448
+      ],
+      "JBFundingCycleData": [
+        18461
+      ],
+      "JBProjectMetadata": [
+        18552
+      ]
+    },
+    "nodeType": "SourceUnit",
+    "src": "32:2015:24",
+    "nodes": [
+      {
+        "id": 12967,
+        "nodeType": "PragmaDirective",
+        "src": "32:22:24",
+        "literals": [
+          "solidity",
+          "0.8",
+          ".6"
+        ]
+      },
+      {
+        "id": 12968,
+        "nodeType": "ImportDirective",
+        "src": "56:50:24",
+        "absolutePath": "/Users/mark.phillips/Developer/juicebox/jbx-staking/node_modules/@jbx-protocol/contracts-v2/contracts/interfaces/IJBControllerUtility.sol",
+        "file": "./../interfaces/IJBControllerUtility.sol",
+        "nameLocation": "-1:-1:-1",
+        "scope": 13013,
+        "sourceUnit": 15973,
+        "symbolAliases": [],
+        "unitAlias": ""
+      },
+      {
+        "id": 13012,
+        "nodeType": "ContractDefinition",
+        "src": "404:1642:24",
+        "nodes": [
+          {
+            "id": 12973,
+            "nodeType": "ErrorDefinition",
+            "src": "699:32:24",
+            "name": "CONTROLLER_UNAUTHORIZED",
+            "nameLocation": "705:23:24",
+            "parameters": {
+              "id": 12972,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "728:2:24"
+            }
+          },
+          {
+            "id": 12994,
+            "nodeType": "ModifierDefinition",
+            "src": "1104:157:24",
+            "body": {
+              "id": 12993,
+              "nodeType": "Block",
+              "src": "1148:113:24",
+              "statements": [
+                {
+                  "condition": {
+                    "commonType": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    },
+                    "id": 12987,
+                    "isConstant": false,
+                    "isLValue": false,
+                    "isPure": false,
+                    "lValueRequested": false,
+                    "leftExpression": {
+                      "arguments": [
+                        {
+                          "arguments": [
+                            {
+                              "id": 12982,
+                              "name": "_projectId",
+                              "nodeType": "Identifier",
+                              "overloadedDeclarations": [],
+                              "referencedDeclaration": 12976,
+                              "src": "1189:10:24",
+                              "typeDescriptions": {
+                                "typeIdentifier": "t_uint256",
+                                "typeString": "uint256"
+                              }
+                            }
+                          ],
+                          "expression": {
+                            "argumentTypes": [
+                              {
+                                "typeIdentifier": "t_uint256",
+                                "typeString": "uint256"
+                              }
+                            ],
+                            "expression": {
+                              "id": 12980,
+                              "name": "directory",
+                              "nodeType": "Identifier",
+                              "overloadedDeclarations": [],
+                              "referencedDeclaration": 12999,
+                              "src": "1166:9:24",
+                              "typeDescriptions": {
+                                "typeIdentifier": "t_contract$_IJBDirectory_$16112",
+                                "typeString": "contract IJBDirectory"
+                              }
+                            },
+                            "id": 12981,
+                            "isConstant": false,
+                            "isLValue": false,
+                            "isPure": false,
+                            "lValueRequested": false,
+                            "memberName": "controllerOf",
+                            "nodeType": "MemberAccess",
+                            "referencedDeclaration": 16042,
+                            "src": "1166:22:24",
+                            "typeDescriptions": {
+                              "typeIdentifier": "t_function_external_view$_t_uint256_$returns$_t_address_$",
+                              "typeString": "function (uint256) view external returns (address)"
+                            }
+                          },
+                          "id": 12983,
+                          "isConstant": false,
+                          "isLValue": false,
+                          "isPure": false,
+                          "kind": "functionCall",
+                          "lValueRequested": false,
+                          "names": [],
+                          "nodeType": "FunctionCall",
+                          "src": "1166:34:24",
+                          "tryCall": false,
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_address",
+                            "typeString": "address"
+                          }
+                        }
+                      ],
+                      "expression": {
+                        "argumentTypes": [
+                          {
+                            "typeIdentifier": "t_address",
+                            "typeString": "address"
+                          }
+                        ],
+                        "id": 12979,
+                        "isConstant": false,
+                        "isLValue": false,
+                        "isPure": true,
+                        "lValueRequested": false,
+                        "nodeType": "ElementaryTypeNameExpression",
+                        "src": "1158:7:24",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_type$_t_address_$",
+                          "typeString": "type(address)"
+                        },
+                        "typeName": {
+                          "id": 12978,
+                          "name": "address",
+                          "nodeType": "ElementaryTypeName",
+                          "src": "1158:7:24",
+                          "typeDescriptions": {}
+                        }
+                      },
+                      "id": 12984,
+                      "isConstant": false,
+                      "isLValue": false,
+                      "isPure": false,
+                      "kind": "typeConversion",
+                      "lValueRequested": false,
+                      "names": [],
+                      "nodeType": "FunctionCall",
+                      "src": "1158:43:24",
+                      "tryCall": false,
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_address",
+                        "typeString": "address"
+                      }
+                    },
+                    "nodeType": "BinaryOperation",
+                    "operator": "!=",
+                    "rightExpression": {
+                      "expression": {
+                        "id": 12985,
+                        "name": "msg",
+                        "nodeType": "Identifier",
+                        "overloadedDeclarations": [],
+                        "referencedDeclaration": -15,
+                        "src": "1205:3:24",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_magic_message",
+                          "typeString": "msg"
+                        }
+                      },
+                      "id": 12986,
+                      "isConstant": false,
+                      "isLValue": false,
+                      "isPure": false,
+                      "lValueRequested": false,
+                      "memberName": "sender",
+                      "nodeType": "MemberAccess",
+                      "src": "1205:10:24",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_address",
+                        "typeString": "address"
+                      }
+                    },
+                    "src": "1158:57:24",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_bool",
+                      "typeString": "bool"
+                    }
+                  },
+                  "id": 12991,
+                  "nodeType": "IfStatement",
+                  "src": "1154:95:24",
+                  "trueBody": {
+                    "errorCall": {
+                      "arguments": [],
+                      "expression": {
+                        "argumentTypes": [],
+                        "id": 12988,
+                        "name": "CONTROLLER_UNAUTHORIZED",
+                        "nodeType": "Identifier",
+                        "overloadedDeclarations": [],
+                        "referencedDeclaration": 12973,
+                        "src": "1224:23:24",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_function_error_pure$__$returns$__$",
+                          "typeString": "function () pure"
+                        }
+                      },
+                      "id": 12989,
+                      "isConstant": false,
+                      "isLValue": false,
+                      "isPure": false,
+                      "kind": "functionCall",
+                      "lValueRequested": false,
+                      "names": [],
+                      "nodeType": "FunctionCall",
+                      "src": "1224:25:24",
+                      "tryCall": false,
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_tuple$__$",
+                        "typeString": "tuple()"
+                      }
+                    },
+                    "id": 12990,
+                    "nodeType": "RevertStatement",
+                    "src": "1217:32:24"
+                  }
+                },
+                {
+                  "id": 12992,
+                  "nodeType": "PlaceholderStatement",
+                  "src": "1255:1:24"
+                }
+              ]
+            },
+            "documentation": {
+              "id": 12974,
+              "nodeType": "StructuredDocumentation",
+              "src": "964:137:24",
+              "text": "@notice\nOnly allows the controller of the specified project to proceed. \n@param _projectId The ID of the project. "
+            },
+            "name": "onlyController",
+            "nameLocation": "1113:14:24",
+            "parameters": {
+              "id": 12977,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 12976,
+                  "mutability": "mutable",
+                  "name": "_projectId",
+                  "nameLocation": "1136:10:24",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 12994,
+                  "src": "1128:18:24",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 12975,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "1128:7:24",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "1127:20:24"
+            },
+            "virtual": false,
+            "visibility": "internal"
+          },
+          {
+            "id": 12999,
+            "nodeType": "VariableDeclaration",
+            "src": "1580:48:24",
+            "baseFunctions": [
+              15971
+            ],
+            "constant": false,
+            "documentation": {
+              "id": 12995,
+              "nodeType": "StructuredDocumentation",
+              "src": "1494:83:24",
+              "text": "@notice \nThe directory of terminals and controllers for projects."
+            },
+            "functionSelector": "c41c2f24",
+            "mutability": "immutable",
+            "name": "directory",
+            "nameLocation": "1619:9:24",
+            "overrides": {
+              "id": 12998,
+              "nodeType": "OverrideSpecifier",
+              "overrides": [],
+              "src": "1610:8:24"
+            },
+            "scope": 13012,
+            "stateVariable": true,
+            "storageLocation": "default",
+            "typeDescriptions": {
+              "typeIdentifier": "t_contract$_IJBDirectory_$16112",
+              "typeString": "contract IJBDirectory"
+            },
+            "typeName": {
+              "id": 12997,
+              "nodeType": "UserDefinedTypeName",
+              "pathNode": {
+                "id": 12996,
+                "name": "IJBDirectory",
+                "nodeType": "IdentifierPath",
+                "referencedDeclaration": 16112,
+                "src": "1580:12:24"
+              },
+              "referencedDeclaration": 16112,
+              "src": "1580:12:24",
+              "typeDescriptions": {
+                "typeIdentifier": "t_contract$_IJBDirectory_$16112",
+                "typeString": "contract IJBDirectory"
+              }
+            },
+            "visibility": "public"
+          },
+          {
+            "id": 13011,
+            "nodeType": "FunctionDefinition",
+            "src": "1974:70:24",
+            "body": {
+              "id": 13010,
+              "nodeType": "Block",
+              "src": "2011:33:24",
+              "statements": [
+                {
+                  "expression": {
+                    "id": 13008,
+                    "isConstant": false,
+                    "isLValue": false,
+                    "isPure": false,
+                    "lValueRequested": false,
+                    "leftHandSide": {
+                      "id": 13006,
+                      "name": "directory",
+                      "nodeType": "Identifier",
+                      "overloadedDeclarations": [],
+                      "referencedDeclaration": 12999,
+                      "src": "2017:9:24",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_contract$_IJBDirectory_$16112",
+                        "typeString": "contract IJBDirectory"
+                      }
+                    },
+                    "nodeType": "Assignment",
+                    "operator": "=",
+                    "rightHandSide": {
+                      "id": 13007,
+                      "name": "_directory",
+                      "nodeType": "Identifier",
+                      "overloadedDeclarations": [],
+                      "referencedDeclaration": 13003,
+                      "src": "2029:10:24",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_contract$_IJBDirectory_$16112",
+                        "typeString": "contract IJBDirectory"
+                      }
+                    },
+                    "src": "2017:22:24",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_contract$_IJBDirectory_$16112",
+                      "typeString": "contract IJBDirectory"
+                    }
+                  },
+                  "id": 13009,
+                  "nodeType": "ExpressionStatement",
+                  "src": "2017:22:24"
+                }
+              ]
+            },
+            "documentation": {
+              "id": 13000,
+              "nodeType": "StructuredDocumentation",
+              "src": "1862:109:24",
+              "text": "@param _directory A contract storing directories of terminals and controllers for each project."
+            },
+            "implemented": true,
+            "kind": "constructor",
+            "modifiers": [],
+            "name": "",
+            "nameLocation": "-1:-1:-1",
+            "parameters": {
+              "id": 13004,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 13003,
+                  "mutability": "mutable",
+                  "name": "_directory",
+                  "nameLocation": "1999:10:24",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 13011,
+                  "src": "1986:23:24",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_contract$_IJBDirectory_$16112",
+                    "typeString": "contract IJBDirectory"
+                  },
+                  "typeName": {
+                    "id": 13002,
+                    "nodeType": "UserDefinedTypeName",
+                    "pathNode": {
+                      "id": 13001,
+                      "name": "IJBDirectory",
+                      "nodeType": "IdentifierPath",
+                      "referencedDeclaration": 16112,
+                      "src": "1986:12:24"
+                    },
+                    "referencedDeclaration": 16112,
+                    "src": "1986:12:24",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_contract$_IJBDirectory_$16112",
+                      "typeString": "contract IJBDirectory"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "1985:25:24"
+            },
+            "returnParameters": {
+              "id": 13005,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "2011:0:24"
+            },
+            "scope": 13012,
+            "stateMutability": "nonpayable",
+            "virtual": false,
+            "visibility": "internal"
+          }
+        ],
+        "abstract": true,
+        "baseContracts": [
+          {
+            "baseName": {
+              "id": 12970,
+              "name": "IJBControllerUtility",
+              "nodeType": "IdentifierPath",
+              "referencedDeclaration": 15972,
+              "src": "445:20:24"
+            },
+            "id": 12971,
+            "nodeType": "InheritanceSpecifier",
+            "src": "445:20:24"
+          }
+        ],
+        "contractDependencies": [],
+        "contractKind": "contract",
+        "documentation": {
+          "id": 12969,
+          "nodeType": "StructuredDocumentation",
+          "src": "108:295:24",
+          "text": "@notice\nProvides tools for contracts with functionality that can only be accessed by a project's controller.\n@dev\nAdheres to -\nIJBControllerUtility: General interface for the methods in this contract that interact with the blockchain's state according to the protocol's rules."
+        },
+        "fullyImplemented": true,
+        "linearizedBaseContracts": [
+          13012,
+          15972
+        ],
+        "name": "JBControllerUtility",
+        "nameLocation": "422:19:24",
+        "scope": 13013,
+        "usedErrors": [
+          12973
+        ]
+      }
+    ],
+    "license": "MIT"
   }
 }
