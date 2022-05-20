@@ -80,13 +80,326 @@
     }
   ],
   "bytecode": {
-    "object": "0x60c4610039600b82828239805160001a60731461002c57634e487b7160e01b600052600060045260246000fd5b30600052607381538281f3fe730000000000000000000000000000000000000000301460806040526004361060655760003560e01c806319a9f94114606a5780634bb970421460865780635d14fef8146086578063870bc1fd14606a578063bc063e1a14606a578063d3c4fca914606a575b600080fd5b6074633b9aca0081565b60405190815260200160405180910390f35b60746127108156fea2646970667358221220f7c43f2ce24d863cc00058e75864d80b860ab73d76c71bbccdc52fcaa245fa4164736f6c63430008060033",
-    "sourceMap": "133:865:39:-:0;;;;;;;;;;;;;;;-1:-1:-1;;;133:865:39;;;;;;;;;;;;;;;;;",
+    "object": "0x60c4610039600b82828239805160001a60731461002c57634e487b7160e01b600052600060045260246000fd5b30600052607381538281f3fe730000000000000000000000000000000000000000301460806040526004361060655760003560e01c806319a9f94114606a5780634bb970421460865780635d14fef8146086578063870bc1fd14606a578063bc063e1a14606a578063d3c4fca914606a575b600080fd5b6074633b9aca0081565b60405190815260200160405180910390f35b60746127108156fea2646970667358221220f643fa58c9dc03bbef73c140c08bb7e05432d520bd61b2fc8147e7d207ba863164736f6c63430008060033",
+    "sourceMap": "124:355:56:-:0;;;;;;;;;;;;;;;-1:-1:-1;;;124:355:56;;;;;;;;;;;;;;;;;",
     "linkReferences": {}
   },
   "deployedBytecode": {
-    "object": "0x730000000000000000000000000000000000000000301460806040526004361060655760003560e01c806319a9f94114606a5780634bb970421460865780635d14fef8146086578063870bc1fd14606a578063bc063e1a14606a578063d3c4fca914606a575b600080fd5b6074633b9aca0081565b60405190815260200160405180910390f35b60746127108156fea2646970667358221220f7c43f2ce24d863cc00058e75864d80b860ab73d76c71bbccdc52fcaa245fa4164736f6c63430008060033",
-    "sourceMap": "133:865:39:-:0;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;942:53;;985:10;942:53;;;;;168:25:83;;;156:2;141:18;942:53:39;;;;;;;402:51;;448:5;402:51;",
+    "object": "0x730000000000000000000000000000000000000000301460806040526004361060655760003560e01c806319a9f94114606a5780634bb970421460865780635d14fef8146086578063870bc1fd14606a578063bc063e1a14606a578063d3c4fca914606a575b600080fd5b6074633b9aca0081565b60405190815260200160405180910390f35b60746127108156fea2646970667358221220f643fa58c9dc03bbef73c140c08bb7e05432d520bd61b2fc8147e7d207ba863164736f6c63430008060033",
+    "sourceMap": "124:355:56:-:0;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;423:53;;466:10;423:53;;;;;168:25:108;;;156:2;141:18;423:53:56;;;;;;;201:51;;247:5;201:51;",
     "linkReferences": {}
+  },
+  "ast": {
+    "absolutePath": "/Users/mark.phillips/Developer/juicebox/jbx-staking/node_modules/@jbx-protocol/contracts-v2/contracts/libraries/JBConstants.sol",
+    "id": 17606,
+    "exportedSymbols": {
+      "JBConstants": [
+        17605
+      ]
+    },
+    "nodeType": "SourceUnit",
+    "src": "32:448:56",
+    "nodes": [
+      {
+        "id": 17585,
+        "nodeType": "PragmaDirective",
+        "src": "32:22:56",
+        "literals": [
+          "solidity",
+          "0.8",
+          ".6"
+        ]
+      },
+      {
+        "id": 17605,
+        "nodeType": "ContractDefinition",
+        "src": "124:355:56",
+        "nodes": [
+          {
+            "id": 17589,
+            "nodeType": "VariableDeclaration",
+            "src": "148:49:56",
+            "constant": true,
+            "functionSelector": "5d14fef8",
+            "mutability": "constant",
+            "name": "MAX_RESERVED_RATE",
+            "nameLocation": "172:17:56",
+            "scope": 17605,
+            "stateVariable": true,
+            "storageLocation": "default",
+            "typeDescriptions": {
+              "typeIdentifier": "t_uint256",
+              "typeString": "uint256"
+            },
+            "typeName": {
+              "id": 17587,
+              "name": "uint256",
+              "nodeType": "ElementaryTypeName",
+              "src": "148:7:56",
+              "typeDescriptions": {
+                "typeIdentifier": "t_uint256",
+                "typeString": "uint256"
+              }
+            },
+            "value": {
+              "hexValue": "3130303030",
+              "id": 17588,
+              "isConstant": false,
+              "isLValue": false,
+              "isPure": true,
+              "kind": "number",
+              "lValueRequested": false,
+              "nodeType": "Literal",
+              "src": "192:5:56",
+              "typeDescriptions": {
+                "typeIdentifier": "t_rational_10000_by_1",
+                "typeString": "int_const 10000"
+              },
+              "value": "10000"
+            },
+            "visibility": "public"
+          },
+          {
+            "id": 17592,
+            "nodeType": "VariableDeclaration",
+            "src": "201:51:56",
+            "constant": true,
+            "functionSelector": "4bb97042",
+            "mutability": "constant",
+            "name": "MAX_REDEMPTION_RATE",
+            "nameLocation": "225:19:56",
+            "scope": 17605,
+            "stateVariable": true,
+            "storageLocation": "default",
+            "typeDescriptions": {
+              "typeIdentifier": "t_uint256",
+              "typeString": "uint256"
+            },
+            "typeName": {
+              "id": 17590,
+              "name": "uint256",
+              "nodeType": "ElementaryTypeName",
+              "src": "201:7:56",
+              "typeDescriptions": {
+                "typeIdentifier": "t_uint256",
+                "typeString": "uint256"
+              }
+            },
+            "value": {
+              "hexValue": "3130303030",
+              "id": 17591,
+              "isConstant": false,
+              "isLValue": false,
+              "isPure": true,
+              "kind": "number",
+              "lValueRequested": false,
+              "nodeType": "Literal",
+              "src": "247:5:56",
+              "typeDescriptions": {
+                "typeIdentifier": "t_rational_10000_by_1",
+                "typeString": "int_const 10000"
+              },
+              "value": "10000"
+            },
+            "visibility": "public"
+          },
+          {
+            "id": 17595,
+            "nodeType": "VariableDeclaration",
+            "src": "256:54:56",
+            "constant": true,
+            "functionSelector": "870bc1fd",
+            "mutability": "constant",
+            "name": "MAX_DISCOUNT_RATE",
+            "nameLocation": "280:17:56",
+            "scope": 17605,
+            "stateVariable": true,
+            "storageLocation": "default",
+            "typeDescriptions": {
+              "typeIdentifier": "t_uint256",
+              "typeString": "uint256"
+            },
+            "typeName": {
+              "id": 17593,
+              "name": "uint256",
+              "nodeType": "ElementaryTypeName",
+              "src": "256:7:56",
+              "typeDescriptions": {
+                "typeIdentifier": "t_uint256",
+                "typeString": "uint256"
+              }
+            },
+            "value": {
+              "hexValue": "31303030303030303030",
+              "id": 17594,
+              "isConstant": false,
+              "isLValue": false,
+              "isPure": true,
+              "kind": "number",
+              "lValueRequested": false,
+              "nodeType": "Literal",
+              "src": "300:10:56",
+              "typeDescriptions": {
+                "typeIdentifier": "t_rational_1000000000_by_1",
+                "typeString": "int_const 1000000000"
+              },
+              "value": "1000000000"
+            },
+            "visibility": "public"
+          },
+          {
+            "id": 17598,
+            "nodeType": "VariableDeclaration",
+            "src": "314:57:56",
+            "constant": true,
+            "functionSelector": "d3c4fca9",
+            "mutability": "constant",
+            "name": "SPLITS_TOTAL_PERCENT",
+            "nameLocation": "338:20:56",
+            "scope": 17605,
+            "stateVariable": true,
+            "storageLocation": "default",
+            "typeDescriptions": {
+              "typeIdentifier": "t_uint256",
+              "typeString": "uint256"
+            },
+            "typeName": {
+              "id": 17596,
+              "name": "uint256",
+              "nodeType": "ElementaryTypeName",
+              "src": "314:7:56",
+              "typeDescriptions": {
+                "typeIdentifier": "t_uint256",
+                "typeString": "uint256"
+              }
+            },
+            "value": {
+              "hexValue": "31303030303030303030",
+              "id": 17597,
+              "isConstant": false,
+              "isLValue": false,
+              "isPure": true,
+              "kind": "number",
+              "lValueRequested": false,
+              "nodeType": "Literal",
+              "src": "361:10:56",
+              "typeDescriptions": {
+                "typeIdentifier": "t_rational_1000000000_by_1",
+                "typeString": "int_const 1000000000"
+              },
+              "value": "1000000000"
+            },
+            "visibility": "public"
+          },
+          {
+            "id": 17601,
+            "nodeType": "VariableDeclaration",
+            "src": "375:44:56",
+            "constant": true,
+            "functionSelector": "bc063e1a",
+            "mutability": "constant",
+            "name": "MAX_FEE",
+            "nameLocation": "399:7:56",
+            "scope": 17605,
+            "stateVariable": true,
+            "storageLocation": "default",
+            "typeDescriptions": {
+              "typeIdentifier": "t_uint256",
+              "typeString": "uint256"
+            },
+            "typeName": {
+              "id": 17599,
+              "name": "uint256",
+              "nodeType": "ElementaryTypeName",
+              "src": "375:7:56",
+              "typeDescriptions": {
+                "typeIdentifier": "t_uint256",
+                "typeString": "uint256"
+              }
+            },
+            "value": {
+              "hexValue": "31303030303030303030",
+              "id": 17600,
+              "isConstant": false,
+              "isLValue": false,
+              "isPure": true,
+              "kind": "number",
+              "lValueRequested": false,
+              "nodeType": "Literal",
+              "src": "409:10:56",
+              "typeDescriptions": {
+                "typeIdentifier": "t_rational_1000000000_by_1",
+                "typeString": "int_const 1000000000"
+              },
+              "value": "1000000000"
+            },
+            "visibility": "public"
+          },
+          {
+            "id": 17604,
+            "nodeType": "VariableDeclaration",
+            "src": "423:53:56",
+            "constant": true,
+            "functionSelector": "19a9f941",
+            "mutability": "constant",
+            "name": "MAX_FEE_DISCOUNT",
+            "nameLocation": "447:16:56",
+            "scope": 17605,
+            "stateVariable": true,
+            "storageLocation": "default",
+            "typeDescriptions": {
+              "typeIdentifier": "t_uint256",
+              "typeString": "uint256"
+            },
+            "typeName": {
+              "id": 17602,
+              "name": "uint256",
+              "nodeType": "ElementaryTypeName",
+              "src": "423:7:56",
+              "typeDescriptions": {
+                "typeIdentifier": "t_uint256",
+                "typeString": "uint256"
+              }
+            },
+            "value": {
+              "hexValue": "31303030303030303030",
+              "id": 17603,
+              "isConstant": false,
+              "isLValue": false,
+              "isPure": true,
+              "kind": "number",
+              "lValueRequested": false,
+              "nodeType": "Literal",
+              "src": "466:10:56",
+              "typeDescriptions": {
+                "typeIdentifier": "t_rational_1000000000_by_1",
+                "typeString": "int_const 1000000000"
+              },
+              "value": "1000000000"
+            },
+            "visibility": "public"
+          }
+        ],
+        "abstract": false,
+        "baseContracts": [],
+        "contractDependencies": [],
+        "contractKind": "library",
+        "documentation": {
+          "id": 17586,
+          "nodeType": "StructuredDocumentation",
+          "src": "56:67:56",
+          "text": "@notice\nGlobal constants used across Juicebox contracts."
+        },
+        "fullyImplemented": true,
+        "linearizedBaseContracts": [
+          17605
+        ],
+        "name": "JBConstants",
+        "nameLocation": "132:11:56",
+        "scope": 17606,
+        "usedErrors": []
+      }
+    ],
+    "license": "MIT"
   }
 }

@@ -29,5 +29,131 @@
     "object": "0x",
     "sourceMap": "",
     "linkReferences": {}
+  },
+  "ast": {
+    "absolutePath": "/Users/mark.phillips/Developer/juicebox/jbx-staking/node_modules/@jbx-protocol/contracts-v2/contracts/interfaces/IJBTokenUriResolver.sol",
+    "id": 17584,
+    "exportedSymbols": {
+      "IJBTokenUriResolver": [
+        17583
+      ]
+    },
+    "nodeType": "SourceUnit",
+    "src": "32:144:55",
+    "nodes": [
+      {
+        "id": 17575,
+        "nodeType": "PragmaDirective",
+        "src": "32:22:55",
+        "literals": [
+          "solidity",
+          "0.8",
+          ".6"
+        ]
+      },
+      {
+        "id": 17583,
+        "nodeType": "ContractDefinition",
+        "src": "56:119:55",
+        "nodes": [
+          {
+            "id": 17582,
+            "nodeType": "FunctionDefinition",
+            "src": "90:83:55",
+            "functionSelector": "da0544aa",
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "getUri",
+            "nameLocation": "99:6:55",
+            "parameters": {
+              "id": 17578,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 17577,
+                  "mutability": "mutable",
+                  "name": "_projectId",
+                  "nameLocation": "114:10:55",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 17582,
+                  "src": "106:18:55",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 17576,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "106:7:55",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "105:20:55"
+            },
+            "returnParameters": {
+              "id": 17581,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 17580,
+                  "mutability": "mutable",
+                  "name": "tokenUri",
+                  "nameLocation": "163:8:55",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 17582,
+                  "src": "149:22:55",
+                  "stateVariable": false,
+                  "storageLocation": "memory",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_string_memory_ptr",
+                    "typeString": "string"
+                  },
+                  "typeName": {
+                    "id": 17579,
+                    "name": "string",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "149:6:55",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_string_storage_ptr",
+                      "typeString": "string"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "148:24:55"
+            },
+            "scope": 17583,
+            "stateMutability": "view",
+            "virtual": false,
+            "visibility": "external"
+          }
+        ],
+        "abstract": false,
+        "baseContracts": [],
+        "contractDependencies": [],
+        "contractKind": "interface",
+        "fullyImplemented": false,
+        "linearizedBaseContracts": [
+          17583
+        ],
+        "name": "IJBTokenUriResolver",
+        "nameLocation": "66:19:55",
+        "scope": 17584,
+        "usedErrors": []
+      }
+    ],
+    "license": "MIT"
   }
 }
