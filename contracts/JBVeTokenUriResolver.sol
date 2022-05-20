@@ -63,121 +63,122 @@ contract JBVeTokenUriResolver is IJBVeTokenUriResolver {
     } else if (_amount >= 101 && _amount <= 200) {
       return 2;
     } else if (_amount >= 201 && _amount <= 300) {
-      return 3;
+      tokenRange = 3;
     } else if (_amount >= 301 && _amount <= 400) {
-      return 4;
+      tokenRange = 4;
     } else if (_amount >= 401 && _amount <= 500) {
-      return 5;
+      tokenRange = 5;
     } else if (_amount >= 501 && _amount <= 600) {
-      return 6;
+      tokenRange = 6;
     } else if (_amount >= 601 && _amount <= 700) {
-      return 7;
+      tokenRange = 7;
     } else if (_amount >= 701 && _amount <= 800) {
-      return 8;
+      tokenRange = 8;
     } else if (_amount >= 801 && _amount <= 900) {
-      return 9;
-    } else if (_amount >= 901 && _amount <= 1000) {
-      return 10;
-    } else if (_amount >= 1001 && _amount <= 2000) {
-      return 11;
-    } else if (_amount >= 2001 && _amount <= 3000) {
-      return 12;
-    } else if (_amount >= 3001 && _amount <= 4000) {
-      return 13;
-    } else if (_amount >= 4001 && _amount <= 5000) {
-      return 14;
-    } else if (_amount >= 5001 && _amount <= 6000) {
-      return 15;
-    } else if (_amount >= 6001 && _amount <= 7000) {
-      return 16;
-    } else if (_amount >= 7001 && _amount <= 8000) {
-      return 17;
-    } else if (_amount >= 8001 && _amount <= 9000) {
-      return 18;
-    } else if (_amount >= 9001 && _amount <= 10000) {
-      return 19;
-    } else if (_amount >= 10001 && _amount <= 12000) {
-      return 20;
-    } else if (_amount >= 12001 && _amount <= 14000) {
-      return 21;
-    } else if (_amount >= 14001 && _amount <= 16000) {
-      return 22;
-    } else if (_amount >= 16001 && _amount <= 18000) {
-      return 23;
-    } else if (_amount >= 18001 && _amount <= 20000) {
-      return 24;
-    } else if (_amount >= 20001 && _amount <= 22000) {
-      return 25;
-    } else if (_amount >= 22001 && _amount <= 24000) {
-      return 26;
-    } else if (_amount >= 24001 && _amount <= 26000) {
-      return 27;
-    } else if (_amount >= 26001 && _amount <= 28000) {
-      return 28;
-    } else if (_amount >= 28001 && _amount <= 30000) {
-      return 29;
-    } else if (_amount >= 30001 && _amount <= 40000) {
-      return 30;
-    } else if (_amount >= 40001 && _amount <= 50000) {
-      return 31;
-    } else if (_amount >= 50001 && _amount <= 60000) {
-      return 32;
-    } else if (_amount >= 60001 && _amount <= 70000) {
-      return 33;
-    } else if (_amount >= 70001 && _amount <= 80000) {
-      return 34;
-    } else if (_amount >= 80001 && _amount <= 90000) {
-      return 35;
-    } else if (_amount >= 90001 && _amount <= 100000) {
-      return 36;
-    } else if (_amount >= 100001 && _amount <= 200000) {
-      return 37;
-    } else if (_amount >= 200001 && _amount <= 300000) {
-      return 38;
-    } else if (_amount >= 300001 && _amount <= 400000) {
-      return 39;
-    } else if (_amount >= 400001 && _amount <= 500000) {
-      return 40;
-    } else if (_amount >= 500001 && _amount <= 600000) {
-      return 41;
-    } else if (_amount >= 600001 && _amount <= 700000) {
-      return 42;
-    } else if (_amount >= 700001 && _amount <= 800000) {
-      return 43;
-    } else if (_amount >= 800001 && _amount <= 900000) {
-      return 44;
-    } else if (_amount >= 900001 && _amount <= 1000000) {
-      return 45;
-    } else if (_amount >= 1000001 && _amount <= 2000000) {
-      return 46;
-    } else if (_amount >= 2000001 && _amount <= 3000000) {
-      return 47;
-    } else if (_amount >= 3000001 && _amount <= 4000000) {
-      return 48;
-    } else if (_amount >= 4000001 && _amount <= 5000000) {
-      return 49;
-    } else if (_amount >= 5000001 && _amount <= 6000000) {
-      return 50;
-    } else if (_amount >= 6000001 && _amount <= 7000000) {
-      return 51;
-    } else if (_amount >= 7000001 && _amount <= 8000000) {
-      return 52;
-    } else if (_amount >= 8000001 && _amount <= 9000000) {
-      return 53;
-    } else if (_amount >= 9000001 && _amount <= 10000000) {
-      return 54;
-    } else if (_amount >= 10000001 && _amount <= 20000000) {
-      return 55;
+      tokenRange = 9;
+    } else if (_amount >= 901 && _amount <= 1_000) {
+      tokenRange = 10;
+    } else if (_amount >= 1_001 && _amount <= 2_000) {
+      tokenRange = 11;
+    } else if (_amount >= 2_001 && _amount <= 3_000) {
+      tokenRange = 12;
+    } else if (_amount >= 3_001 && _amount <= 4_000) {
+      tokenRange = 13;
+    } else if (_amount >= 4_001 && _amount <= 5_000) {
+      tokenRange = 14;
+    } else if (_amount >= 5_001 && _amount <= 6_000) {
+      tokenRange = 15;
+    } else if (_amount >= 6_001 && _amount <= 7_000) {
+      tokenRange = 16;
+    } else if (_amount >= 7_001 && _amount <= 8_000) {
+      tokenRange = 17;
+    } else if (_amount >= 8_001 && _amount <= 9_000) {
+      tokenRange = 18;
+    } else if (_amount >= 9_001 && _amount <= 10_000) {
+      tokenRange = 19;
+    } else if (_amount >= 10_001 && _amount <= 12_000) {
+      tokenRange = 20;
+    } else if (_amount >= 12_001 && _amount <= 14_000) {
+      tokenRange = 21;
+    } else if (_amount >= 14_001 && _amount <= 16_000) {
+      tokenRange = 22;
+    } else if (_amount >= 16_001 && _amount <= 18_000) {
+      tokenRange = 23;
+    } else if (_amount >= 18_001 && _amount <= 20_000) {
+      tokenRange = 24;
+    } else if (_amount >= 20_001 && _amount <= 22_000) {
+      tokenRange = 25;
+    } else if (_amount >= 22_001 && _amount <= 24_000) {
+      tokenRange = 26;
+    } else if (_amount >= 24_001 && _amount <= 26_000) {
+      tokenRange = 27;
+    } else if (_amount >= 26_001 && _amount <= 28_000) {
+      tokenRange = 28;
+    } else if (_amount >= 28_001 && _amount <= 30_000) {
+      tokenRange = 29;
+    } else if (_amount >= 30_001 && _amount <= 40_000) {
+      tokenRange = 30;
+    } else if (_amount >= 40_001 && _amount <= 50_000) {
+      tokenRange = 31;
+    } else if (_amount >= 50_001 && _amount <= 60_000) {
+      tokenRange = 32;
+    } else if (_amount >= 60_001 && _amount <= 70_000) {
+      tokenRange = 33;
+    } else if (_amount >= 70_001 && _amount <= 80_000) {
+      tokenRange = 34;
+    } else if (_amount >= 80_001 && _amount <= 90_000) {
+      tokenRange = 35;
+    } else if (_amount >= 90_001 && _amount <= 100_000) {
+      tokenRange = 36;
+    } else if (_amount >= 100_001 && _amount <= 200_000) {
+      tokenRange = 37;
+    } else if (_amount >= 200_001 && _amount <= 300_000) {
+      tokenRange = 38;
+    } else if (_amount >= 300_001 && _amount <= 400_000) {
+      tokenRange = 39;
+    } else if (_amount >= 400_001 && _amount <= 500_000) {
+      tokenRange = 40;
+    } else if (_amount >= 500_001 && _amount <= 600_000) {
+      tokenRange = 41;
+    } else if (_amount >= 600_001 && _amount <= 700_000) {
+      tokenRange = 42;
+    } else if (_amount >= 700_001 && _amount <= 800_000) {
+      tokenRange = 43;
+    } else if (_amount >= 800_001 && _amount <= 900_000) {
+      tokenRange = 44;
+    } else if (_amount >= 900_001 && _amount <= 1_000_000) {
+      tokenRange = 45;
+    } else if (_amount >= 1_000_001 && _amount <= 2_000_000) {
+      tokenRange = 46;
+    } else if (_amount >= 2_000_001 && _amount <= 3_000_000) {
+      tokenRange = 47;
+    } else if (_amount >= 3_000_001 && _amount <= 4_000_000) {
+      tokenRange = 48;
+    } else if (_amount >= 4_000_001 && _amount <= 5_000_000) {
+      tokenRange = 49;
+    } else if (_amount >= 5_000_001 && _amount <= 6_000_000) {
+      tokenRange = 50;
+    } else if (_amount >= 6_000_001 && _amount <= 7_000_000) {
+      tokenRange = 51;
+    } else if (_amount >= 7_000_001 && _amount <= 8_000_000) {
+      tokenRange = 52;
+    } else if (_amount >= 8_000_001 && _amount <= 9_000_000) {
+      tokenRange = 53;
+    } else if (_amount >= 9_000_001 && _amount <= 10_000_000) {
+      tokenRange = 54;
+    } else if (_amount >= 10_000_001 && _amount <= 20_000_000) {
+      tokenRange = 55;
     } else if (_amount >= 20000001 && _amount <= 40000000) {
-      return 56;
-    } else if (_amount >= 40000001 && _amount <= 50000000) {
-      return 57;
-    } else if (_amount >= 50000001 && _amount <= 100000000) {
-      return 58;
-    } else if (_amount >= 100000001 && _amount <= 500000000) {
-      return 59;
-    } else if (_amount >= 500000001 && _amount <= 700000000) {
-      return 60;
+      tokenRange = 56;
+    } else if (_amount >= 40_000_001 && _amount <= 60_000_000) {
+      tokenRange = 57;
+    } else if (_amount >= 60_000_001 && _amount <= 100_000_000) {
+      tokenRange = 58;
+    } else if (_amount >= 100_000_001 && _amount <= 600_000_000) {
+      tokenRange = 59;
+    } else if (_amount >= 600_000_001) {
+      tokenRange = 60;
+>>>>>>> c39af014e83f8f3af63d6b6cf7375ba17c3895a1
     } else {
       return 61;
     }
@@ -191,6 +192,7 @@ contract JBVeTokenUriResolver is IJBVeTokenUriResolver {
      The Staking durations below were gleaned from the JBveBanny.sol contract line 55-59.
      Returns the duration multiplier used to index into the proper veBanny mediallion on IPFS.
   */
+<<<<<<< HEAD
   function _getTokenStakeMultiplier(uint256 _duration, uint256[] memory _lockDurationOptions)
     private
     pure
@@ -199,5 +201,55 @@ contract JBVeTokenUriResolver is IJBVeTokenUriResolver {
     for (uint256 _i = 0; _i < _lockDurationOptions.length; _i++)
       if (_lockDurationOptions[_i] == _duration) return _i + 1;
     revert JBErrors.INVALID_LOCK_DURATION();
+=======
+  function getTokenDuration(uint256 _duration) public pure returns (uint256) {
+    if (_duration <= 0) {
+      revert INVALID_DURATION();
+    }
+    uint16 _stakeMultiplier = 0;
+    if (uint256(JBConstants.TEN_DAYS) == _duration) {
+      _stakeMultiplier = 1;
+    } else if (uint256(JBConstants.TWENTY_FIVE_DAYS) == _duration) {
+      _stakeMultiplier = 2;
+    } else if (uint256(JBConstants.ONE_HUNDRED_DAYS) == _duration) {
+      _stakeMultiplier = 3;
+    } else if (uint256(JBConstants.TWO_HUNDRED_FIFTY_DAYS) == _duration) {
+      _stakeMultiplier = 4;
+    } else if (uint256(JBConstants.ONE_THOUSAND_DAYS) == _duration) {
+      _stakeMultiplier = 5;
+    } else {
+      revert INVALID_DURATION();
+    }
+    return _stakeMultiplier;
+  }
+
+  /**
+     @notice Computes the specific veBanny IPFS URI  based on the above locked Juicebox token range index and the duration multiplier.
+     @param _amount Amount of locked Juicebox. 
+     @param _duration Duration in seconds to stake Juicebox.
+     Returns one of the epic and totally righteous veBanny character IPFS URI the user is entitled to with the aforementioned parameters.
+    */
+  function tokenURI(uint256 _amount, uint256 _duration) public pure returns (string memory uri) {
+    if (_amount <= 0) {
+      revert INSUFFICIENT_BALANCE();
+    }
+    if (_duration <= 0) {
+      revert INVALID_DURATION();
+    }
+    // Convert the token amount and duration to indexes
+    uint256 _tokenRange = getTokenRange(_amount);
+    uint256 _stakeDuration = getTokenDuration(_duration);
+    /*
+      To account for multiplicative identity and since we don't have zero as an index we 
+      can do the following magic to insure proper Banny character assignment.
+    */
+    return
+      string(
+        abi.encodePacked(
+          'ipfs://QmWSL7jMuEkkk9798eWVMY9WYurAPRfPDVkHF1e7wJqzdX/',
+          Strings.toString(_tokenRange * 5 - 5 + _stakeDuration)
+        )
+      );
+>>>>>>> c39af014e83f8f3af63d6b6cf7375ba17c3895a1
   }
 }
