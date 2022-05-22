@@ -148,6 +148,10 @@ abstract contract TestBaseWorkflow is DSTest {
     return address(_jbERC20PaymentTerminal);
   }
 
+  function jbToken() internal view returns (JBToken) {
+    return _jbToken;
+  }
+
   //*********************************************************************//
   // --------------------------- test setup ---------------------------- //
   //*********************************************************************//
@@ -194,7 +198,7 @@ abstract contract TestBaseWorkflow is DSTest {
     evm.prank(_multisig);
     _jbToken = new JBToken('MyToken', 'MT');
     evm.prank(_multisig);
-    _jbToken.mint(0, _multisig, 100 * 10**18);
+    _jbToken.mint(0, _multisig, 100 ether);
 
     // AccessJBLib
     _accessJBLib = new AccessJBLib();

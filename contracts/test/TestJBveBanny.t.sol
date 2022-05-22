@@ -11,6 +11,8 @@ contract JBveBannyTests is TestBaseWorkflow {
   JBveBanny private _jbveBanny;
   JBVeTokenUriResolver private _jbveTokenUriResolver;
   IJBToken _token;
+    IJBToken _jbtoken;
+
   JBTokenStore private _jbTokenStore;
   JBController private _jbController;
   JBOperatorStore private _jbOperatorStore;
@@ -32,7 +34,9 @@ contract JBveBannyTests is TestBaseWorkflow {
     _jbController = jbController();
     _redemptionTerminal = jbERC20PaymentTerminal();
     _projectOwner = projectOwner();
+    _jbtoken = jbToken();
     _token = _jbTokenStore.tokenOf(_projectId);
+
 
     // Send some funds in the overflow
     evm.startPrank(_projectOwner);
@@ -45,6 +49,7 @@ contract JBveBannyTests is TestBaseWorkflow {
       'Forge test',
       new bytes(0)
     );
+    
     evm.stopPrank();
 
     // lock duration options array to be used for mock deployment
@@ -138,7 +143,7 @@ contract JBveBannyTests is TestBaseWorkflow {
   function testRedeem() public {    
     evm.startPrank(_projectOwner);
     _token.approve(_projectId, address(_jbveBanny), 10 ether);
-    
+    // assert(_token.allowance(_projectId, _projectOwner, address(_jbveBanny) >= 10 ether));
     uint256 _tokenId = _jbveBanny.lock(_projectOwner, 10 ether, 864000, _projectOwner, true, false);
     (, , uint256 lockedUntil, , ) = _jbveBanny.getSpecs(_tokenId);
     evm.warp(lockedUntil * 2);
@@ -163,14 +168,17 @@ contract JBveBannyTests is TestBaseWorkflow {
       IJBRedemptionTerminal(_redemptionTerminal)
     );
 
-    uint balBefore = _jbTokenStore.balanceOf(_projectOwner, _projectId);
-
+    uint balBefore = _jbTokenStore.balanceOf(address(_jbveBanny), _projectId);
+    uint jbtoknenBalBefore = _jbtoken.balanceOf(_projectOwner, _projectId);
     evm.prank(_projectOwner);
     _jbveBanny.redeem(redeems);
-    uint balAfter = _jbTokenStore.balanceOf(_projectOwner, _projectId);
+    uint jbtoknenBalAfter = _jbtoken.balanceOf(_projectOwner, _projectId);
+
+    uint balAfter = _jbTokenStore.balanceOf(address(_jbveBanny), _projectId);
+
     assert(balAfter < balBefore);
+    assert(jbtoknenBalAfter > jbtoknenBalBefore);
     
-    // assertEq(_token.balanceOf(address(_jbveBanny), _projectId), 0);
   }
 
   // function testScenarioWithInvalidFlagForPublicExtension() public {
