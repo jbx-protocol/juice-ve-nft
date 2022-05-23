@@ -5,6 +5,7 @@ import './DSTest.t.sol';
 import './hevm.t.sol';
 import '../../JBveBanny.sol';
 import '../../JBVeTokenUriResolver.sol';
+import './AccessJBLib.sol';
 
 import '@jbx-protocol/contracts-v2/contracts/JBDirectory.sol';
 import '@jbx-protocol/contracts-v2/contracts/JBETHPaymentTerminal.sol';
@@ -17,6 +18,7 @@ import '@jbx-protocol/contracts-v2/contracts/JBFundingCycleStore.sol';
 import '@jbx-protocol/contracts-v2/contracts/JBSplitsStore.sol';
 import '@jbx-protocol/contracts-v2/contracts/JBController.sol';
 import '@jbx-protocol/contracts-v2/contracts/JBToken.sol';
+import '@jbx-protocol/contracts-v2/contracts/JBERC20PaymentTerminal.sol';
 
 import '@jbx-protocol/contracts-v2/contracts/structs/JBProjectMetadata.sol';
 import '@jbx-protocol/contracts-v2/contracts/structs/JBFundingCycleData.sol';
@@ -76,8 +78,14 @@ abstract contract TestBaseWorkflow is DSTest {
   JBFundAccessConstraints[] private _fundAccessConstraints;
   // JBETHPaymentTerminalStore
   JBSingleTokenPaymentTerminalStore private _jbPaymentTerminalStore;
+  // JBERC20PaymentTerminal
+  JBERC20PaymentTerminal private _jbERC20PaymentTerminal;
+  // JBToken
+  JBToken private _jbToken;
   // IJBTerminal
   IJBPaymentTerminal[] private _terminals;
+  // AccessJBLib
+  AccessJBLib private _accessJBLib;
 
   uint256 private _projectId;
   address private _projectOwner;
@@ -135,6 +143,15 @@ abstract contract TestBaseWorkflow is DSTest {
     return _projectOwner;
   }
 
+  function jbERC20PaymentTerminal() internal view returns (address) {
+    return address(_jbERC20PaymentTerminal);
+  }
+
+  function jbToken() internal view returns (JBToken) {
+    return _jbToken;
+  }
+
+
   //*********************************************************************//
   // --------------------------- test setup ---------------------------- //
   //*********************************************************************//
@@ -171,7 +188,47 @@ abstract contract TestBaseWorkflow is DSTest {
       _jbTokenStore,
       _jbSplitsStore
     );
+
+    _jbPaymentTerminalStore = new JBSingleTokenPaymentTerminalStore(
+      _jbDirectory,
+      _jbFundingCycleStore,
+      _jbPrices
+    );
+
+    evm.prank(_multisig);
+    _jbToken = new JBToken('MyToken', 'MT');
+    evm.prank(_multisig);
+    _jbToken.mint(0, _multisig, 100 ether);
+
+    // AccessJBLib
+    _accessJBLib = new AccessJBLib();
+
+    _jbERC20PaymentTerminal = new JBERC20PaymentTerminal(
+      _jbToken,
+      _accessJBLib.ETH(), // currency
+      _accessJBLib.ETH(), // base weight currency
+      1, // JBSplitsGroupe
+      _jbOperatorStore,
+      _jbProjects,
+      _jbDirectory,
+      _jbSplitsStore,
+      _jbPrices,
+      _jbPaymentTerminalStore,
+      _multisig
+    );
+
     evm.startPrank(_projectOwner);
+
+    _fundAccessConstraints.push(
+      JBFundAccessConstraints({
+        terminal: _jbERC20PaymentTerminal,
+        token: address(_jbToken),
+        distributionLimit: 10 * 10**18,
+        overflowAllowance: 5 * 10**18,
+        distributionLimitCurrency: _accessJBLib.ETH(),
+        overflowAllowanceCurrency: _accessJBLib.ETH()
+      })
+    );
     _jbDirectory.setIsAllowedToSetFirstController(address(_jbController), true);
 
     // JBETHPaymentTerminal
@@ -187,6 +244,7 @@ abstract contract TestBaseWorkflow is DSTest {
         _multisig
       )
     );
+    _terminals.push(_jbERC20PaymentTerminal);
 
     evm.stopPrank();
     // JBVeTokenUriResolver

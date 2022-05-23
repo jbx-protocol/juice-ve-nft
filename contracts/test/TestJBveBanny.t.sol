@@ -14,8 +14,11 @@ contract JBveBannyTests is TestBaseWorkflow {
   JBTokenStore private _jbTokenStore;
   JBController private _jbController;
   JBOperatorStore private _jbOperatorStore;
+  address private _redemptionTerminal;
   uint256 private _projectId;
   address private _projectOwner;
+  IJBToken _token;
+  JBToken _jbTerminalToken;
 
   //*********************************************************************//
   // --------------------------- test setup ---------------------------- //
@@ -29,6 +32,8 @@ contract JBveBannyTests is TestBaseWorkflow {
     _jbOperatorStore = jbOperatorStore();
     _jbveTokenUriResolver = jbveTokenUriResolver();
     _jbController = jbController();
+    _redemptionTerminal = jbERC20PaymentTerminal();
+    _jbTerminalToken = jbToken();
 
     // lock duration options array to be used for mock deployment
     // All have to be dividable by weeks
@@ -63,30 +68,30 @@ contract JBveBannyTests is TestBaseWorkflow {
   }
 
   function mintIJBTokens() public returns (IJBToken) {
-    IJBToken _token = _jbTokenStore.tokenOf(_projectId);
+    IJBToken _jbToken = _jbTokenStore.tokenOf(_projectId);
     _projectOwner = projectOwner();
     evm.startPrank(_projectOwner);
     _jbController.mintTokensOf(_projectId, 100 ether, _projectOwner, 'Test Memo', true, true);
-    _token.approve(_projectId, address(_jbveBanny), 10 ether);
-    return _token;
+    _jbToken.approve(_projectId, address(_jbveBanny), 10 ether);
+    return _jbToken;
   }
 
   function mintIJBTokensFor(address _account, uint256 _amount) public returns (IJBToken) {
-    IJBToken _token = _jbTokenStore.tokenOf(_projectId);
+    IJBToken _jbToken = _jbTokenStore.tokenOf(_projectId);
     _projectOwner = projectOwner();
 
     evm.startPrank(_projectOwner);
     // Mint tokens for project owner
     _jbController.mintTokensOf(_projectId, _amount * 10, _projectOwner, 'Test Memo', true, true);
     // Transfer tokens to account
-    _token.transfer(_projectId, _account, _amount);
+    _jbToken.transfer(_projectId, _account, _amount);
     evm.stopPrank();
 
     // Approve accounts tokens for jbveBanny
     evm.prank(_account);
-    _token.approve(_projectId, address(_jbveBanny), _amount);
+    _jbToken.approve(_projectId, address(_jbveBanny), _amount);
 
-    return _token;
+    return _jbToken;
   }
 
   function testLockWithJBToken() public {
@@ -107,7 +112,7 @@ contract JBveBannyTests is TestBaseWorkflow {
   }
 
   function testUnlockingTokens() public {
-    IJBToken _token = mintIJBTokens();
+    IJBToken _jbToken = mintIJBTokens();
     _jbveBanny.lock(_projectOwner, 10 ether, 604800, _projectOwner, true, false);
     (, , uint256 lockedUntil, , ) = _jbveBanny.getSpecs(1);
     evm.warp(lockedUntil + 2);
@@ -119,7 +124,7 @@ contract JBveBannyTests is TestBaseWorkflow {
     (int128 _amount, uint256 end, , , ) = _jbveBanny.locked(1);
     assertEq(_amount, 0);
     assertEq(end, 0);
-    assertEq(_token.balanceOf(address(_jbveBanny), _projectId), 0);
+    assertEq(_jbToken.balanceOf(address(_jbveBanny), _projectId), 0);
   }
 
   function testExtendLock() public {
@@ -139,6 +144,55 @@ contract JBveBannyTests is TestBaseWorkflow {
     assertEq(duration, 2419200);
   }
 
+
+  function testRedeem() public {
+    mintIJBTokens();
+    uint256 _tokenId = _jbveBanny.lock(_projectOwner, 10 ether, 604800, _projectOwner, true, false);
+    (, , uint256 lockedUntil, , ) = _jbveBanny.getSpecs(_tokenId);
+    evm.warp(lockedUntil * 2);
+    evm.stopPrank();
+
+    evm.startPrank(address(_jbveBanny));
+    uint256[] memory _permissionIndexes = new uint256[](1);
+    _permissionIndexes[0] = JBOperations.BURN;
+    jbOperatorStore().setOperator(
+      JBOperatorData(address(_redemptionTerminal), _projectId, _permissionIndexes)
+    );
+    evm.stopPrank();
+
+    evm.startPrank(_projectOwner);
+    // adding overflow
+    _jbTerminalToken.approve(address(_redemptionTerminal), 40 ether);
+     IJBPaymentTerminal(_redemptionTerminal).addToBalanceOf(
+      _projectId,
+      40 ether,
+      address(0),
+      'Forge test',
+      new bytes(0)
+    );
+
+    JBRedeemData[] memory redeems = new JBRedeemData[](1);
+    redeems[0] = JBRedeemData(
+      _tokenId,
+      address(0),
+      1 ether,
+      payable(_projectOwner),
+      'test memo',
+      '0x69',
+      IJBRedemptionTerminal(_redemptionTerminal)
+    );
+
+    uint tokenStoreBalanceBeforeRedeem = _jbTokenStore.balanceOf(address(_jbveBanny), _projectId);
+    uint jbTerminalTokenBalanceBeforeRedeem = _jbTerminalToken.balanceOf(_projectOwner, _projectId);
+
+    _jbveBanny.redeem(redeems);
+
+    uint jbTerminalTokenBalanceAfterRedeem = _jbTerminalToken.balanceOf(_projectOwner, _projectId);
+    uint tokenStoreBalanceAfterRedeem = _jbTokenStore.balanceOf(address(_jbveBanny), _projectId);
+
+    assert(tokenStoreBalanceBeforeRedeem > tokenStoreBalanceAfterRedeem);
+    assert(jbTerminalTokenBalanceAfterRedeem > jbTerminalTokenBalanceBeforeRedeem);
+  }
   function testScenarioWithInvalidLockDuration() public {
     mintIJBTokens();
     evm.expectRevert(abi.encodeWithSignature('INVALID_LOCK_DURATION()'));
