@@ -8,7 +8,6 @@ import '../../JBVeTokenUriResolver.sol';
 import './AccessJBLib.sol';
 
 import '@jbx-protocol/contracts-v2/contracts/JBDirectory.sol';
-import '@jbx-protocol/contracts-v2/contracts/JBETHPaymentTerminal.sol';
 import '@jbx-protocol/contracts-v2/contracts/JBSingleTokenPaymentTerminalStore.sol';
 import '@jbx-protocol/contracts-v2/contracts/JBOperatorStore.sol';
 import '@jbx-protocol/contracts-v2/contracts/JBPrices.sol';
@@ -231,19 +230,6 @@ abstract contract TestBaseWorkflow is DSTest {
     );
     _jbDirectory.setIsAllowedToSetFirstController(address(_jbController), true);
 
-    // JBETHPaymentTerminal
-    _terminals.push(
-      new JBETHPaymentTerminal(
-        JBCurrencies.ETH,
-        _jbOperatorStore,
-        _jbProjects,
-        _jbDirectory,
-        _jbSplitsStore,
-        _jbPrices,
-        _jbPaymentTerminalStore,
-        _multisig
-      )
-    );
     _terminals.push(_jbERC20PaymentTerminal);
 
     evm.stopPrank();
@@ -262,7 +248,7 @@ abstract contract TestBaseWorkflow is DSTest {
 
     _metadata = JBFundingCycleMetadata({
       reservedRate: _reservedRate,
-      redemptionRate: 5000,
+      redemptionRate: 10000,
       ballotRedemptionRate: 0,
       pausePay: false,
       pauseDistributions: false,

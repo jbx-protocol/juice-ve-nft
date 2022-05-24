@@ -38,9 +38,9 @@ contract JBveBannyTests is TestBaseWorkflow {
     // lock duration options array to be used for mock deployment
     // All have to be dividable by weeks
     uint256[] memory _lockDurationOptions = new uint256[](3);
-    _lockDurationOptions[0] = 604800; // 1 week
-    _lockDurationOptions[1] = 2419200; // 4 weeks
-    _lockDurationOptions[2] = 7257600; // 12 weeks
+    _lockDurationOptions[0] = 1 weeks; // 1 week
+    _lockDurationOptions[1] = 4 weeks; // 4 weeks
+    _lockDurationOptions[2] = 12 weeks; // 12 weeks
 
     // JBveBanny
     _jbveBanny = new JBveBanny(
@@ -57,9 +57,9 @@ contract JBveBannyTests is TestBaseWorkflow {
   function testConstructor() public {
     // All have to be dividable by weeks
     uint256[] memory _lockDurationOptions = new uint256[](3);
-    _lockDurationOptions[0] = 604800; // 1 week
-    _lockDurationOptions[1] = 2419200; // 4 weeks
-    _lockDurationOptions[2] = 7257600; // 12 weeks
+    _lockDurationOptions[0] = 1 weeks; // 1 week
+    _lockDurationOptions[1] = 4 weeks; // 4 weeks
+    _lockDurationOptions[2] = 12 weeks; // 12 weeks
     // assertion checks for constructor code
     assertEq(address(_jbTokenStore.tokenOf(_projectId)), address(_jbveBanny.token()));
     assertEq(address(_jbveTokenUriResolver), address(_jbveBanny.uriResolver()));
@@ -162,10 +162,10 @@ contract JBveBannyTests is TestBaseWorkflow {
 
     evm.startPrank(_projectOwner);
     // adding overflow
-    _jbTerminalToken.approve(address(_redemptionTerminal), 40 ether);
+    _jbTerminalToken.approve(address(_redemptionTerminal), 20 ether);
      IJBPaymentTerminal(_redemptionTerminal).addToBalanceOf(
       _projectId,
-      40 ether,
+      20 ether,
       address(0),
       'Forge test',
       new bytes(0)
