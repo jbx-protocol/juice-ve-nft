@@ -99,16 +99,16 @@ contract JBveBannyTests is TestBaseWorkflow {
     _jbveBanny.lock(_projectOwner, 10 ether, 1 weeks, _projectOwner, true, false);
     (int128 _amount, , uint256 _duration, bool _useJbToken, bool _allowPublicExtension) = _jbveBanny
       .locked(1);
-    assert(_jbveBanny.tokenVotingPowerAt(1, block.number) > 0);
+    assertGt(_jbveBanny.tokenVotingPowerAt(1, block.number), 0);
     assertEq(_amount, 10 ether);
     assertEq(_duration, 1 weeks);
-    assert(_useJbToken);
-    assert(!_allowPublicExtension);
+    assertTrue(_useJbToken);
+    assertTrue(!_allowPublicExtension);
     assertEq(_jbveBanny.ownerOf(1), _projectOwner);
     (uint256 amount, uint256 duration, , bool isJbToken, ) = _jbveBanny.getSpecs(1);
     assertEq(amount, 10 ether);
     assertEq(duration, 1 weeks);
-    assert(isJbToken);
+    assertTrue(isJbToken);
   }
 
   function testUnlockingTokens() public {
@@ -120,7 +120,7 @@ contract JBveBannyTests is TestBaseWorkflow {
     JBUnlockData[] memory unlocks = new JBUnlockData[](1);
     unlocks[0] = JBUnlockData(1, _projectOwner);
     _jbveBanny.unlock(unlocks);
-    assert(_jbveBanny.tokenVotingPowerAt(1, block.number) == 0);
+    assertTrue(_jbveBanny.tokenVotingPowerAt(1, block.number) == 0);
     (int128 _amount, uint256 _end, , , ) = _jbveBanny.locked(1);
     assertEq(_amount, 0);
     assertEq(_end, 0);
@@ -139,7 +139,7 @@ contract JBveBannyTests is TestBaseWorkflow {
     extends[0] = JBLockExtensionData(1, 2419200);
     _tokenId = _jbveBanny.extendLock(extends)[0];
     uint256 votingPowerAfterExtending = _jbveBanny.tokenVotingPowerAt(1, block.number);
-    assert(votingPowerAfterExtending > votingPowerBeforeExtending);
+    assertGt(votingPowerAfterExtending, votingPowerBeforeExtending);
     (, _duration, , , ) = _jbveBanny.getSpecs(_tokenId);
     assertEq(_duration, 2419200);
   }
@@ -190,8 +190,8 @@ contract JBveBannyTests is TestBaseWorkflow {
     uint jbTerminalTokenBalanceAfterRedeem = _paymentToken.balanceOf(_projectOwner, _projectId);
     uint tokenStoreBalanceAfterRedeem = _jbTokenStore.balanceOf(address(_jbveBanny), _projectId);
 
-    assert(tokenStoreBalanceBeforeRedeem > tokenStoreBalanceAfterRedeem);
-    assert(jbTerminalTokenBalanceAfterRedeem > jbTerminalTokenBalanceBeforeRedeem);
+    assertGt(tokenStoreBalanceBeforeRedeem, tokenStoreBalanceAfterRedeem);
+    assertGt(jbTerminalTokenBalanceAfterRedeem, jbTerminalTokenBalanceBeforeRedeem);
   }
   function testScenarioWithInvalidLockDuration() public {
     mintIJBTokens();
@@ -253,13 +253,13 @@ contract JBveBannyTests is TestBaseWorkflow {
       JBOperatorData(address(_jbveBanny), _projectId, _permissionIndexes)
     );
     _jbveBanny.lock(_projectOwner, 10 ether, 1 weeks, _projectOwner, false, false);
-    assert(_jbveBanny.tokenVotingPowerAt(1, block.number) > 0);
+    assertGt(_jbveBanny.tokenVotingPowerAt(1, block.number), 0);
     (int128 _amount, , uint256 _duration, bool _useJbToken, bool _allowPublicExtension) = _jbveBanny
       .locked(1);
     assertEq(_amount, 10 ether);
     assertEq(_duration, 1 weeks);
-    assert(!_useJbToken);
-    assert(!_allowPublicExtension);
+    assertTrue(!_useJbToken);
+    assertTrue(!_allowPublicExtension);
     assertEq(_jbveBanny.ownerOf(1), _projectOwner);
     (uint256 amount, uint256 duration, , , ) = _jbveBanny.getSpecs(1);
     assertEq(amount, 10 ether);
@@ -270,10 +270,10 @@ contract JBveBannyTests is TestBaseWorkflow {
     mintIJBTokens();
 
     _jbveBanny.lock(_projectOwner, 5 ether, 1 weeks, _projectOwner, true, false);
-    assert(_jbveBanny.tokenVotingPowerAt(1, block.number) > 0);
+    assertGt(_jbveBanny.tokenVotingPowerAt(1, block.number), 0);
 
     _jbveBanny.lock(_projectOwner, 5 ether, 2419200, _projectOwner, true, false);
-    assert(_jbveBanny.tokenVotingPowerAt(2, block.number) > 0);
+    assertGt(_jbveBanny.tokenVotingPowerAt(2, block.number), 0);
 
     // Since lock-2 is 4x as long as lock-1, it should have x4 the voting power
     // (might be slightly more or less due to rounding to nearest week)
@@ -372,7 +372,7 @@ contract JBveBannyTests is TestBaseWorkflow {
       );
 
       assertEq(_historicVotingPower[_i], _votingPowerAtBlock);
-      assert(_historicVotingPower[_i] > 0 && _votingPowerAtBlock > 0);
+      assertTrue(_historicVotingPower[_i] > 0 && _votingPowerAtBlock > 0);
     }
   }
 
@@ -388,7 +388,7 @@ contract JBveBannyTests is TestBaseWorkflow {
     _jbveBanny.lock(_user, 5 ether, 1 weeks, _user, true, false);
 
     // Did the user receive the voting power
-    assert(_jbveBanny.getVotes(_user) - _initialVotingPower > 0);
+    assertGt(_jbveBanny.getVotes(_user) - _initialVotingPower, 0);
   }
 
   function testVotingPowerDoesNotGetActivatedIfMintedForOtherUser() public {
@@ -403,7 +403,7 @@ contract JBveBannyTests is TestBaseWorkflow {
     _jbveBanny.lock(_user, 5 ether, 1 weeks, _projectOwner, true, false);
 
     // The user should now have an increased voting power
-    assert(_jbveBanny.getVotes(_projectOwner) - _initialVotingPower == 0);
+    assertTrue(_jbveBanny.getVotes(_projectOwner) - _initialVotingPower == 0);
   }
 
   function testActivatingVotingPower() public {
@@ -418,14 +418,14 @@ contract JBveBannyTests is TestBaseWorkflow {
     uint256 _tokenId = _jbveBanny.lock(_user, 5 ether, 1 weeks, _projectOwner, true, false);
 
     // There should be no change
-    assert(_jbveBanny.getVotes(_projectOwner) - _initialVotingPower == 0);
+    assertTrue(_jbveBanny.getVotes(_projectOwner) - _initialVotingPower == 0);
 
     // As the benificiary enable the voting power of the token
     evm.prank(_projectOwner);
     _jbveBanny.activateVotingPower(_tokenId);
 
     // Should now be higher
-    assert(_jbveBanny.getVotes(_projectOwner) - _initialVotingPower > 0);
+    assertGt(_jbveBanny.getVotes(_projectOwner) - _initialVotingPower, 0);
   }
 
   function testVotingPowerGetsDisabledOnTransfer() public {
@@ -444,7 +444,7 @@ contract JBveBannyTests is TestBaseWorkflow {
     uint256 _afterMintVotingPower = _jbveBanny.getVotes(_userA);
 
     // UserA should have received voting power
-    assert(_afterMintVotingPower - _initialVotingPower > 0);
+    assertGt(_afterMintVotingPower - _initialVotingPower, 0);
 
     // Get the voting power of user B
     uint256 _userBVotingPowerBeforeTransfer = _jbveBanny.getVotes(_userB);
