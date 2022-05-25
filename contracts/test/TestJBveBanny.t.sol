@@ -17,7 +17,6 @@ contract JBveBannyTests is TestBaseWorkflow {
   address private _redemptionTerminal;
   uint256 private _projectId;
   address private _projectOwner;
-  IJBToken _token;
   JBToken _paymentToken;
 
   //*********************************************************************//

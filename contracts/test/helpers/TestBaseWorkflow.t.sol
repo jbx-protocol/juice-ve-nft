@@ -80,7 +80,7 @@ abstract contract TestBaseWorkflow is DSTest {
   // JBERC20PaymentTerminal
   JBERC20PaymentTerminal private _jbERC20PaymentTerminal;
   // JBToken
-  JBToken private _jbToken;
+  JBToken private _paymentToken;
   // IJBTerminal
   IJBPaymentTerminal[] private _terminals;
   // AccessJBLib
@@ -147,7 +147,7 @@ abstract contract TestBaseWorkflow is DSTest {
   }
 
   function jbToken() internal view returns (JBToken) {
-    return _jbToken;
+    return _paymentToken;
   }
 
 
@@ -195,15 +195,15 @@ abstract contract TestBaseWorkflow is DSTest {
     );
 
     evm.prank(_multisig);
-    _jbToken = new JBToken('MyToken', 'MT');
+    _paymentToken = new JBToken('MyToken', 'MT');
     evm.prank(_multisig);
-    _jbToken.mint(0, _multisig, 100 ether);
+    _paymentToken.mint(0, _multisig, 100 ether);
 
     // AccessJBLib
     _accessJBLib = new AccessJBLib();
 
     _jbERC20PaymentTerminal = new JBERC20PaymentTerminal(
-      _jbToken,
+      _paymentToken,
       _accessJBLib.ETH(), // currency
       _accessJBLib.ETH(), // base weight currency
       1, // JBSplitsGroupe
@@ -221,7 +221,7 @@ abstract contract TestBaseWorkflow is DSTest {
     _fundAccessConstraints.push(
       JBFundAccessConstraints({
         terminal: _jbERC20PaymentTerminal,
-        token: address(_jbToken),
+        token: address(_paymentToken),
         distributionLimit: 10 * 10**18,
         overflowAllowance: 5 * 10**18,
         distributionLimitCurrency: _accessJBLib.ETH(),
