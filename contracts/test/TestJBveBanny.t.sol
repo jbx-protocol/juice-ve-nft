@@ -207,14 +207,15 @@ contract JBveBannyTests is TestBaseWorkflow {
       _projectId
     );
     uint256 jbTerminalTokenBalanceBeforeRedeem = _paymentToken.balanceOf(_projectOwner, _projectId);
-
+    uint256 totalSupply = jbController().totalOutstandingTokensOf(_projectId, 5000);
+    uint256 overflow = jbPaymentTerminalStore().currentTotalOverflowOf(_projectId, 18, 1);
     _jbveBanny.redeem(redeems);
 
     uint256 jbTerminalTokenBalanceAfterRedeem = _paymentToken.balanceOf(_projectOwner, _projectId);
     uint256 tokenStoreBalanceAfterRedeem = _jbTokenStore.balanceOf(address(_jbveBanny), _projectId);
 
     assertGt(tokenStoreBalanceBeforeRedeem, tokenStoreBalanceAfterRedeem);
-    assertGt(jbTerminalTokenBalanceAfterRedeem, jbTerminalTokenBalanceBeforeRedeem);
+    assertEq(jbTerminalTokenBalanceAfterRedeem, jbTerminalTokenBalanceBeforeRedeem + ((10 ether * overflow) / totalSupply));
     evm.stopPrank();
   }
 
