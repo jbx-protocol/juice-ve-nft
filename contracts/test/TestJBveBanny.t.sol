@@ -55,7 +55,7 @@ contract JBveBannyTests is TestBaseWorkflow {
   }
 
   function testConstructor() public {
-    // All have to be dividable by weeks
+    // Every duration has to be a multiple of weeks
     uint256[] memory _lockDurationOptions = new uint256[](3);
     _lockDurationOptions[0] = 1 weeks; // 1 week
     _lockDurationOptions[1] = 4 weeks; // 4 weeks
@@ -67,16 +67,17 @@ contract JBveBannyTests is TestBaseWorkflow {
     assertEq(_lockDurationOptions[0], _jbveBanny.lockDurationOptions()[0]);
   }
 
-  function mintIJBTokens() public returns (IJBToken) {
+  function mintAndApproveIJBTokens() public returns (IJBToken) {
     IJBToken _jbToken = _jbTokenStore.tokenOf(_projectId);
     _projectOwner = projectOwner();
     evm.startPrank(_projectOwner);
     _jbController.mintTokensOf(_projectId, 100 ether, _projectOwner, 'Test Memo', true, true);
     _jbToken.approve(_projectId, address(_jbveBanny), 10 ether);
+    evm.stopPrank();
     return _jbToken;
   }
 
-  function mintIJBTokensFor(address _account, uint256 _amount) public returns (IJBToken) {
+  function mintAndApproveIJBTokensFor(address _account, uint256 _amount) public returns (IJBToken) {
     IJBToken _jbToken = _jbTokenStore.tokenOf(_projectId);
     _projectOwner = projectOwner();
 
@@ -95,7 +96,8 @@ contract JBveBannyTests is TestBaseWorkflow {
   }
 
   function testLockWithJBToken() public {
-    mintIJBTokens();
+    mintAndApproveIJBTokens();
+    evm.startPrank(_projectOwner);
     _jbveBanny.lock(_projectOwner, 10 ether, 1 weeks, _projectOwner, true, false);
     (int128 _amount, , uint256 _duration, bool _useJbToken, bool _allowPublicExtension) = _jbveBanny
       .locked(1);
@@ -109,10 +111,12 @@ contract JBveBannyTests is TestBaseWorkflow {
     assertEq(amount, 10 ether);
     assertEq(duration, 1 weeks);
     assertTrue(isJbToken);
+    evm.stopPrank();
   }
 
   function testUnlockingTokens() public {
-    IJBToken _jbToken = mintIJBTokens();
+    IJBToken _jbToken = mintAndApproveIJBTokens();
+    evm.startPrank(_projectOwner);
     _jbveBanny.lock(_projectOwner, 10 ether, 1 weeks, _projectOwner, true, false);
     (, , uint256 _lockedUntil, , ) = _jbveBanny.getSpecs(1);
     evm.warp(_lockedUntil + 2);
@@ -125,11 +129,20 @@ contract JBveBannyTests is TestBaseWorkflow {
     assertEq(_amount, 0);
     assertEq(_end, 0);
     assertEq(_jbToken.balanceOf(address(_jbveBanny), _projectId), 0);
+    evm.stopPrank();
   }
 
   function testExtendLock() public {
-    mintIJBTokens();
-    uint256 _tokenId = _jbveBanny.lock(_projectOwner, 10 ether, 1 weeks, _projectOwner, true, false);
+    mintAndApproveIJBTokens();
+    evm.startPrank(_projectOwner);
+    uint256 _tokenId = _jbveBanny.lock(
+      _projectOwner,
+      10 ether,
+      1 weeks,
+      _projectOwner,
+      true,
+      false
+    );
     (, uint256 _duration, uint256 _lockedUntil, , ) = _jbveBanny.getSpecs(_tokenId);
     assertEq(_duration, 1 weeks);
     evm.warp(_lockedUntil + 2);
@@ -142,12 +155,20 @@ contract JBveBannyTests is TestBaseWorkflow {
     assertGt(votingPowerAfterExtending, votingPowerBeforeExtending);
     (, _duration, , , ) = _jbveBanny.getSpecs(_tokenId);
     assertEq(_duration, 2419200);
+    evm.stopPrank();
   }
 
-
   function testRedeem() public {
-    mintIJBTokens();
-    uint256 _tokenId = _jbveBanny.lock(_projectOwner, 10 ether, 1 weeks, _projectOwner, true, false);
+    mintAndApproveIJBTokens();
+    evm.startPrank(_projectOwner);
+    uint256 _tokenId = _jbveBanny.lock(
+      _projectOwner,
+      10 ether,
+      1 weeks,
+      _projectOwner,
+      true,
+      false
+    );
     (, , uint256 _lockedUntil, , ) = _jbveBanny.getSpecs(_tokenId);
     evm.warp(_lockedUntil * 2);
     evm.stopPrank();
@@ -163,7 +184,7 @@ contract JBveBannyTests is TestBaseWorkflow {
     evm.startPrank(_projectOwner);
     // adding overflow
     _paymentToken.approve(address(_redemptionTerminal), 20 ether);
-     IJBPaymentTerminal(_redemptionTerminal).addToBalanceOf(
+    IJBPaymentTerminal(_redemptionTerminal).addToBalanceOf(
       _projectId,
       20 ether,
       address(0),
@@ -182,31 +203,41 @@ contract JBveBannyTests is TestBaseWorkflow {
       IJBRedemptionTerminal(_redemptionTerminal)
     );
 
-    uint tokenStoreBalanceBeforeRedeem = _jbTokenStore.balanceOf(address(_jbveBanny), _projectId);
-    uint jbTerminalTokenBalanceBeforeRedeem = _paymentToken.balanceOf(_projectOwner, _projectId);
+    uint256 tokenStoreBalanceBeforeRedeem = _jbTokenStore.balanceOf(
+      address(_jbveBanny),
+      _projectId
+    );
+    uint256 jbTerminalTokenBalanceBeforeRedeem = _paymentToken.balanceOf(_projectOwner, _projectId);
 
     _jbveBanny.redeem(redeems);
 
-    uint jbTerminalTokenBalanceAfterRedeem = _paymentToken.balanceOf(_projectOwner, _projectId);
-    uint tokenStoreBalanceAfterRedeem = _jbTokenStore.balanceOf(address(_jbveBanny), _projectId);
+    uint256 jbTerminalTokenBalanceAfterRedeem = _paymentToken.balanceOf(_projectOwner, _projectId);
+    uint256 tokenStoreBalanceAfterRedeem = _jbTokenStore.balanceOf(address(_jbveBanny), _projectId);
 
     assertGt(tokenStoreBalanceBeforeRedeem, tokenStoreBalanceAfterRedeem);
     assertGt(jbTerminalTokenBalanceAfterRedeem, jbTerminalTokenBalanceBeforeRedeem);
+    evm.stopPrank();
   }
+
   function testScenarioWithInvalidLockDuration() public {
-    mintIJBTokens();
+    mintAndApproveIJBTokens();
+    evm.startPrank(_projectOwner);
     evm.expectRevert(abi.encodeWithSignature('INVALID_LOCK_DURATION()'));
     _jbveBanny.lock(_projectOwner, 10 ether, 864001, _projectOwner, true, false);
+    evm.stopPrank();
   }
 
   function testScenarioWithInsufficientBalance() public {
-    mintIJBTokens();
+    mintAndApproveIJBTokens();
+    evm.startPrank(_projectOwner);
     evm.expectRevert('ERC20: transfer amount exceeds allowance');
     _jbveBanny.lock(_projectOwner, 101 ether, 1 weeks, _projectOwner, true, false);
+    evm.stopPrank();
   }
 
   function testScenarioWhenLockPeriodIsNotOver() public {
-    mintIJBTokens();
+    mintAndApproveIJBTokens();
+    evm.startPrank(_projectOwner);
     _jbveBanny.lock(_projectOwner, 10 ether, 1 weeks, _projectOwner, true, false);
     (, , uint256 _lockedUntil, , ) = _jbveBanny.getSpecs(1);
     evm.warp(_lockedUntil - 2);
@@ -215,10 +246,12 @@ contract JBveBannyTests is TestBaseWorkflow {
     JBUnlockData[] memory unlocks = new JBUnlockData[](1);
     unlocks[0] = JBUnlockData(1, _projectOwner);
     _jbveBanny.unlock(unlocks);
+    evm.stopPrank();
   }
 
   function testScenarioWithInvalidLockDurationWhenExtendingDuration() public {
-    mintIJBTokens();
+    mintAndApproveIJBTokens();
+    evm.startPrank(_projectOwner);
     _jbveBanny.lock(_projectOwner, 10 ether, 1 weeks, _projectOwner, true, false);
     (, uint256 _duration, uint256 _lockedUntil, , ) = _jbveBanny.getSpecs(1);
     assertEq(_duration, 1 weeks);
@@ -228,10 +261,12 @@ contract JBveBannyTests is TestBaseWorkflow {
     JBLockExtensionData[] memory extends = new JBLockExtensionData[](1);
     extends[0] = JBLockExtensionData(1, 2419201);
     _jbveBanny.extendLock(extends);
+    evm.stopPrank();
   }
 
   function testScenarioWithInvalidLockExtension() public {
-    mintIJBTokens();
+    mintAndApproveIJBTokens();
+    evm.startPrank(_projectOwner);
     _jbveBanny.lock(_projectOwner, 10 ether, 1 weeks, _projectOwner, true, false);
     (, uint256 _duration, uint256 _lockedUntil, , ) = _jbveBanny.getSpecs(1);
     assertEq(_duration, 1 weeks);
@@ -241,6 +276,7 @@ contract JBveBannyTests is TestBaseWorkflow {
     JBLockExtensionData[] memory extends = new JBLockExtensionData[](1);
     extends[0] = JBLockExtensionData(1, 2419200);
     _jbveBanny.extendLock(extends);
+    evm.stopPrank();
   }
 
   function testLockWithNonJbToken() public {
@@ -264,11 +300,12 @@ contract JBveBannyTests is TestBaseWorkflow {
     (uint256 amount, uint256 duration, , , ) = _jbveBanny.getSpecs(1);
     assertEq(amount, 10 ether);
     assertEq(duration, 1 weeks);
+    evm.stopPrank();
   }
 
   function testLockVotingPowerIncreasesIfLockedLonger() public {
-    mintIJBTokens();
-
+    mintAndApproveIJBTokens();
+    evm.startPrank(_projectOwner);
     _jbveBanny.lock(_projectOwner, 5 ether, 1 weeks, _projectOwner, true, false);
     assertGt(_jbveBanny.tokenVotingPowerAt(1, block.number), 0);
 
@@ -281,15 +318,23 @@ contract JBveBannyTests is TestBaseWorkflow {
       _jbveBanny.tokenVotingPowerAt(2, block.number),
       _jbveBanny.tokenVotingPowerAt(1, block.number) * 4
     );
+    evm.stopPrank();
   }
 
   function testLockVotingPowerDecreasesOverTime() public {
-    mintIJBTokens();
-
+    mintAndApproveIJBTokens();
+    evm.startPrank(_projectOwner);
     uint256 _steps = 4;
     uint256 _secondsPerBlock = 1;
     uint256 _lastVotingPower = 0;
-    uint256 _tokenId = _jbveBanny.lock(_projectOwner, 10 ether, 1 weeks, _projectOwner, true, false);
+    uint256 _tokenId = _jbveBanny.lock(
+      _projectOwner,
+      10 ether,
+      1 weeks,
+      _projectOwner,
+      true,
+      false
+    );
     (, uint256 _end, , , ) = _jbveBanny.locked(_tokenId);
 
     uint256 _timePerStep = (_end - block.timestamp) / _steps + 1;
@@ -314,6 +359,7 @@ contract JBveBannyTests is TestBaseWorkflow {
 
       evm.warp(_currentTime);
       evm.roll(_currentBlock);
+      evm.stopPrank();
     }
 
     // After the lock has expired it should be 0
@@ -321,12 +367,19 @@ contract JBveBannyTests is TestBaseWorkflow {
   }
 
   function testLockVotingPowerHistoricLookupIsCorrect() public {
-    mintIJBTokens();
-
+    mintAndApproveIJBTokens();
+    evm.startPrank(_projectOwner);
     uint256 _steps = 4;
     uint256 _secondsPerBlock = 1;
     uint256 _lastVotingPower = 0;
-    uint256 _tokenId = _jbveBanny.lock(_projectOwner, 10 ether, 1 weeks, _projectOwner, true, false);
+    uint256 _tokenId = _jbveBanny.lock(
+      _projectOwner,
+      10 ether,
+      1 weeks,
+      _projectOwner,
+      true,
+      false
+    );
     (, uint256 _end, , , ) = _jbveBanny.locked(_tokenId);
 
     uint256[] memory _historicVotingPower = new uint256[](_steps);
@@ -374,11 +427,12 @@ contract JBveBannyTests is TestBaseWorkflow {
       assertEq(_historicVotingPower[_i], _votingPowerAtBlock);
       assertTrue(_historicVotingPower[_i] > 0 && _votingPowerAtBlock > 0);
     }
+    evm.stopPrank();
   }
 
   function testVotingPowerGetsActivatedIfMintedForSelf() public {
     address _user = address(0xf00ba6);
-    mintIJBTokensFor(_user, 5 ether);
+    mintAndApproveIJBTokensFor(_user, 5 ether);
 
     // Check the users voting power before creating the new lock
     uint256 _initialVotingPower = _jbveBanny.getVotes(_user);
@@ -393,7 +447,7 @@ contract JBveBannyTests is TestBaseWorkflow {
 
   function testVotingPowerDoesNotGetActivatedIfMintedForOtherUser() public {
     address _user = address(0xf00ba6);
-    mintIJBTokensFor(_user, 5 ether);
+    mintAndApproveIJBTokensFor(_user, 5 ether);
 
     // Check the users voting power before creating the new lock
     uint256 _initialVotingPower = _jbveBanny.getVotes(_projectOwner);
@@ -408,7 +462,7 @@ contract JBveBannyTests is TestBaseWorkflow {
 
   function testActivatingVotingPower() public {
     address _user = address(0xf00ba6);
-    mintIJBTokensFor(_user, 5 ether);
+    mintAndApproveIJBTokensFor(_user, 5 ether);
 
     // Check the users voting power before creating the new lock
     uint256 _initialVotingPower = _jbveBanny.getVotes(_projectOwner);
@@ -431,7 +485,7 @@ contract JBveBannyTests is TestBaseWorkflow {
   function testVotingPowerGetsDisabledOnTransfer() public {
     address _userA = address(0xf00);
     address _userB = address(0xba6);
-    mintIJBTokensFor(_userA, 5 ether);
+    mintAndApproveIJBTokensFor(_userA, 5 ether);
 
     // Check the users voting power before creating the new lock
     uint256 _initialVotingPower = _jbveBanny.getVotes(_userA);
