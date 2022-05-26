@@ -1,11 +1,10 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.6;
 
-import './DSTest.t.sol';
-import './hevm.t.sol';
 import '../../JBveBanny.sol';
 import '../../JBVeTokenUriResolver.sol';
 import './AccessJBLib.sol';
+import 'forge-std/Test.sol';
 
 import '@jbx-protocol/contracts-v2/contracts/JBDirectory.sol';
 import '@jbx-protocol/contracts-v2/contracts/JBSingleTokenPaymentTerminalStore.sol';
@@ -36,16 +35,13 @@ import '@jbx-protocol/contracts-v2/contracts/libraries/JBCurrencies.sol';
 // Base contract for JBX Banny system tests.
 //
 // Provides common functionality, such as deploying contracts on test setup.
-abstract contract TestBaseWorkflow is DSTest {
+abstract contract TestBaseWorkflow is Test {
   //*********************************************************************//
   // --------------------- private stored properties ------------------- //
   //*********************************************************************//
 
   // Multisig address used for testing.
   address private _multisig = address(123);
-
-  // EVM Cheat codes - test addresses via prank and startPrank in hevm
-  Hevm public evm = Hevm(0x7109709ECfa91a80626fF3989D68f67F5b1DD12D);
 
   // JBOperatorStore
   JBOperatorStore private _jbOperatorStore;
@@ -194,9 +190,9 @@ abstract contract TestBaseWorkflow is DSTest {
       _jbPrices
     );
 
-    evm.prank(_multisig);
+    vm.prank(_multisig);
     _paymentToken = new JBToken('MyToken', 'MT');
-    evm.prank(_multisig);
+    vm.prank(_multisig);
     _paymentToken.mint(0, _multisig, 100 ether);
 
     // AccessJBLib
@@ -216,7 +212,7 @@ abstract contract TestBaseWorkflow is DSTest {
       _multisig
     );
 
-    evm.startPrank(_projectOwner);
+    vm.startPrank(_projectOwner);
 
     _fundAccessConstraints.push(
       JBFundAccessConstraints({
@@ -232,7 +228,7 @@ abstract contract TestBaseWorkflow is DSTest {
 
     _terminals.push(_jbERC20PaymentTerminal);
 
-    evm.stopPrank();
+    vm.stopPrank();
     // JBVeTokenUriResolver
     _jbveTokenUriResolver = new JBVeTokenUriResolver();
 
@@ -280,10 +276,10 @@ abstract contract TestBaseWorkflow is DSTest {
     );
 
     // calls will originate from projectOwner addr
-    evm.startPrank(_projectOwner);
+    vm.startPrank(_projectOwner);
     // issue an ERC-20 token for project
     _jbController.issueTokenFor(_projectId, 'TestName', 'TestSymbol');
-    evm.stopPrank();
+    vm.stopPrank();
   }
 
   //https://ethereum.stackexchange.com/questions/24248/how-to-calculate-an-ethereum-contracts-address-during-its-creation-using-the-so
