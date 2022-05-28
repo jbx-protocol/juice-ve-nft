@@ -106,7 +106,9 @@ contract JBveBannyTests is TestBaseWorkflow {
     assertTrue(_useJbToken);
     assertTrue(!_allowPublicExtension);
     assertEq(_jbveBanny.ownerOf(1), _projectOwner);
-    (uint256 _specsAmount, uint256 _specsDuration, , bool _specsIsJbToken, ) = _jbveBanny.getSpecs(1);
+    (uint256 _specsAmount, uint256 _specsDuration, , bool _specsIsJbToken, ) = _jbveBanny.getSpecs(
+      1
+    );
     assertEq(_specsAmount, 10 ether);
     assertEq(_specsDuration, 1 weeks);
     assertTrue(_specsIsJbToken);
@@ -550,6 +552,42 @@ contract JBveBannyTests is TestBaseWorkflow {
       assertEq(_specsAmount, _inputAmount);
       assertEq(_specsDuration, _inputDuration);
       assertTrue(_specsIsJbToken);
+    }
+    vm.stopPrank();
+  }
+
+  function testFuzzLockWithNonJbToken(uint256 _inputAmount, uint256 _inputDuration) public {
+    _projectOwner = projectOwner();
+    vm.startPrank(_projectOwner);
+    if (_inputAmount == 0) vm.expectRevert(abi.encodeWithSignature('ZERO_TOKENS_TO_MINT()'));
+    _jbController.mintTokensOf(_projectId, _inputAmount, _projectOwner, 'Test Memo', false, true);
+    bool _isDurationAcceptable;
+    for (uint256 _i; _i < _jbveBanny.lockDurationOptions().length; _i++)
+      if (_jbveBanny.lockDurationOptions()[_i] == _inputDuration) _isDurationAcceptable = true;
+
+    if (_isDurationAcceptable) {
+      uint256[] memory _permissionIndexes = new uint256[](1);
+      _permissionIndexes[0] = JBOperations.TRANSFER;
+      jbOperatorStore().setOperator(
+        JBOperatorData(address(_jbveBanny), _projectId, _permissionIndexes)
+      );
+      _jbveBanny.lock(_projectOwner, _inputAmount, _inputDuration, _projectOwner, false, false);
+      assertGt(_jbveBanny.tokenVotingPowerAt(1, block.number), 0);
+      (
+        int128 _amount,
+        ,
+        uint256 _duration,
+        bool _useJbToken,
+        bool _allowPublicExtension
+      ) = _jbveBanny.locked(1);
+      assertEq(uint256(uint128(_amount)), _inputAmount);
+      assertEq(_duration, _inputDuration);
+      assertTrue(!_useJbToken);
+      assertTrue(!_allowPublicExtension);
+      assertEq(_jbveBanny.ownerOf(1), _projectOwner);
+      (uint256 _specsAmount, uint256 _specsDuration, , , ) = _jbveBanny.getSpecs(1);
+      assertEq(_specsAmount, _inputAmount);
+      assertEq(_specsDuration, _inputDuration);
     }
     vm.stopPrank();
   }
