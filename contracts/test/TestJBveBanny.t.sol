@@ -591,4 +591,50 @@ contract JBveBannyTests is TestBaseWorkflow {
     }
     vm.stopPrank();
   }
+
+  function testFuzzExtendLock(
+    uint256 _inputAmount,
+    uint256 _inputDuration,
+    uint256 _newDuration
+  ) public {
+    IJBToken _jbToken = _jbTokenStore.tokenOf(_projectId);
+    _projectOwner = projectOwner();
+    vm.startPrank(_projectOwner);
+    if (_inputAmount == 0) vm.expectRevert(abi.encodeWithSignature('ZERO_TOKENS_TO_MINT()'));
+    _jbController.mintTokensOf(_projectId, _inputAmount, _projectOwner, 'Test Memo', true, true);
+    bool _isDurationAcceptable;
+    for (uint256 _i; _i < _jbveBanny.lockDurationOptions().length; _i++) {
+      if (
+        _jbveBanny.lockDurationOptions()[_i] == _inputDuration &&
+        _jbveBanny.lockDurationOptions()[_i] == _newDuration &&
+        _newDuration > _inputDuration
+      ) {
+        _isDurationAcceptable = true;
+      }
+    }
+
+    if (_isDurationAcceptable) {
+      _jbToken.approve(_projectId, address(_jbveBanny), _inputAmount);
+      uint256 _tokenId = _jbveBanny.lock(
+        _projectOwner,
+        _inputAmount,
+        _inputDuration,
+        _projectOwner,
+        true,
+        false
+      );
+      (, , uint256 _lockedUntil, , ) = _jbveBanny.getSpecs(_tokenId);
+      vm.warp(_lockedUntil + 2);
+      uint256 votingPowerBeforeExtending = _jbveBanny.tokenVotingPowerAt(1, block.number);
+
+      JBLockExtensionData[] memory extends = new JBLockExtensionData[](1);
+      extends[0] = JBLockExtensionData(_tokenId, _newDuration);
+      _tokenId = _jbveBanny.extendLock(extends)[0];
+      uint256 votingPowerAfterExtending = _jbveBanny.tokenVotingPowerAt(1, block.number);
+      assertGt(votingPowerAfterExtending, votingPowerBeforeExtending);
+      (, uint256 _duration, , , ) = _jbveBanny.getSpecs(_tokenId);
+      assertEq(_duration, _newDuration);
+    }
+    vm.stopPrank();
+  }
 }
