@@ -318,7 +318,6 @@ contract JBveBannyTests is TestBaseWorkflow {
     assertGt(_jbveBanny.tokenVotingPowerAt(2, block.number), 0);
 
     // Since lock-2 is 4x as long as lock-1, it should have x4 the voting power
-    // (might be slightly more or less due to rounding to nearest week)
     assertGt(
       _jbveBanny.tokenVotingPowerAt(2, block.number),
       _jbveBanny.tokenVotingPowerAt(1, block.number) * 4
@@ -636,5 +635,60 @@ contract JBveBannyTests is TestBaseWorkflow {
       assertEq(_duration, _newDuration);
     }
     vm.stopPrank();
+  }
+
+  function testFuzzVotingPowerDecreasesOverTime(
+    uint256 _inputAmount,
+    uint256 _inputDuration,
+    uint256 _inputSteps
+  ) public {
+    vm.assume(_inputSteps > 0);
+    vm.assume(_inputAmount > 0);
+    uint256 _lastVotingPower = 0;
+    uint256 _secondsPerBlock = 1;
+    IJBToken _jbToken = _jbTokenStore.tokenOf(_projectId);
+    _projectOwner = projectOwner();
+    vm.startPrank(_projectOwner);
+    _jbController.mintTokensOf(_projectId, _inputAmount, _projectOwner, 'Test Memo', true, true);
+    bool _isDurationAcceptable;
+    for (uint256 _i; _i < _jbveBanny.lockDurationOptions().length; _i++)
+      if (_jbveBanny.lockDurationOptions()[_i] == _inputDuration) _isDurationAcceptable = true;
+    if (_isDurationAcceptable) {
+      _jbToken.approve(_projectId, address(_jbveBanny), _inputAmount);
+      uint256 _tokenId = _jbveBanny.lock(
+        _projectOwner,
+        _inputAmount,
+        _inputDuration,
+        _projectOwner,
+        true,
+        false
+      );
+      (, uint256 _end, , , ) = _jbveBanny.locked(_tokenId);
+
+      uint256 _timePerStep = (_end - block.timestamp) / _inputSteps + 1;
+      uint256 _blocksPerStep = _timePerStep / _secondsPerBlock;
+
+      // Increase the current timestamp and verify that the voting power keeps decreasing
+      uint256 _currentTime = block.timestamp;
+      uint256 _currentBlock = block.number;
+
+      for (uint256 _i; _i < _inputSteps; _i++) {
+        uint256 _currentVotingPower = _jbveBanny.tokenVotingPowerAt(_tokenId, _currentBlock);
+
+        if (_lastVotingPower != 0) {
+          assertLt(_currentVotingPower, _lastVotingPower);
+        }
+        assertTrue(_currentVotingPower > 0);
+
+        _lastVotingPower = _currentVotingPower;
+
+        _currentTime += _timePerStep;
+        _currentBlock += _blocksPerStep; // Assuming 15 second block times
+
+        vm.warp(_currentTime);
+        vm.roll(_currentBlock);
+        vm.stopPrank();
+      }
+    }
   }
 }
