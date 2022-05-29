@@ -768,4 +768,50 @@ contract JBveBannyTests is TestBaseWorkflow {
     vm.stopPrank(); 
     }
   }
+
+  function testFuzzVotingPowerDisabledOnTransfer(uint256 _inputAmount, uint256 _inputDuration) public {
+    address _userA = address(0xf00);
+    address _userB = address(0xba6);
+    vm.assume(_inputAmount > 0);
+    
+    // Check the users voting power before creating the new lock
+    uint256 _initialVotingPower = _jbveBanny.getVotes(_userA);
+
+    IJBToken _jbToken = _jbTokenStore.tokenOf(_projectId);
+    _projectOwner = projectOwner();
+    vm.startPrank(_projectOwner);
+    _jbController.mintTokensOf(_projectId, _inputAmount, _userA, 'Test Memo', true, true);
+    bool _isDurationAcceptable;
+    for (uint256 _i; _i < _jbveBanny.lockDurationOptions().length; _i++)
+      if (_jbveBanny.lockDurationOptions()[_i] == _inputDuration) _isDurationAcceptable = true;
+    if (_isDurationAcceptable) {
+
+    // Lock the tokens and mint new NFT for user A
+    vm.prank(_userA);
+    uint256 _tokenId = _jbveBanny.lock(_userA, _inputAmount, _inputDuration, _userA, true, false);
+
+    // Get the new voting power of the user
+    uint256 _afterMintVotingPower = _jbveBanny.getVotes(_userA);
+
+    // UserA should have received voting power
+    assertGt(_afterMintVotingPower - _initialVotingPower, 0);
+
+    // Get the voting power of user B
+    uint256 _userBVotingPowerBeforeTransfer = _jbveBanny.getVotes(_userB);
+
+    // Have user A tranfer the token to user B
+    vm.prank(_userA);
+    _jbveBanny.safeTransferFrom(_userA, _userB, _tokenId);
+
+    // Get the updated voting powers for both users
+    uint256 _userAVotingPowerAfterTransfer = _jbveBanny.getVotes(_userA);
+    uint256 _userBVotingPowerAfterTransfer = _jbveBanny.getVotes(_userB);
+
+    // User A should now be back to the same voting power as before the mint
+    assertEq(_userAVotingPowerAfterTransfer, _initialVotingPower);
+    // User B's voting power should not have changed (since it needs to be activated manually)
+    assertEq(_userBVotingPowerAfterTransfer, _userBVotingPowerBeforeTransfer);
+    }
+    vm.stopPrank();
+  }
 }
