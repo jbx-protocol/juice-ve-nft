@@ -558,7 +558,7 @@ contract JBveBannyTests is TestBaseWorkflow {
   function testFuzzLockWithNonJbToken(uint256 _inputAmount, uint256 _inputDuration) public {
     _projectOwner = projectOwner();
     vm.startPrank(_projectOwner);
-    if (_inputAmount == 0) vm.expectRevert(abi.encodeWithSignature('ZERO_TOKENS_TO_MINT()'));
+    vm.assume(_inputAmount > 0);
     _jbController.mintTokensOf(_projectId, _inputAmount, _projectOwner, 'Test Memo', false, true);
     bool _isDurationAcceptable;
     for (uint256 _i; _i < _jbveBanny.lockDurationOptions().length; _i++)
@@ -596,10 +596,10 @@ contract JBveBannyTests is TestBaseWorkflow {
     uint256 _inputDuration,
     uint256 _newDuration
   ) public {
+    vm.assume(_inputAmount > 0);
     IJBToken _jbToken = _jbTokenStore.tokenOf(_projectId);
     _projectOwner = projectOwner();
     vm.startPrank(_projectOwner);
-    if (_inputAmount == 0) vm.expectRevert(abi.encodeWithSignature('ZERO_TOKENS_TO_MINT()'));
     _jbController.mintTokensOf(_projectId, _inputAmount, _projectOwner, 'Test Memo', true, true);
     bool _isDurationAcceptable;
     for (uint256 _i; _i < _jbveBanny.lockDurationOptions().length; _i++) {
@@ -689,6 +689,83 @@ contract JBveBannyTests is TestBaseWorkflow {
         vm.roll(_currentBlock);
         vm.stopPrank();
       }
+    }
+  }
+
+  function testFuzzVotingPowerHistoricalLookUpIsCorrect(
+    uint256 _inputAmount,
+    uint256 _inputDuration,
+    uint256 _inputSteps
+  ) public {
+    vm.assume(_inputSteps > 0);
+    vm.assume(_inputAmount > 0);
+    uint256 _lastVotingPower = 0;
+    uint256 _secondsPerBlock = 1;
+    IJBToken _jbToken = _jbTokenStore.tokenOf(_projectId);
+    _projectOwner = projectOwner();
+    vm.startPrank(_projectOwner);
+    _jbController.mintTokensOf(_projectId, _inputAmount, _projectOwner, 'Test Memo', true, true);
+    bool _isDurationAcceptable;
+    for (uint256 _i; _i < _jbveBanny.lockDurationOptions().length; _i++)
+      if (_jbveBanny.lockDurationOptions()[_i] == _inputDuration) _isDurationAcceptable = true;
+    if (_isDurationAcceptable) {
+      _jbToken.approve(_projectId, address(_jbveBanny), _inputAmount);
+      uint256 _tokenId = _jbveBanny.lock(
+        _projectOwner,
+        _inputAmount,
+        _inputDuration,
+        _projectOwner,
+        true,
+        false
+      );
+      (, uint256 _end, , , ) = _jbveBanny.locked(_tokenId);
+
+    uint256[] memory _historicVotingPower = new uint256[](_inputSteps);
+    uint256[] memory _historicVotingPowerBlocks = new uint256[](_inputSteps);
+
+    uint256 _timePerStep = (_end - block.timestamp) / _inputSteps + 1;
+    uint256 _blocksPerStep = _timePerStep / _secondsPerBlock;
+
+    // Increase the current timestamp and verify that the voting power keeps decreasing
+    uint256 _currentTime = block.timestamp;
+    uint256 _currentBlock = block.number;
+
+    // Check the voting power and check if it decreases in comparison with the previous check
+    // Store the `_currentVotingPower`
+    for (uint256 _i; _i < _inputSteps; _i++) {
+      uint256 _currentVotingPower = _jbveBanny.tokenVotingPowerAt(_tokenId, _currentBlock);
+
+      if (_lastVotingPower != 0) {
+        assertLt(_currentVotingPower, _lastVotingPower);
+      }
+      assertTrue(_currentVotingPower > 0);
+
+      _historicVotingPower[_i] = _currentVotingPower;
+      _historicVotingPowerBlocks[_i] = _currentBlock;
+      _lastVotingPower = _currentVotingPower;
+
+      _currentTime += _timePerStep;
+      _currentBlock += _blocksPerStep; // Assuming 15 second block times
+
+      vm.warp(_currentTime);
+      vm.roll(_currentBlock);
+    }
+
+    // After the lock has expired it should be 0
+    assert(_jbveBanny.tokenVotingPowerAt(_tokenId, _currentBlock) == 0);
+
+    // Use the stored `_currentVotingPower` and `_currentBlock` and perform historic lookups for each
+    // Make sure the historic lookup and (at the time) current values are the same
+    for (uint256 _i = 0; _i < _historicVotingPower.length; _i++) {
+      uint256 _votingPowerAtBlock = _jbveBanny.tokenVotingPowerAt(
+        _tokenId,
+        _historicVotingPowerBlocks[_i]
+      );
+
+      assertEq(_historicVotingPower[_i], _votingPowerAtBlock);
+      assertTrue(_historicVotingPower[_i] > 0 && _votingPowerAtBlock > 0);
+    }
+    vm.stopPrank(); 
     }
   }
 }
