@@ -720,60 +720,62 @@ contract JBveBannyTests is TestBaseWorkflow {
       );
       (, uint256 _end, , , ) = _jbveBanny.locked(_tokenId);
 
-    uint256[] memory _historicVotingPower = new uint256[](_inputSteps);
-    uint256[] memory _historicVotingPowerBlocks = new uint256[](_inputSteps);
+      uint256[] memory _historicVotingPower = new uint256[](_inputSteps);
+      uint256[] memory _historicVotingPowerBlocks = new uint256[](_inputSteps);
 
-    uint256 _timePerStep = (_end - block.timestamp) / _inputSteps + 1;
-    uint256 _blocksPerStep = _timePerStep / _secondsPerBlock;
+      uint256 _timePerStep = (_end - block.timestamp) / _inputSteps + 1;
+      uint256 _blocksPerStep = _timePerStep / _secondsPerBlock;
 
-    // Increase the current timestamp and verify that the voting power keeps decreasing
-    uint256 _currentTime = block.timestamp;
-    uint256 _currentBlock = block.number;
+      // Increase the current timestamp and verify that the voting power keeps decreasing
+      uint256 _currentTime = block.timestamp;
+      uint256 _currentBlock = block.number;
 
-    // Check the voting power and check if it decreases in comparison with the previous check
-    // Store the `_currentVotingPower`
-    for (uint256 _i; _i < _inputSteps; _i++) {
-      uint256 _currentVotingPower = _jbveBanny.tokenVotingPowerAt(_tokenId, _currentBlock);
+      // Check the voting power and check if it decreases in comparison with the previous check
+      // Store the `_currentVotingPower`
+      for (uint256 _i; _i < _inputSteps; _i++) {
+        uint256 _currentVotingPower = _jbveBanny.tokenVotingPowerAt(_tokenId, _currentBlock);
 
-      if (_lastVotingPower != 0) {
-        assertLt(_currentVotingPower, _lastVotingPower);
+        if (_lastVotingPower != 0) {
+          assertLt(_currentVotingPower, _lastVotingPower);
+        }
+        assertTrue(_currentVotingPower > 0);
+
+        _historicVotingPower[_i] = _currentVotingPower;
+        _historicVotingPowerBlocks[_i] = _currentBlock;
+        _lastVotingPower = _currentVotingPower;
+
+        _currentTime += _timePerStep;
+        _currentBlock += _blocksPerStep; // Assuming 15 second block times
+
+        vm.warp(_currentTime);
+        vm.roll(_currentBlock);
       }
-      assertTrue(_currentVotingPower > 0);
 
-      _historicVotingPower[_i] = _currentVotingPower;
-      _historicVotingPowerBlocks[_i] = _currentBlock;
-      _lastVotingPower = _currentVotingPower;
+      // After the lock has expired it should be 0
+      assert(_jbveBanny.tokenVotingPowerAt(_tokenId, _currentBlock) == 0);
 
-      _currentTime += _timePerStep;
-      _currentBlock += _blocksPerStep; // Assuming 15 second block times
+      // Use the stored `_currentVotingPower` and `_currentBlock` and perform historic lookups for each
+      // Make sure the historic lookup and (at the time) current values are the same
+      for (uint256 _i = 0; _i < _historicVotingPower.length; _i++) {
+        uint256 _votingPowerAtBlock = _jbveBanny.tokenVotingPowerAt(
+          _tokenId,
+          _historicVotingPowerBlocks[_i]
+        );
 
-      vm.warp(_currentTime);
-      vm.roll(_currentBlock);
-    }
-
-    // After the lock has expired it should be 0
-    assert(_jbveBanny.tokenVotingPowerAt(_tokenId, _currentBlock) == 0);
-
-    // Use the stored `_currentVotingPower` and `_currentBlock` and perform historic lookups for each
-    // Make sure the historic lookup and (at the time) current values are the same
-    for (uint256 _i = 0; _i < _historicVotingPower.length; _i++) {
-      uint256 _votingPowerAtBlock = _jbveBanny.tokenVotingPowerAt(
-        _tokenId,
-        _historicVotingPowerBlocks[_i]
-      );
-
-      assertEq(_historicVotingPower[_i], _votingPowerAtBlock);
-      assertTrue(_historicVotingPower[_i] > 0 && _votingPowerAtBlock > 0);
-    }
-    vm.stopPrank(); 
+        assertEq(_historicVotingPower[_i], _votingPowerAtBlock);
+        assertTrue(_historicVotingPower[_i] > 0 && _votingPowerAtBlock > 0);
+      }
+      vm.stopPrank();
     }
   }
 
-  function testFuzzVotingPowerDisabledOnTransfer(uint256 _inputAmount, uint256 _inputDuration) public {
+  function testFuzzVotingPowerDisabledOnTransfer(uint256 _inputAmount, uint256 _inputDuration)
+    public
+  {
     address _userA = address(0xf00);
     address _userB = address(0xba6);
     vm.assume(_inputAmount > 0);
-    
+
     // Check the users voting power before creating the new lock
     uint256 _initialVotingPower = _jbveBanny.getVotes(_userA);
 
@@ -785,33 +787,71 @@ contract JBveBannyTests is TestBaseWorkflow {
     for (uint256 _i; _i < _jbveBanny.lockDurationOptions().length; _i++)
       if (_jbveBanny.lockDurationOptions()[_i] == _inputDuration) _isDurationAcceptable = true;
     if (_isDurationAcceptable) {
+      // Lock the tokens and mint new NFT for user A
+      vm.prank(_userA);
+      uint256 _tokenId = _jbveBanny.lock(_userA, _inputAmount, _inputDuration, _userA, true, false);
 
-    // Lock the tokens and mint new NFT for user A
-    vm.prank(_userA);
-    uint256 _tokenId = _jbveBanny.lock(_userA, _inputAmount, _inputDuration, _userA, true, false);
+      // Get the new voting power of the user
+      uint256 _afterMintVotingPower = _jbveBanny.getVotes(_userA);
 
-    // Get the new voting power of the user
-    uint256 _afterMintVotingPower = _jbveBanny.getVotes(_userA);
+      // UserA should have received voting power
+      assertGt(_afterMintVotingPower - _initialVotingPower, 0);
 
-    // UserA should have received voting power
-    assertGt(_afterMintVotingPower - _initialVotingPower, 0);
+      // Get the voting power of user B
+      uint256 _userBVotingPowerBeforeTransfer = _jbveBanny.getVotes(_userB);
 
-    // Get the voting power of user B
-    uint256 _userBVotingPowerBeforeTransfer = _jbveBanny.getVotes(_userB);
+      // Have user A tranfer the token to user B
+      vm.prank(_userA);
+      _jbToken.approve(_projectId, address(_jbveBanny), _inputAmount);
+      _jbveBanny.safeTransferFrom(_userA, _userB, _tokenId);
 
-    // Have user A tranfer the token to user B
-    vm.prank(_userA);
-    _jbveBanny.safeTransferFrom(_userA, _userB, _tokenId);
+      // Get the updated voting powers for both users
+      uint256 _userAVotingPowerAfterTransfer = _jbveBanny.getVotes(_userA);
+      uint256 _userBVotingPowerAfterTransfer = _jbveBanny.getVotes(_userB);
 
-    // Get the updated voting powers for both users
-    uint256 _userAVotingPowerAfterTransfer = _jbveBanny.getVotes(_userA);
-    uint256 _userBVotingPowerAfterTransfer = _jbveBanny.getVotes(_userB);
-
-    // User A should now be back to the same voting power as before the mint
-    assertEq(_userAVotingPowerAfterTransfer, _initialVotingPower);
-    // User B's voting power should not have changed (since it needs to be activated manually)
-    assertEq(_userBVotingPowerAfterTransfer, _userBVotingPowerBeforeTransfer);
+      // User A should now be back to the same voting power as before the mint
+      assertEq(_userAVotingPowerAfterTransfer, _initialVotingPower);
+      // User B's voting power should not have changed (since it needs to be activated manually)
+      assertEq(_userBVotingPowerAfterTransfer, _userBVotingPowerBeforeTransfer);
     }
     vm.stopPrank();
+  }
+
+  function testFuzzActivatingVotingPower(uint256 _inputAmount, uint256 _inputDuration) public {
+    vm.assume(_inputAmount > 0);
+    address _user = address(0xf00ba6);
+    IJBToken _jbToken = _jbTokenStore.tokenOf(_projectId);
+    _projectOwner = projectOwner();
+
+    // Check the users voting power before creating the new lock
+    uint256 _initialVotingPower = _jbveBanny.getVotes(_projectOwner);
+
+    vm.prank(_projectOwner);
+    _jbController.mintTokensOf(_projectId, _inputAmount, _user, 'Test Memo', true, true);
+    bool _isDurationAcceptable;
+    for (uint256 _i; _i < _jbveBanny.lockDurationOptions().length; _i++)
+      if (_jbveBanny.lockDurationOptions()[_i] == _inputDuration) _isDurationAcceptable = true;
+    if (_isDurationAcceptable) {
+      vm.startPrank(_user);
+      _jbToken.approve(_projectId, address(_jbveBanny), _inputAmount);
+      uint256 _tokenId = _jbveBanny.lock(
+        _projectOwner,
+        _inputAmount,
+        _inputDuration,
+        _projectOwner,
+        true,
+        false
+      );
+      vm.stopPrank();
+      // There should be no change
+      assertTrue(_jbveBanny.getVotes(_projectOwner) - _initialVotingPower == 0);
+
+      // As the benificiary enable the voting power of the token
+      vm.prank(_projectOwner);
+      _jbveBanny.activateVotingPower(_tokenId);
+
+      // Should now be higher
+      assertGt(_jbveBanny.getVotes(_projectOwner) - _initialVotingPower, 0);
+    }
   }
 }
