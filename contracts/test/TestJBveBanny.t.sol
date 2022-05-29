@@ -527,9 +527,8 @@ contract JBveBannyTests is TestBaseWorkflow {
     vm.startPrank(_projectOwner);
     if (_inputAmount == 0) vm.expectRevert(abi.encodeWithSignature('ZERO_TOKENS_TO_MINT()'));
     _jbController.mintTokensOf(_projectId, _inputAmount, _projectOwner, 'Test Memo', true, true);
-    bool _isDurationAcceptable;
-    for (uint256 _i; _i < _jbveBanny.lockDurationOptions().length; _i++)
-      if (_jbveBanny.lockDurationOptions()[_i] == _inputDuration) _isDurationAcceptable = true;
+    bool _isDurationAcceptable = _isDurationAccepted(_inputDuration);
+
     if (_isDurationAcceptable) {
       _jbToken.approve(_projectId, address(_jbveBanny), _inputAmount);
       _jbveBanny.lock(_projectOwner, _inputAmount, _inputDuration, _projectOwner, true, false);
@@ -551,6 +550,9 @@ contract JBveBannyTests is TestBaseWorkflow {
       assertEq(_specsAmount, _inputAmount);
       assertEq(_specsDuration, _inputDuration);
       assertTrue(_specsIsJbToken);
+    } else {
+      vm.expectRevert(abi.encodeWithSignature('INVALID_LOCK_DURATION()'));
+      _jbveBanny.lock(_projectOwner, _inputAmount, _inputDuration, _projectOwner, true, false);
     }
     vm.stopPrank();
   }
@@ -560,10 +562,7 @@ contract JBveBannyTests is TestBaseWorkflow {
     vm.startPrank(_projectOwner);
     vm.assume(_inputAmount > 0);
     _jbController.mintTokensOf(_projectId, _inputAmount, _projectOwner, 'Test Memo', false, true);
-    bool _isDurationAcceptable;
-    for (uint256 _i; _i < _jbveBanny.lockDurationOptions().length; _i++)
-      if (_jbveBanny.lockDurationOptions()[_i] == _inputDuration) _isDurationAcceptable = true;
-
+    bool _isDurationAcceptable = _isDurationAccepted(_inputDuration);
     if (_isDurationAcceptable) {
       uint256[] memory _permissionIndexes = new uint256[](1);
       _permissionIndexes[0] = JBOperations.TRANSFER;
@@ -587,6 +586,9 @@ contract JBveBannyTests is TestBaseWorkflow {
       (uint256 _specsAmount, uint256 _specsDuration, , , ) = _jbveBanny.getSpecs(1);
       assertEq(_specsAmount, _inputAmount);
       assertEq(_specsDuration, _inputDuration);
+    } else {
+      vm.expectRevert(abi.encodeWithSignature('INVALID_LOCK_DURATION()'));
+      _jbveBanny.lock(_projectOwner, _inputAmount, _inputDuration, _projectOwner, true, false);
     }
     vm.stopPrank();
   }
@@ -633,6 +635,9 @@ contract JBveBannyTests is TestBaseWorkflow {
       assertGt(votingPowerAfterExtending, votingPowerBeforeExtending);
       (, uint256 _duration, , , ) = _jbveBanny.getSpecs(_tokenId);
       assertEq(_duration, _newDuration);
+    } else {
+      vm.expectRevert(abi.encodeWithSignature('INVALID_LOCK_DURATION()'));
+      _jbveBanny.lock(_projectOwner, _inputAmount, _inputDuration, _projectOwner, true, false);
     }
     vm.stopPrank();
   }
@@ -650,9 +655,8 @@ contract JBveBannyTests is TestBaseWorkflow {
     _projectOwner = projectOwner();
     vm.startPrank(_projectOwner);
     _jbController.mintTokensOf(_projectId, _inputAmount, _projectOwner, 'Test Memo', true, true);
-    bool _isDurationAcceptable;
-    for (uint256 _i; _i < _jbveBanny.lockDurationOptions().length; _i++)
-      if (_jbveBanny.lockDurationOptions()[_i] == _inputDuration) _isDurationAcceptable = true;
+    bool _isDurationAcceptable = _isDurationAccepted(_inputDuration);
+
     if (_isDurationAcceptable) {
       _jbToken.approve(_projectId, address(_jbveBanny), _inputAmount);
       uint256 _tokenId = _jbveBanny.lock(
@@ -705,9 +709,8 @@ contract JBveBannyTests is TestBaseWorkflow {
     _projectOwner = projectOwner();
     vm.startPrank(_projectOwner);
     _jbController.mintTokensOf(_projectId, _inputAmount, _projectOwner, 'Test Memo', true, true);
-    bool _isDurationAcceptable;
-    for (uint256 _i; _i < _jbveBanny.lockDurationOptions().length; _i++)
-      if (_jbveBanny.lockDurationOptions()[_i] == _inputDuration) _isDurationAcceptable = true;
+    bool _isDurationAcceptable = _isDurationAccepted(_inputDuration);
+
     if (_isDurationAcceptable) {
       _jbToken.approve(_projectId, address(_jbveBanny), _inputAmount);
       uint256 _tokenId = _jbveBanny.lock(
@@ -783,9 +786,7 @@ contract JBveBannyTests is TestBaseWorkflow {
     _projectOwner = projectOwner();
     vm.startPrank(_projectOwner);
     _jbController.mintTokensOf(_projectId, _inputAmount, _userA, 'Test Memo', true, true);
-    bool _isDurationAcceptable;
-    for (uint256 _i; _i < _jbveBanny.lockDurationOptions().length; _i++)
-      if (_jbveBanny.lockDurationOptions()[_i] == _inputDuration) _isDurationAcceptable = true;
+    bool _isDurationAcceptable = _isDurationAccepted(_inputDuration);
     if (_isDurationAcceptable) {
       // Lock the tokens and mint new NFT for user A
       vm.prank(_userA);
@@ -828,9 +829,7 @@ contract JBveBannyTests is TestBaseWorkflow {
 
     vm.prank(_projectOwner);
     _jbController.mintTokensOf(_projectId, _inputAmount, _user, 'Test Memo', true, true);
-    bool _isDurationAcceptable;
-    for (uint256 _i; _i < _jbveBanny.lockDurationOptions().length; _i++)
-      if (_jbveBanny.lockDurationOptions()[_i] == _inputDuration) _isDurationAcceptable = true;
+    bool _isDurationAcceptable = _isDurationAccepted(_inputDuration);
     if (_isDurationAcceptable) {
       vm.startPrank(_user);
       _jbToken.approve(_projectId, address(_jbveBanny), _inputAmount);
@@ -853,5 +852,11 @@ contract JBveBannyTests is TestBaseWorkflow {
       // Should now be higher
       assertGt(_jbveBanny.getVotes(_projectOwner) - _initialVotingPower, 0);
     }
+  }
+
+  function _isDurationAccepted(uint256 _duration) internal returns (bool) {
+    for (uint256 _i; _i < _jbveBanny.lockDurationOptions().length; _i++)
+      if (_jbveBanny.lockDurationOptions()[_i] == _duration) return true;
+      else return false;
   }
 }
