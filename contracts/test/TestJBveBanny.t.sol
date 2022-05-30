@@ -5,6 +5,9 @@ import './helpers/TestBaseWorkflow.t.sol';
 import '../veERC721.sol';
 import '../interfaces/IJBVeTokenUriResolver.sol';
 
+/**
+@title JBveBanny Forge Tests
+*/
 contract JBveBannyTests is TestBaseWorkflow {
   //*********************************************************************//
   // --------------------- private stored properties ------------------- //
@@ -22,6 +25,9 @@ contract JBveBannyTests is TestBaseWorkflow {
   //*********************************************************************//
   // --------------------------- test setup ---------------------------- //
   //*********************************************************************//
+  /**
+    @dev Setup the contract instances.
+  */
   function setUp() public override {
     // calling before each for TestBaseWorkflow
     super.setUp();
@@ -53,6 +59,9 @@ contract JBveBannyTests is TestBaseWorkflow {
     );
   }
 
+  /**
+    @dev Constructor Test Assertions.
+  */
   function testConstructor() public {
     // Every duration has to be a multiple of weeks
     uint256[] memory _lockDurationOptions = new uint256[](3);
@@ -66,6 +75,9 @@ contract JBveBannyTests is TestBaseWorkflow {
     assertEq(_lockDurationOptions[0], _jbveBanny.lockDurationOptions()[0]);
   }
 
+  /**
+    @dev Minting & Approving JBTokens.
+  */
   function mintAndApproveIJBTokens() public returns (IJBToken) {
     IJBToken _jbToken = _jbTokenStore.tokenOf(_projectId);
     _projectOwner = projectOwner();
@@ -76,6 +88,11 @@ contract JBveBannyTests is TestBaseWorkflow {
     return _jbToken;
   }
 
+  /**
+    @dev Minting & Approving JBTokens.
+    @param _account Address to mint for
+    @param _amount Amount to mint
+  */
   function mintAndApproveIJBTokensFor(address _account, uint256 _amount) public returns (IJBToken) {
     IJBToken _jbToken = _jbTokenStore.tokenOf(_projectId);
     _projectOwner = projectOwner();
@@ -94,6 +111,9 @@ contract JBveBannyTests is TestBaseWorkflow {
     return _jbToken;
   }
 
+  /**
+    @dev Lock Test using a JBToken.
+  */
   function testLockWithJBToken() public {
     mintAndApproveIJBTokens();
     vm.startPrank(_projectOwner);
@@ -115,6 +135,9 @@ contract JBveBannyTests is TestBaseWorkflow {
     vm.stopPrank();
   }
 
+  /**
+    @dev Unlock Test.
+  */
   function testUnlockingTokens() public {
     IJBToken _jbToken = mintAndApproveIJBTokens();
     vm.startPrank(_projectOwner);
@@ -133,6 +156,9 @@ contract JBveBannyTests is TestBaseWorkflow {
     vm.stopPrank();
   }
 
+  /**
+    @dev Extend Lock Test.
+  */
   function testExtendLock() public {
     mintAndApproveIJBTokens();
     vm.startPrank(_projectOwner);
@@ -159,6 +185,9 @@ contract JBveBannyTests is TestBaseWorkflow {
     vm.stopPrank();
   }
 
+  /**
+    @dev Redeem Test.
+  */
   function testRedeem() public {
     mintAndApproveIJBTokens();
     vm.startPrank(_projectOwner);
@@ -224,6 +253,9 @@ contract JBveBannyTests is TestBaseWorkflow {
     vm.stopPrank();
   }
 
+  /**
+    @dev Invalid Lock Duration Test.
+  */
   function testScenarioWithInvalidLockDuration() public {
     mintAndApproveIJBTokens();
     vm.startPrank(_projectOwner);
@@ -232,6 +264,9 @@ contract JBveBannyTests is TestBaseWorkflow {
     vm.stopPrank();
   }
 
+  /**
+    @dev Insufficient JBToken Balance Test.
+  */
   function testScenarioWithInsufficientBalance() public {
     mintAndApproveIJBTokens();
     vm.startPrank(_projectOwner);
@@ -240,6 +275,9 @@ contract JBveBannyTests is TestBaseWorkflow {
     vm.stopPrank();
   }
 
+  /**
+    @dev Unlocking before the lock period expires Test.
+  */
   function testScenarioWhenLockPeriodIsNotOver() public {
     mintAndApproveIJBTokens();
     vm.startPrank(_projectOwner);
@@ -254,6 +292,9 @@ contract JBveBannyTests is TestBaseWorkflow {
     vm.stopPrank();
   }
 
+  /**
+    @dev Invalid Lock Duration while extending duration Test.
+  */
   function testScenarioWithInvalidLockDurationWhenExtendingDuration() public {
     mintAndApproveIJBTokens();
     vm.startPrank(_projectOwner);
@@ -269,6 +310,9 @@ contract JBveBannyTests is TestBaseWorkflow {
     vm.stopPrank();
   }
 
+  /**
+    @dev Invalid Lock Extension Test.
+  */
   function testScenarioWithInvalidLockExtension() public {
     mintAndApproveIJBTokens();
     vm.startPrank(_projectOwner);
@@ -284,6 +328,9 @@ contract JBveBannyTests is TestBaseWorkflow {
     vm.stopPrank();
   }
 
+  /**
+    @dev Lock with non-Jbtoken Test.
+  */
   function testLockWithNonJbToken() public {
     _projectOwner = projectOwner();
     vm.startPrank(_projectOwner);
@@ -308,6 +355,9 @@ contract JBveBannyTests is TestBaseWorkflow {
     vm.stopPrank();
   }
 
+  /**
+    @dev Voting power increase Test.
+  */
   function testLockVotingPowerIncreasesIfLockedLonger() public {
     mintAndApproveIJBTokens();
     vm.startPrank(_projectOwner);
@@ -325,6 +375,9 @@ contract JBveBannyTests is TestBaseWorkflow {
     vm.stopPrank();
   }
 
+  /**
+    @dev Voting power decrease Test.
+  */
   function testLockVotingPowerDecreasesOverTime() public {
     mintAndApproveIJBTokens();
     vm.startPrank(_projectOwner);
@@ -370,6 +423,9 @@ contract JBveBannyTests is TestBaseWorkflow {
     assert(_jbveBanny.tokenVotingPowerAt(_tokenId, _currentBlock) == 0);
   }
 
+  /**
+    @dev Historic Voting power lookup Test.
+  */
   function testLockVotingPowerHistoricLookupIsCorrect() public {
     mintAndApproveIJBTokens();
     vm.startPrank(_projectOwner);
@@ -434,6 +490,9 @@ contract JBveBannyTests is TestBaseWorkflow {
     vm.stopPrank();
   }
 
+  /**
+    @dev Voting power activation Test.
+  */
   function testVotingPowerGetsActivatedIfMintedForSelf() public {
     address _user = address(0xf00ba6);
     mintAndApproveIJBTokensFor(_user, 5 ether);
@@ -449,6 +508,9 @@ contract JBveBannyTests is TestBaseWorkflow {
     assertGt(_jbveBanny.getVotes(_user) - _initialVotingPower, 0);
   }
 
+  /**
+    @dev Voting power activation Test.
+  */
   function testVotingPowerDoesNotGetActivatedIfMintedForOtherUser() public {
     address _user = address(0xf00ba6);
     mintAndApproveIJBTokensFor(_user, 5 ether);
@@ -464,6 +526,9 @@ contract JBveBannyTests is TestBaseWorkflow {
     assertTrue(_jbveBanny.getVotes(_projectOwner) - _initialVotingPower == 0);
   }
 
+  /**
+    @dev Voting power activation Test.
+  */
   function testActivatingVotingPower() public {
     address _user = address(0xf00ba6);
     mintAndApproveIJBTokensFor(_user, 5 ether);
@@ -486,6 +551,9 @@ contract JBveBannyTests is TestBaseWorkflow {
     assertGt(_jbveBanny.getVotes(_projectOwner) - _initialVotingPower, 0);
   }
 
+  /**
+    @dev Voting power disable Test.
+  */
   function testVotingPowerGetsDisabledOnTransfer() public {
     address _userA = address(0xf00);
     address _userB = address(0xba6);
@@ -521,6 +589,10 @@ contract JBveBannyTests is TestBaseWorkflow {
     assertEq(_userBVotingPowerAfterTransfer, _userBVotingPowerBeforeTransfer);
   }
 
+
+  //*********************************************************************//
+  // --------------------------- Fuzzer Tests ---------------------------- //
+  //*********************************************************************//
   function testFuzzLockWithJBToken(uint256 _inputAmount, uint256 _inputDuration) public {
     IJBToken _jbToken = _jbTokenStore.tokenOf(_projectId);
     _projectOwner = projectOwner();
