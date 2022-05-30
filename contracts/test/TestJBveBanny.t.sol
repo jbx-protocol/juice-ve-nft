@@ -589,7 +589,6 @@ contract JBveBannyTests is TestBaseWorkflow {
     assertEq(_userBVotingPowerAfterTransfer, _userBVotingPowerBeforeTransfer);
   }
 
-
   //*********************************************************************//
   // --------------------------- Fuzzer Tests ---------------------------- //
   //*********************************************************************//
@@ -712,6 +711,94 @@ contract JBveBannyTests is TestBaseWorkflow {
       _jbveBanny.lock(_projectOwner, _inputAmount, _inputDuration, _projectOwner, true, false);
     }
     vm.stopPrank();
+  }
+
+  function testFuzzRedeem(
+    uint256 _inputAmount,
+    uint256 _inputDuration,
+    uint256 _inputOverflowAmount,
+    uint256 _inputMinReclaimAmount
+  ) public {
+    vm.assume(_inputAmount > 0);
+    IJBToken _jbToken = _jbTokenStore.tokenOf(_projectId);
+    _projectOwner = projectOwner();
+    vm.startPrank(_projectOwner);
+    _jbController.mintTokensOf(_projectId, _inputAmount, _projectOwner, 'Test Memo', true, true);
+    bool _isDurationAcceptable = _isDurationAccepted(_inputDuration);
+
+    if (_isDurationAcceptable) {
+      JBRedeemData[] memory redeems = new JBRedeemData[](1);
+      // scope to prevent stack overflow
+      {
+        _jbToken.approve(_projectId, address(_jbveBanny), _inputAmount);
+        uint256 _tokenId = _jbveBanny.lock(
+          _projectOwner,
+          _inputAmount,
+          _inputDuration,
+          _projectOwner,
+          true,
+          false
+        );
+
+        (, , uint256 _lockedUntil, , ) = _jbveBanny.getSpecs(_tokenId);
+        vm.warp(_lockedUntil * 2);
+        vm.stopPrank();
+
+        vm.startPrank(address(_jbveBanny));
+        uint256[] memory _permissionIndexes = new uint256[](1);
+        _permissionIndexes[0] = JBOperations.BURN;
+        jbOperatorStore().setOperator(
+          JBOperatorData(address(_redemptionTerminal), _projectId, _permissionIndexes)
+        );
+        vm.stopPrank();
+
+        vm.startPrank(_projectOwner);
+        // adding overflow
+        // overflow alloance is 5 ether
+        vm.assume(_inputOverflowAmount > 5 ether);
+        _paymentToken.approve(address(_redemptionTerminal), _inputOverflowAmount);
+        IJBPaymentTerminal(_redemptionTerminal).addToBalanceOf(
+          _projectId,
+          _inputOverflowAmount,
+          address(0),
+          'Forge test',
+          new bytes(0)
+        );
+        vm.assume(_inputMinReclaimAmount > 5 ether);
+        vm.assume(_inputMinReclaimAmount <= (_inputOverflowAmount - 5 ether));
+
+        redeems[0] = JBRedeemData(
+          _tokenId,
+          address(0),
+          _inputMinReclaimAmount,
+          payable(_projectOwner),
+          'test memo',
+          '0x69',
+          IJBRedemptionTerminal(_redemptionTerminal)
+        );
+      }
+      // scope to prevent stack overflow
+      {
+        uint256 jbTerminalTokenBalanceBeforeRedeem = _paymentToken.balanceOf(
+          _projectOwner,
+          _projectId
+        );
+        uint256 totalSupply = jbController().totalOutstandingTokensOf(_projectId, 5000);
+        uint256 overflow = jbPaymentTerminalStore().currentTotalOverflowOf(_projectId, 18, 1);
+        _jbveBanny.redeem(redeems);
+
+        uint256 jbTerminalTokenBalanceAfterRedeem = _paymentToken.balanceOf(
+          _projectOwner,
+          _projectId
+        );
+
+        assertEq(
+          jbTerminalTokenBalanceAfterRedeem,
+          jbTerminalTokenBalanceBeforeRedeem + ((_inputAmount * overflow) / totalSupply)
+        );
+      }
+      vm.stopPrank();
+    }
   }
 
   function testFuzzVotingPowerDecreasesOverTime(
