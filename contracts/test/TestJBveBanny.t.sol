@@ -1013,7 +1013,7 @@ contract JBveBannyTests is TestBaseWorkflow {
     }
   }
 
-  function _isDurationAccepted(uint256 _duration) internal returns (bool) {
+  function _isDurationAccepted(uint256 _duration) internal view returns (bool) {
     for (uint256 _i; _i < _jbveBanny.lockDurationOptions().length; _i++)
       if (_jbveBanny.lockDurationOptions()[_i] == _duration) return true;
       else return false;
