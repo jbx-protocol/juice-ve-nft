@@ -51,7 +51,7 @@
     "account": "hardhat account",
     "test": "mocha './test/**/*.test.js' -r esm --bail",
     "clean": "rimraf ./cache && rimraf ./artifacts",
-    "compile": "yarn clean && hardhat compile",
+    "compile": "forge build",
     "pretty": "prettier --write \"./**/*.{js,jsx,json}\""
   }
 }
