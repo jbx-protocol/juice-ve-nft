@@ -368,9 +368,11 @@ contract JBveBannyTests is TestBaseWorkflow {
     assertGt(_jbveBanny.tokenVotingPowerAt(2, block.number), 0);
 
     // Since lock-2 is 4x as long as lock-1, it should have x4 the voting power
-    assertGt(
+    // the delata diff is 0.08 approx
+    assertApproxEqAbs(
       _jbveBanny.tokenVotingPowerAt(2, block.number),
-      _jbveBanny.tokenVotingPowerAt(1, block.number) * 4
+      _jbveBanny.tokenVotingPowerAt(1, block.number) * 4,
+      _jbveBanny.tokenVotingPowerAt(2, block.number) - _jbveBanny.tokenVotingPowerAt(1, block.number) * 4
     );
     vm.stopPrank();
   }
