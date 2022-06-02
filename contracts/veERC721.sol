@@ -273,7 +273,8 @@ abstract contract veERC721 is ERC721Enumerable, IVotes {
       }
     }
 
-    return super._afterTokenTransfer(_from, _to, _tokenId);
+    // Register/unregister in ERC721Enumerable
+    return super._beforeTokenTransfer(_from, _to, _tokenId);
   }
 
   /**
