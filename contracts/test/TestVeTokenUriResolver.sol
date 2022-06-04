@@ -33,7 +33,7 @@ contract JBveTokenUriResolverTests is TestBaseWorkflow {
     _lockDurationOptions[0] = 864000;
     _lockDurationOptions[1] = 2160000;
     _lockDurationOptions[2] = 8640000;
-    
+
     // JBveBanny
     _jbveBanny = new JBveBanny(
       _projectId,
@@ -57,21 +57,11 @@ contract JBveTokenUriResolverTests is TestBaseWorkflow {
   function mintIJBTokens() public returns (IJBToken) {
     IJBToken _token = _jbTokenStore.tokenOf(_projectId);
     _projectOwner = projectOwner();
-    evm.startPrank(_projectOwner);
-    _jbController.mintTokensOf(
-      _projectId, 
-      100 ether, 
-      _projectOwner, 
-      'Test Memo', 
-      true, 
-      true);
-    _token.approve(
-      _projectId, 
-      address(_jbveBanny), 
-      10 ether);
+    vm.startPrank(_projectOwner);
+    _jbController.mintTokensOf(_projectId, 100 ether, _projectOwner, 'Test Memo', true, true);
+    _token.approve(_projectId, address(_jbveBanny), 10 ether);
     return _token;
   }
-  
 
   /*
   function testJBveTokenUriResolverParameters(uint256 amount, uint256 duration) public {
@@ -93,12 +83,13 @@ contract JBveTokenUriResolverTests is TestBaseWorkflow {
       _lockDurationOptions[1],
       0,
       _lockDurationOptions
-      );
+    );
     string memory derived = string(
       abi.encodePacked(
         'ipfs://QmSCaNi3VeyrV78qWiDgxdkJTUB7yitnLKHsPHudguc9kv/',
-        Strings.toString(1 * 2))
-        );
+        Strings.toString(1 * 2)
+      )
+    );
     assert(keccak256(bytes(uri)) == keccak256(bytes(derived)));
   }
 }
