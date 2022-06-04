@@ -1,13 +1,12 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.6;
 
-import './DSTest.t.sol';
-import './hevm.t.sol';
 import '../../JBveBanny.sol';
 import '../../JBVeTokenUriResolver.sol';
+import './AccessJBLib.sol';
+import 'forge-std/Test.sol';
 
 import '@jbx-protocol/contracts-v2/contracts/JBDirectory.sol';
-import '@jbx-protocol/contracts-v2/contracts/JBETHPaymentTerminal.sol';
 import '@jbx-protocol/contracts-v2/contracts/JBSingleTokenPaymentTerminalStore.sol';
 import '@jbx-protocol/contracts-v2/contracts/JBOperatorStore.sol';
 import '@jbx-protocol/contracts-v2/contracts/JBPrices.sol';
@@ -17,6 +16,7 @@ import '@jbx-protocol/contracts-v2/contracts/JBFundingCycleStore.sol';
 import '@jbx-protocol/contracts-v2/contracts/JBSplitsStore.sol';
 import '@jbx-protocol/contracts-v2/contracts/JBController.sol';
 import '@jbx-protocol/contracts-v2/contracts/JBToken.sol';
+import '@jbx-protocol/contracts-v2/contracts/JBERC20PaymentTerminal.sol';
 
 import '@jbx-protocol/contracts-v2/contracts/structs/JBProjectMetadata.sol';
 import '@jbx-protocol/contracts-v2/contracts/structs/JBFundingCycleData.sol';
@@ -35,16 +35,13 @@ import '@jbx-protocol/contracts-v2/contracts/libraries/JBCurrencies.sol';
 // Base contract for JBX Banny system tests.
 //
 // Provides common functionality, such as deploying contracts on test setup.
-abstract contract TestBaseWorkflow is DSTest {
+abstract contract TestBaseWorkflow is Test {
   //*********************************************************************//
   // --------------------- private stored properties ------------------- //
   //*********************************************************************//
 
   // Multisig address used for testing.
   address private _multisig = address(123);
-
-  // EVM Cheat codes - test addresses via prank and startPrank in hevm
-  Hevm public evm = Hevm(0x7109709ECfa91a80626fF3989D68f67F5b1DD12D);
 
   // JBOperatorStore
   JBOperatorStore private _jbOperatorStore;
@@ -76,8 +73,14 @@ abstract contract TestBaseWorkflow is DSTest {
   JBFundAccessConstraints[] private _fundAccessConstraints;
   // JBETHPaymentTerminalStore
   JBSingleTokenPaymentTerminalStore private _jbPaymentTerminalStore;
+  // JBERC20PaymentTerminal
+  JBERC20PaymentTerminal private _jbERC20PaymentTerminal;
+  // JBToken
+  JBToken private _paymentToken;
   // IJBTerminal
   IJBPaymentTerminal[] private _terminals;
+  // AccessJBLib
+  AccessJBLib private _accessJBLib;
 
   uint256 private _projectId;
   address private _projectOwner;
@@ -135,6 +138,15 @@ abstract contract TestBaseWorkflow is DSTest {
     return _projectOwner;
   }
 
+  function jbERC20PaymentTerminal() internal view returns (address) {
+    return address(_jbERC20PaymentTerminal);
+  }
+
+  function jbToken() internal view returns (JBToken) {
+    return _paymentToken;
+  }
+
+
   //*********************************************************************//
   // --------------------------- test setup ---------------------------- //
   //*********************************************************************//
@@ -171,24 +183,52 @@ abstract contract TestBaseWorkflow is DSTest {
       _jbTokenStore,
       _jbSplitsStore
     );
-    evm.startPrank(_projectOwner);
-    _jbDirectory.setIsAllowedToSetFirstController(address(_jbController), true);
 
-    // JBETHPaymentTerminal
-    _terminals.push(
-      new JBETHPaymentTerminal(
-        JBCurrencies.ETH,
-        _jbOperatorStore,
-        _jbProjects,
-        _jbDirectory,
-        _jbSplitsStore,
-        _jbPrices,
-        _jbPaymentTerminalStore,
-        _multisig
-      )
+    _jbPaymentTerminalStore = new JBSingleTokenPaymentTerminalStore(
+      _jbDirectory,
+      _jbFundingCycleStore,
+      _jbPrices
     );
 
-    evm.stopPrank();
+    vm.prank(_multisig);
+    _paymentToken = new JBToken('MyToken', 'MT');
+    vm.prank(_multisig);
+    _paymentToken.mint(0, _multisig, 100 ether);
+
+    // AccessJBLib
+    _accessJBLib = new AccessJBLib();
+
+    _jbERC20PaymentTerminal = new JBERC20PaymentTerminal(
+      _paymentToken,
+      _accessJBLib.ETH(), // currency
+      _accessJBLib.ETH(), // base weight currency
+      1, // JBSplitsGroupe
+      _jbOperatorStore,
+      _jbProjects,
+      _jbDirectory,
+      _jbSplitsStore,
+      _jbPrices,
+      _jbPaymentTerminalStore,
+      _multisig
+    );
+
+    vm.startPrank(_projectOwner);
+
+    _fundAccessConstraints.push(
+      JBFundAccessConstraints({
+        terminal: _jbERC20PaymentTerminal,
+        token: address(_paymentToken),
+        distributionLimit: 10 * 10**18,
+        overflowAllowance: 5 * 10**18,
+        distributionLimitCurrency: _accessJBLib.ETH(),
+        overflowAllowanceCurrency: _accessJBLib.ETH()
+      })
+    );
+    _jbDirectory.setIsAllowedToSetFirstController(address(_jbController), true);
+
+    _terminals.push(_jbERC20PaymentTerminal);
+
+    vm.stopPrank();
     // JBVeTokenUriResolver
     _jbveTokenUriResolver = new JBVeTokenUriResolver();
 
@@ -204,7 +244,7 @@ abstract contract TestBaseWorkflow is DSTest {
 
     _metadata = JBFundingCycleMetadata({
       reservedRate: _reservedRate,
-      redemptionRate: 5000,
+      redemptionRate: 10000,
       ballotRedemptionRate: 0,
       pausePay: false,
       pauseDistributions: false,
@@ -236,10 +276,10 @@ abstract contract TestBaseWorkflow is DSTest {
     );
 
     // calls will originate from projectOwner addr
-    evm.startPrank(_projectOwner);
+    vm.startPrank(_projectOwner);
     // issue an ERC-20 token for project
     _jbController.issueTokenFor(_projectId, 'TestName', 'TestSymbol');
-    evm.stopPrank();
+    vm.stopPrank();
   }
 
   //https://ethereum.stackexchange.com/questions/24248/how-to-calculate-an-ethereum-contracts-address-during-its-creation-using-the-so

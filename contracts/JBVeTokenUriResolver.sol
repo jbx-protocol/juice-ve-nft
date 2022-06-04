@@ -8,11 +8,18 @@ import '@openzeppelin/contracts/utils/Strings.sol';
 import './interfaces/IJBVeTokenUriResolver.sol';
 import './libraries/JBErrors.sol';
 
-
 contract JBVeTokenUriResolver is IJBVeTokenUriResolver, Ownable {
-  using SafeMath for uint256;
-
+  uint8 public constant decimals = 18;
   string public baseUri = 'ipfs://QmSCaNi3VeyrV78qWiDgxdkJTUB7yitnLKHsPHudguc9kv/';
+
+  /**
+    @notice
+    provides the metadata for the storefront
+  */
+  function contractURI() public pure override returns (string memory) {
+    // TODO: Change to correct URI
+    return 'https://metadata-url.com/my-metadata';
+  }
   
   /** 
     @notice Sets the baseUri for the JBVeToken on IPFS.
@@ -64,7 +71,10 @@ contract JBVeTokenUriResolver is IJBVeTokenUriResolver, Ownable {
     @return The token range index or veBanny character commensurate with amount of locked Juicebox.
   */
   function _getTokenRange(uint256 _amount) private pure returns (uint256) {
-    if (_amount >= 1 && _amount <= 100) {
+    // Reduce amount to exclude decimals
+    _amount = _amount / 10**decimals;
+
+    if (_amount <= 100) {
       return 1;
     } else if (_amount >= 101 && _amount <= 200) {
       return 2;

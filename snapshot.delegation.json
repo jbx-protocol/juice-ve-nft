@@ -1,0 +1,39 @@
+{
+    "name": "delegation",
+    "params": {
+        "symbol": "veJBX",
+        "defaultToSelf": true,
+        "strategies": [
+            {
+                "name": "contract-call",
+                "params": {
+                    "args": [
+                        "%{address}"
+                    ],
+                    "symbol": "veJBX",
+                    "address": "0x94ae2d533e2954691df87f2d5b18b0072d4b19a4",
+                    "decimals": 18,
+                    "methodABI": {
+                        "inputs": [
+                            {
+                                "internalType": "address",
+                                "name": "_account",
+                                "type": "address"
+                            }
+                        ],
+                        "name": "getVotes",
+                        "outputs": [
+                            {
+                                "internalType": "uint256",
+                                "name": "votingPower",
+                                "type": "uint256"
+                            }
+                        ],
+                        "stateMutability": "view",
+                        "type": "function"
+                    }
+                }
+            }
+        ]
+    }
+}
