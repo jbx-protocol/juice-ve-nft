@@ -22,6 +22,8 @@ contract JBveBannyTests is TestBaseWorkflow {
   address private _projectOwner;
   JBToken _paymentToken;
 
+  uint256 public constant MAXTIME = 3 * 365 * 86400;
+
   //*********************************************************************//
   // --------------------------- test setup ---------------------------- //
   //*********************************************************************//
@@ -361,11 +363,16 @@ contract JBveBannyTests is TestBaseWorkflow {
   function testLockVotingPowerIncreasesIfLockedLonger() public {
     mintAndApproveIJBTokens();
     vm.startPrank(_projectOwner);
+
     _jbveBanny.lock(_projectOwner, 5 ether, 1 weeks, _projectOwner, true, false);
-    assertGt(_jbveBanny.tokenVotingPowerAt(1, block.number), 0);
+    uint expectedVotingPower = 5 ether / MAXTIME * 1 weeks;
+
+    assertApproxEqAbs(_jbveBanny.tokenVotingPowerAt(1, block.number), expectedVotingPower, expectedVotingPower - _jbveBanny.tokenVotingPowerAt(1, block.number));
 
     _jbveBanny.lock(_projectOwner, 5 ether, 4 weeks, _projectOwner, true, false);
-    assertGt(_jbveBanny.tokenVotingPowerAt(2, block.number), 0);
+     expectedVotingPower = 5 ether / MAXTIME * 4 weeks;
+
+    assertApproxEqAbs(_jbveBanny.tokenVotingPowerAt(2, block.number), expectedVotingPower, expectedVotingPower - _jbveBanny.tokenVotingPowerAt(2, block.number));
 
     // Since lock-2 is 4x as long as lock-1, it should have x4 the voting power
     // the delata diff is 0.08 approx
@@ -422,7 +429,7 @@ contract JBveBannyTests is TestBaseWorkflow {
     }
 
     // After the lock has expired it should be 0
-    assert(_jbveBanny.tokenVotingPowerAt(_tokenId, _currentBlock) == 0);
+    assertTrue(_jbveBanny.tokenVotingPowerAt(_tokenId, _currentBlock) == 0);
   }
 
   /**
@@ -476,7 +483,7 @@ contract JBveBannyTests is TestBaseWorkflow {
     }
 
     // After the lock has expired it should be 0
-    assert(_jbveBanny.tokenVotingPowerAt(_tokenId, _currentBlock) == 0);
+    assertTrue(_jbveBanny.tokenVotingPowerAt(_tokenId, _currentBlock) == 0);
 
     // Use the stored `_currentVotingPower` and `_currentBlock` and perform historic lookups for each
     // Make sure the historic lookup and (at the time) current values are the same
@@ -507,7 +514,8 @@ contract JBveBannyTests is TestBaseWorkflow {
     _jbveBanny.lock(_user, 5 ether, 1 weeks, _user, true, false);
 
     // Did the user receive the voting power
-    assertGt(_jbveBanny.getVotes(_user) - _initialVotingPower, 0);
+    uint expectedVotingPower = 5 ether / MAXTIME * 1 weeks;
+    assertApproxEqAbs(_jbveBanny.getVotes(_user) - _initialVotingPower, expectedVotingPower, expectedVotingPower - _jbveBanny.getVotes(_user) - _initialVotingPower);
   }
 
   /**
@@ -550,7 +558,8 @@ contract JBveBannyTests is TestBaseWorkflow {
     _jbveBanny.activateVotingPower(_tokenId);
 
     // Should now be higher
-    assertGt(_jbveBanny.getVotes(_projectOwner) - _initialVotingPower, 0);
+    uint expectedVotingPower = 5 ether / MAXTIME * 1 weeks;
+    assertApproxEqAbs(_jbveBanny.getVotes(_projectOwner) - _initialVotingPower, expectedVotingPower, expectedVotingPower - _jbveBanny.getVotes(_projectOwner) - _initialVotingPower);
   }
 
   /**
@@ -572,7 +581,8 @@ contract JBveBannyTests is TestBaseWorkflow {
     uint256 _afterMintVotingPower = _jbveBanny.getVotes(_userA);
 
     // UserA should have received voting power
-    assertGt(_afterMintVotingPower - _initialVotingPower, 0);
+    uint expectedVotingPower = 5 ether / MAXTIME * 1 weeks;
+    assertApproxEqAbs(_afterMintVotingPower - _initialVotingPower, expectedVotingPower, expectedVotingPower - _afterMintVotingPower - _initialVotingPower);
 
     // Get the voting power of user B
     uint256 _userBVotingPowerBeforeTransfer = _jbveBanny.getVotes(_userB);
@@ -916,7 +926,7 @@ contract JBveBannyTests is TestBaseWorkflow {
       }
 
       // After the lock has expired it should be 0
-      assert(_jbveBanny.tokenVotingPowerAt(_tokenId, _currentBlock) == 0);
+      assertTrue(_jbveBanny.tokenVotingPowerAt(_tokenId, _currentBlock) == 0);
 
       // Use the stored `_currentVotingPower` and `_currentBlock` and perform historic lookups for each
       // Make sure the historic lookup and (at the time) current values are the same

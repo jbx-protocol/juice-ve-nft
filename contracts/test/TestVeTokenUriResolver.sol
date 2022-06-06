@@ -63,19 +63,6 @@ contract JBveTokenUriResolverTests is TestBaseWorkflow {
     return _token;
   }
 
-  /*
-  function testJBveTokenUriResolverParameters(uint256 amount, uint256 duration) public {
-    if (amount > 0 && duration > 0) {
-      string uri = _jbveTokenUriResolver.tokenURI(0, amount, duration, 0, _lockDurationOptions);
-      // TODO: break out _getTokenRange and _getTokenStakeMultiplier for fuzzy testing
-      string derived = string(abi.encodePacked(
-        'ipfs://QmVicV3vNyPKtKxYPPPiVKxaAFa8X2kP5xys6NFhiHf8zj/', 
-        Strings.toString(_tokenRange * _stakeMultiplier)));
-      assert(uri == derived);
-    }
-  }
-  */
-
   function testJBveTokenUriResolver() public view {
     string memory uri = _jbveTokenUriResolver.tokenURI(
       0,
