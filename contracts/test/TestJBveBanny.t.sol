@@ -362,6 +362,12 @@ contract JBveBannyTests is TestBaseWorkflow {
   */
   function testLockVotingPowerIncreasesIfLockedLonger() public {
     mintAndApproveIJBTokens();
+
+    // fast forwarding to the start of the week for better analyse the voting power tests
+    uint unixWeekCount = block.timestamp / 1 weeks;
+    uint nextUnixWeek = (unixWeekCount + 1) * unixWeekCount;
+    vm.warp(nextUnixWeek);
+
     vm.startPrank(_projectOwner);
 
     _jbveBanny.lock(_projectOwner, 5 ether, 1 weeks, _projectOwner, true, false);
@@ -389,6 +395,7 @@ contract JBveBannyTests is TestBaseWorkflow {
   */
   function testLockVotingPowerDecreasesOverTime() public {
     mintAndApproveIJBTokens();
+
     vm.startPrank(_projectOwner);
     uint256 _steps = 4;
     uint256 _secondsPerBlock = 1;
@@ -506,6 +513,11 @@ contract JBveBannyTests is TestBaseWorkflow {
     address _user = address(0xf00ba6);
     mintAndApproveIJBTokensFor(_user, 5 ether);
 
+    // fast forwarding to the start of the week for better analyse the voting power tests
+    uint unixWeekCount = block.timestamp / 1 weeks;
+    uint nextUnixWeek = (unixWeekCount + 1) * unixWeekCount;
+    vm.warp(nextUnixWeek);
+
     // Check the users voting power before creating the new lock
     uint256 _initialVotingPower = _jbveBanny.getVotes(_user);
 
@@ -543,6 +555,11 @@ contract JBveBannyTests is TestBaseWorkflow {
     address _user = address(0xf00ba6);
     mintAndApproveIJBTokensFor(_user, 5 ether);
 
+    // fast forwarding to the start of the week for better analyse the voting power tests
+    uint unixWeekCount = block.timestamp / 1 weeks;
+    uint nextUnixWeek = (unixWeekCount + 1) * unixWeekCount;
+    vm.warp(nextUnixWeek);
+
     // Check the users voting power before creating the new lock
     uint256 _initialVotingPower = _jbveBanny.getVotes(_projectOwner);
 
@@ -569,6 +586,11 @@ contract JBveBannyTests is TestBaseWorkflow {
     address _userA = address(0xf00);
     address _userB = address(0xba6);
     mintAndApproveIJBTokensFor(_userA, 5 ether);
+
+    // fast forwarding to the start of the week for better analyse the voting power tests
+    uint unixWeekCount = block.timestamp / 1 weeks;
+    uint nextUnixWeek = (unixWeekCount + 1) * unixWeekCount;
+    vm.warp(nextUnixWeek);
 
     // Check the users voting power before creating the new lock
     uint256 _initialVotingPower = _jbveBanny.getVotes(_userA);
