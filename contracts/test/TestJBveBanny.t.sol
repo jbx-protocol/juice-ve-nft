@@ -363,14 +363,9 @@ contract JBveBannyTests is TestBaseWorkflow {
   function testLockVotingPowerIncreasesIfLockedLonger() public {
     mintAndApproveIJBTokens();
 
-    // fast forwarding to the start of the week for better analyse the voting power tests
-    uint256 unixWeekCount = block.timestamp / 1 weeks;
-    uint256 nextUnixWeek = (unixWeekCount + 1) * unixWeekCount;
-    vm.warp(nextUnixWeek);
-
     vm.startPrank(_projectOwner);
 
-    uint256 idOfSingleWeek = _jbveBanny.lock(
+    uint256 _tokenId = _jbveBanny.lock(
       _projectOwner,
       5 ether,
       1 weeks,
@@ -385,15 +380,16 @@ contract JBveBannyTests is TestBaseWorkflow {
     uint256 singleWeekLockExactSeconds = (unlockDate - block.timestamp);
     uint256 expectedVotingPower = (5 ether / MAXTIME) * singleWeekLockExactSeconds;
     // Check if the actual voting power is the same as the expected voting power
-    assertEq(_jbveBanny.tokenVotingPowerAt(1, block.number), expectedVotingPower);
+    assertEq(_jbveBanny.tokenVotingPowerAt(_tokenId, block.number), expectedVotingPower);
 
-    _jbveBanny.lock(_projectOwner, 5 ether, 4 weeks, _projectOwner, true, false);
+    _tokenId = _jbveBanny.lock(_projectOwner, 5 ether, 4 weeks, _projectOwner, true, false);
+
     unlockDate = ((block.timestamp + 4 weeks) / 1 weeks) * 1 weeks;
     // The exact amount of seconds until the 4 week lock expires
     uint256 fourWeekLockExactSeconds = (unlockDate - block.timestamp);
     expectedVotingPower = (5 ether / MAXTIME) * (unlockDate - block.timestamp);
     // Check if the actual voting power is the same as the expected voting power
-    assertEq(_jbveBanny.tokenVotingPowerAt(2, block.number), expectedVotingPower);
+    assertEq(_jbveBanny.tokenVotingPowerAt(_tokenId, block.number), expectedVotingPower);
 
     assertEq(
       _jbveBanny.tokenVotingPowerAt(2, block.number) / fourWeekLockExactSeconds,
@@ -525,11 +521,6 @@ contract JBveBannyTests is TestBaseWorkflow {
     address _user = address(0xf00ba6);
     mintAndApproveIJBTokensFor(_user, 5 ether);
 
-    // fast forwarding to the start of the week for better analyse the voting power tests
-    uint256 unixWeekCount = block.timestamp / 1 weeks;
-    uint256 nextUnixWeek = (unixWeekCount + 1) * unixWeekCount;
-    vm.warp(nextUnixWeek);
-
     // Check the users voting power before creating the new lock
     uint256 _initialVotingPower = _jbveBanny.getVotes(_user);
 
@@ -537,12 +528,16 @@ contract JBveBannyTests is TestBaseWorkflow {
     vm.prank(_user);
     _jbveBanny.lock(_user, 5 ether, 1 weeks, _user, true, false);
 
-    // Did the user receive the voting power
-    uint256 expectedVotingPower = (5 ether / MAXTIME) * 1 weeks;
-    assertApproxEqAbs(
+    // The unlock date gets rounded to the week, so it may not be exact
+    uint256 unlockDate = ((block.timestamp + 1 weeks) / 1 weeks) * 1 weeks;
+    // The exact amount of seconds until the 1 week lock expires
+    uint256 singleWeekLockExactSeconds = (unlockDate - block.timestamp);
+    uint256 expectedVotingPower = (5 ether / MAXTIME) * singleWeekLockExactSeconds;
+
+    // Check if the actual voting power is the same as the expected voting power
+    assertEq(
       _jbveBanny.getVotes(_user) - _initialVotingPower,
-      expectedVotingPower,
-      expectedVotingPower - _jbveBanny.getVotes(_user) - _initialVotingPower
+      expectedVotingPower
     );
   }
 
@@ -571,11 +566,6 @@ contract JBveBannyTests is TestBaseWorkflow {
     address _user = address(0xf00ba6);
     mintAndApproveIJBTokensFor(_user, 5 ether);
 
-    // fast forwarding to the start of the week for better analyse the voting power tests
-    uint256 unixWeekCount = block.timestamp / 1 weeks;
-    uint256 nextUnixWeek = (unixWeekCount + 1) * unixWeekCount;
-    vm.warp(nextUnixWeek);
-
     // Check the users voting power before creating the new lock
     uint256 _initialVotingPower = _jbveBanny.getVotes(_projectOwner);
 
@@ -590,12 +580,16 @@ contract JBveBannyTests is TestBaseWorkflow {
     vm.prank(_projectOwner);
     _jbveBanny.activateVotingPower(_tokenId);
 
-    // Should now be higher
-    uint256 expectedVotingPower = (5 ether / MAXTIME) * 1 weeks;
-    assertApproxEqAbs(
+    // The unlock date gets rounded to the week, so it may not be exact
+    uint256 unlockDate = ((block.timestamp + 1 weeks) / 1 weeks) * 1 weeks;
+    // The exact amount of seconds until the 1 week lock expires
+    uint256 singleWeekLockExactSeconds = (unlockDate - block.timestamp);
+    uint256 expectedVotingPower = (5 ether / MAXTIME) * singleWeekLockExactSeconds;
+
+    // Check if the actual voting power is the same as the expected voting power
+    assertEq(
       _jbveBanny.getVotes(_projectOwner) - _initialVotingPower,
-      expectedVotingPower,
-      expectedVotingPower - _jbveBanny.getVotes(_projectOwner) - _initialVotingPower
+      expectedVotingPower
     );
   }
 
@@ -607,11 +601,6 @@ contract JBveBannyTests is TestBaseWorkflow {
     address _userB = address(0xba6);
     mintAndApproveIJBTokensFor(_userA, 5 ether);
 
-    // fast forwarding to the start of the week for better analyse the voting power tests
-    uint256 unixWeekCount = block.timestamp / 1 weeks;
-    uint256 nextUnixWeek = (unixWeekCount + 1) * unixWeekCount;
-    vm.warp(nextUnixWeek);
-
     // Check the users voting power before creating the new lock
     uint256 _initialVotingPower = _jbveBanny.getVotes(_userA);
 
@@ -622,12 +611,17 @@ contract JBveBannyTests is TestBaseWorkflow {
     // Get the new voting power of the user
     uint256 _afterMintVotingPower = _jbveBanny.getVotes(_userA);
 
-    // UserA should have received voting power
-    uint256 expectedVotingPower = (5 ether / MAXTIME) * 1 weeks;
-    assertApproxEqAbs(
+
+    // The unlock date gets rounded to the week, so it may not be exact
+    uint256 unlockDate = ((block.timestamp + 1 weeks) / 1 weeks) * 1 weeks;
+    // The exact amount of seconds until the 1 week lock expires
+    uint256 singleWeekLockExactSeconds = (unlockDate - block.timestamp);
+    uint256 expectedVotingPower = (5 ether / MAXTIME) * singleWeekLockExactSeconds;
+
+    // Check if the actual voting power is the same as the expected voting power
+    assertEq(
       _afterMintVotingPower - _initialVotingPower,
-      expectedVotingPower,
-      expectedVotingPower - _afterMintVotingPower - _initialVotingPower
+      expectedVotingPower
     );
 
     // Get the voting power of user B
@@ -1007,6 +1001,8 @@ contract JBveBannyTests is TestBaseWorkflow {
     if (_isDurationAcceptable) {
       // Lock the tokens and mint new NFT for user A
       vm.prank(_userA);
+
+      
       uint256 _tokenId = _jbveBanny.lock(_userA, _inputAmount, _inputDuration, _userA, true, false);
 
       // Get the new voting power of the user
@@ -1050,6 +1046,7 @@ contract JBveBannyTests is TestBaseWorkflow {
     if (_isDurationAcceptable) {
       vm.startPrank(_user);
       _jbToken.approve(_projectId, address(_jbveBanny), _inputAmount);
+      
       uint256 _tokenId = _jbveBanny.lock(
         _projectOwner,
         _inputAmount,
@@ -1066,8 +1063,14 @@ contract JBveBannyTests is TestBaseWorkflow {
       vm.prank(_projectOwner);
       _jbveBanny.activateVotingPower(_tokenId);
 
-      // Should now be higher
-      assertGt(_jbveBanny.getVotes(_projectOwner) - _initialVotingPower, 0);
+      // The unlock date gets rounded to the week, so it may not be exact
+      uint256 unlockDate = ((block.timestamp + _inputDuration) / 1 weeks) * 1 weeks;
+      // The exact amount of seconds until the 1 week lock expires
+      uint256 lockExactSeconds = (unlockDate - block.timestamp);
+      uint256 expectedVotingPower = (_inputAmount / MAXTIME) * lockExactSeconds;
+
+    // Check if the actual voting power is the same as the expected voting power
+      assertEq(_jbveBanny.getVotes(_projectOwner) - _initialVotingPower, expectedVotingPower);
     }
   }
 
