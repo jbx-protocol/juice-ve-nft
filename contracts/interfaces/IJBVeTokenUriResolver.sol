@@ -3,6 +3,12 @@ pragma solidity 0.8.6;
 
 interface IJBVeTokenUriResolver {
   /**
+    @notice
+    provides the metadata for the storefront
+  */
+  function contractURI() external view returns (string memory);
+
+  /**
     @notice 
     Computes the metadata url.
     @param _tokenId TokenId of the Banny

@@ -9,7 +9,8 @@ remappings = [
     '@paulrberg=node_modules/@paulrberg/',
     'hardhat=node_modules/hardhat/',
     'prb-math=node_modules/prb-math/',
-]
+    'forge-std/=lib/forge-std/src/',
+    ]
 libraries = []
 cache = true
 force = false
