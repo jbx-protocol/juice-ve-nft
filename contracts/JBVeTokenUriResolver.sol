@@ -20,7 +20,7 @@ contract JBVeTokenUriResolver is IJBVeTokenUriResolver, Ownable {
     // TODO: Change to correct URI
     return 'https://metadata-url.com/my-metadata';
   }
-  
+
   /** 
     @notice Sets the baseUri for the JBVeToken on IPFS.
 
@@ -46,16 +46,17 @@ contract JBVeTokenUriResolver is IJBVeTokenUriResolver, Ownable {
     uint256,
     uint256[] memory _lockDurationOptions
   ) external view override returns (string memory) {
+    if (_amount <= 0) revert JBErrors.INSUFFICIENT_BALANCE();
 
-    if (_amount <= 0) revert JBErrors.INSUFFICIENT_BALANCE();    
-    
     if (_duration <= 0) revert JBErrors.INVALID_LOCK_DURATION();
-      
+
     return
       string(
         abi.encodePacked(
           baseUri,
-          Strings.toString(_getTokenRange(_amount) * _getTokenStakeMultiplier(_duration, _lockDurationOptions))
+          Strings.toString(
+            _getTokenRange(_amount) * 5 + _getTokenStakeMultiplier(_duration, _lockDurationOptions)
+          )
         )
       );
   }
@@ -74,127 +75,127 @@ contract JBVeTokenUriResolver is IJBVeTokenUriResolver, Ownable {
     // Reduce amount to exclude decimals
     _amount = _amount / 10**decimals;
 
-    if (_amount <= 100) {
+    if (_amount < 100) {
+      return 0;
+    } else if (_amount < 200) {
       return 1;
-    } else if (_amount >= 101 && _amount <= 200) {
+    } else if (_amount < 300) {
       return 2;
-    } else if (_amount >= 201 && _amount <= 300) {
-      return 3;      
-    } else if (_amount >= 301 && _amount <= 400) {
-      return 4;      
-    } else if (_amount >= 401 && _amount <= 500) {
+    } else if (_amount < 400) {
+      return 3;
+    } else if (_amount < 500) {
+      return 4;
+    } else if (_amount < 600) {
       return 5;
-    } else if (_amount >= 501 && _amount <= 600) {
+    } else if (_amount < 700) {
       return 6;
-    } else if (_amount >= 601 && _amount <= 700) {
+    } else if (_amount < 800) {
       return 7;
-    } else if (_amount >= 701 && _amount <= 800) {
+    } else if (_amount < 900) {
       return 8;
-    } else if (_amount >= 801 && _amount <= 900) {
+    } else if (_amount < 1_000) {
       return 9;
-    } else if (_amount >= 901 && _amount <= 1000) {
+    } else if (_amount < 2_000) {
       return 10;
-    } else if (_amount >= 1001 && _amount <= 2000) {
+    } else if (_amount < 3_000) {
       return 11;
-    } else if (_amount >= 2001 && _amount <= 3000) {
+    } else if (_amount < 4_000) {
       return 12;
-    } else if (_amount >= 3001 && _amount <= 4000) {
+    } else if (_amount < 5_000) {
       return 13;
-    } else if (_amount >= 4001 && _amount <= 5000) {
+    } else if (_amount < 6_000) {
       return 14;
-    } else if (_amount >= 5001 && _amount <= 6000) {
+    } else if (_amount < 7_000) {
       return 15;
-    } else if (_amount >= 6001 && _amount <= 7000) {
+    } else if (_amount < 8_000) {
       return 16;
-    } else if (_amount >= 7001 && _amount <= 8000) {
+    } else if (_amount < 9_000) {
       return 17;
-    } else if (_amount >= 8001 && _amount <= 9000) {
+    } else if (_amount < 10_000) {
       return 18;
-    } else if (_amount >= 9001 && _amount <= 10000) {
+    } else if (_amount < 12_000) {
       return 19;
-    } else if (_amount >= 10001 && _amount <= 12000) {
+    } else if (_amount < 14_000) {
       return 20;
-    } else if (_amount >= 12001 && _amount <= 14000) {
+    } else if (_amount < 16_000) {
       return 21;
-    } else if (_amount >= 14001 && _amount <= 16000) {
+    } else if (_amount < 18_000) {
       return 22;
-    } else if (_amount >= 16001 && _amount <= 18000) {
+    } else if (_amount < 20_000) {
       return 23;
-    } else if (_amount >= 18001 && _amount <= 20000) {
+    } else if (_amount < 22_000) {
       return 24;
-    } else if (_amount >= 20001 && _amount <= 22000) {
+    } else if (_amount < 24_000) {
       return 25;
-    } else if (_amount >= 22001 && _amount <= 24000) {
+    } else if (_amount < 26_000) {
       return 26;
-    } else if (_amount >= 24001 && _amount <= 26000) {
+    } else if (_amount < 28_000) {
       return 27;
-    } else if (_amount >= 26001 && _amount <= 28000) {
+    } else if (_amount < 30_000) {
       return 28;
-    } else if (_amount >= 28001 && _amount <= 30000) {
+    } else if (_amount < 40_000) {
       return 29;
-    } else if (_amount >= 30001 && _amount <= 40000) {
+    } else if (_amount < 50_000) {
       return 30;
-    } else if (_amount >= 40001 && _amount <= 50000) {
+    } else if (_amount < 60_000) {
       return 31;
-    } else if (_amount >= 50001 && _amount <= 60000) {
+    } else if (_amount < 70_000) {
       return 32;
-    } else if (_amount >= 60001 && _amount <= 70000) {
+    } else if (_amount < 80_000) {
       return 33;
-    } else if (_amount >= 70001 && _amount <= 80000) {
+    } else if (_amount < 90_000) {
       return 34;
-    } else if (_amount >= 80001 && _amount <= 90000) {
+    } else if (_amount < 100_000) {
       return 35;
-    } else if (_amount >= 90001 && _amount <= 100000) {
+    } else if (_amount < 200_000) {
       return 36;
-    } else if (_amount >= 100001 && _amount <= 200000) {
+    } else if (_amount < 300_000) {
       return 37;
-    } else if (_amount >= 200001 && _amount <= 300000) {
+    } else if (_amount < 400_000) {
       return 38;
-    } else if (_amount >= 300001 && _amount <= 400000) {
+    } else if (_amount < 500_000) {
       return 39;
-    } else if (_amount >= 400001 && _amount <= 500000) {
+    } else if (_amount < 600_000) {
       return 40;
-    } else if (_amount >= 500001 && _amount <= 600000) {
+    } else if (_amount < 700_000) {
       return 41;
-    } else if (_amount >= 600001 && _amount <= 700000) {
+    } else if (_amount < 800_000) {
       return 42;
-    } else if (_amount >= 700001 && _amount <= 800000) {
+    } else if (_amount < 900_000) {
       return 43;
-    } else if (_amount >= 800001 && _amount <= 900000) {
+    } else if (_amount < 1_000_000) {
       return 44;
-    } else if (_amount >= 900001 && _amount <= 1000000) {
+    } else if (_amount < 2_000_000) {
       return 45;
-    } else if (_amount >= 1000001 && _amount <= 2000000) {
+    } else if (_amount < 3_000_000) {
       return 46;
-    } else if (_amount >= 2000001 && _amount <= 3000000) {
+    } else if (_amount < 4_000_000) {
       return 47;
-    } else if (_amount >= 3000001 && _amount <= 4000000) {
+    } else if (_amount < 5_000_000) {
       return 48;
-    } else if (_amount >= 4000001 && _amount <= 5000000) {
+    } else if (_amount < 6_000_000) {
       return 49;
-    } else if (_amount >= 5000001 && _amount <= 6000000) {
+    } else if (_amount < 7_000_000) {
       return 50;
-    } else if (_amount >= 6000001 && _amount <= 7000000) {
+    } else if (_amount < 8_000_000) {
       return 51;
-    } else if (_amount >= 7000001 && _amount <= 8000000) {
+    } else if (_amount < 9_000_000) {
       return 52;
-    } else if (_amount >= 8000001 && _amount <= 9000000) {
+    } else if (_amount < 10_000_000) {
       return 53;
-    } else if (_amount >= 9000001 && _amount <= 10000000) {
+    } else if (_amount < 20_000_000) {
       return 54;
-    } else if (_amount >= 10000001 && _amount <= 20000000) {
+    } else if (_amount < 40_000_000) {
       return 55;
-    } else if (_amount >= 20000001 && _amount <= 40000000) {
+    } else if (_amount < 60_000_000) {
       return 56;
-    } else if (_amount >= 40000001 && _amount <= 50000000) {
+    } else if (_amount < 100_000_000) {
       return 57;
-    } else if (_amount >= 50000001 && _amount <= 100000000) {
+    } else if (_amount < 600_000_000) {
       return 58;
-    } else if (_amount >= 100000001 && _amount <= 500000000) {
+    } else {
       return 59;
-    } else { // _amount >= 600_000_001
-      return 60;
-    } 
+    }
   }
 
   /**

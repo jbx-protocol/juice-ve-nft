@@ -66,15 +66,15 @@ contract JBveTokenUriResolverTests is TestBaseWorkflow {
   function testJBveTokenUriResolver() public view {
     string memory uri = _jbveTokenUriResolver.tokenURI(
       0,
-      100,
-      _lockDurationOptions[1],
+      1000000000000000000000, // 1000 Tokens
+      _lockDurationOptions[1], // 50 Days
       0,
       _lockDurationOptions
     );
     string memory derived = string(
       abi.encodePacked(
         'ipfs://QmSCaNi3VeyrV78qWiDgxdkJTUB7yitnLKHsPHudguc9kv/',
-        Strings.toString(1 * 2)
+        Strings.toString(10 * 5 + 2)
       )
     );
     assert(keccak256(bytes(uri)) == keccak256(bytes(derived)));
