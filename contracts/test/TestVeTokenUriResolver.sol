@@ -42,7 +42,8 @@ contract JBVeTokenUriResolverTests is TestBaseWorkflow {
       IJBVeTokenUriResolver(address(_jbveTokenUriResolver)),
       IJBTokenStore(address(_jbTokenStore)),
       IJBOperatorStore(address(_jbOperatorStore)),
-      _lockDurationOptions
+      _lockDurationOptions,
+      projectOwner()
     );
   }
 
