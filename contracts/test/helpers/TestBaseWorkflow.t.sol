@@ -3,6 +3,10 @@ pragma solidity 0.8.6;
 
 import '../../JBVeNft.sol';
 import '../../JBVeTokenUriResolver.sol';
+import '../../JBVeNftDeployer.sol';
+import '../../interfaces/IJBVeNft.sol';
+import '../../libraries/JBStakingOperations.sol';
+
 import './AccessJBLib.sol';
 import 'forge-std/Test.sol';
 
@@ -26,6 +30,7 @@ import '@jbx-protocol/contracts-v2/contracts/structs/JBFundAccessConstraints.sol
 import '@jbx-protocol/contracts-v2/contracts/structs/JBOperatorData.sol';
 
 import '@jbx-protocol/contracts-v2/contracts/interfaces/IJBPaymentTerminal.sol';
+import '@jbx-protocol/contracts-v2/contracts/interfaces/IJBProjects.sol';
 import '@jbx-protocol/contracts-v2/contracts/interfaces/IJBToken.sol';
 import '@jbx-protocol/contracts-v2/contracts/interfaces/IJBTokenStore.sol';
 import '@jbx-protocol/contracts-v2/contracts/abstract/JBOperatable.sol';
