@@ -61,7 +61,7 @@ module.exports = async ({ getNamedAccounts, deployments, getChainId }) => {
     ]
   ];
 
-  const veBanny = await deploy('JBveBanny', {
+  const veBanny = await deploy('JBVeNft', {
     ...baseDeployArgs,
     args: veBannyArgs,
   });

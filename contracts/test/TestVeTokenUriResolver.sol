@@ -4,11 +4,11 @@ pragma solidity 0.8.6;
 import './helpers/TestBaseWorkflow.t.sol';
 import '../interfaces/IJBVeTokenUriResolver.sol';
 
-contract JBveTokenUriResolverTests is TestBaseWorkflow {
+contract JBVeTokenUriResolverTests is TestBaseWorkflow {
   //*********************************************************************//
   // --------------------- private stored properties ------------------- //
   //*********************************************************************//
-  JBveBanny private _jbveBanny;
+  JBVeNft private _jbveBanny;
   JBVeTokenUriResolver private _jbveTokenUriResolver;
   JBTokenStore private _jbTokenStore;
   JBController private _jbController;
@@ -34,8 +34,8 @@ contract JBveTokenUriResolverTests is TestBaseWorkflow {
     _lockDurationOptions[1] = 2160000;
     _lockDurationOptions[2] = 8640000;
 
-    // JBveBanny
-    _jbveBanny = new JBveBanny(
+    // JBVeNft
+    _jbveBanny = new JBVeNft(
       _projectId,
       'Banny',
       'Banny',
@@ -63,7 +63,7 @@ contract JBveTokenUriResolverTests is TestBaseWorkflow {
     return _token;
   }
 
-  function testJBveTokenUriResolver() public view {
+  function testJBVeTokenUriResolver() public view {
     string memory uri = _jbveTokenUriResolver.tokenURI(
       0,
       1000000000000000000000, // 1000 Tokens

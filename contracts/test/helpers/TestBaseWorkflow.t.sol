@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.6;
 
-import '../../JBveBanny.sol';
+import '../../JBVeNft.sol';
 import '../../JBVeTokenUriResolver.sol';
 import './AccessJBLib.sol';
 import 'forge-std/Test.sol';
@@ -145,7 +145,6 @@ abstract contract TestBaseWorkflow is Test {
   function jbToken() internal view returns (JBToken) {
     return _paymentToken;
   }
-
 
   //*********************************************************************//
   // --------------------------- test setup ---------------------------- //
