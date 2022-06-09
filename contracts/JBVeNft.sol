@@ -100,7 +100,7 @@ contract JBVeNft is IJBVeNft, veERC721, Ownable, ReentrancyGuard, JBOperatable {
     @notice 
     Token URI Resolver Instance
   */
-  IJBVeTokenUriResolver public uriResolver;
+  IJBVeTokenUriResolver public override uriResolver;
 
   /** 
     @notice 

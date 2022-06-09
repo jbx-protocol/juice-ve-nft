@@ -20,6 +20,8 @@ interface IJBVeNft {
 
   function contractURI() external view returns (string memory);
 
+  function uriResolver() external view returns (IJBVeTokenUriResolver);
+
   function getSpecs(uint256 _tokenId)
     external
     view
