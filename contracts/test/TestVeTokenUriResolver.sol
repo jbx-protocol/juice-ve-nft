@@ -47,23 +47,6 @@ contract JBVeTokenUriResolverTests is TestBaseWorkflow {
     );
   }
 
-  function testConstructor() public {
-    // assertion checks for constructor code
-    assertEq(address(_jbTokenStore.tokenOf(_projectId)), address(_jbveBanny.token()));
-    assertEq(address(_jbveTokenUriResolver), address(_jbveBanny.uriResolver()));
-    assertEq(_projectId, _jbveBanny.projectId());
-    assertEq(_lockDurationOptions[0], _jbveBanny.lockDurationOptions()[0]);
-  }
-
-  function mintIJBTokens() public returns (IJBToken) {
-    IJBToken _token = _jbTokenStore.tokenOf(_projectId);
-    _projectOwner = projectOwner();
-    vm.startPrank(_projectOwner);
-    _jbController.mintTokensOf(_projectId, 100 ether, _projectOwner, 'Test Memo', true, true);
-    _token.approve(_projectId, address(_jbveBanny), 10 ether);
-    return _token;
-  }
-
   function testJBVeTokenUriResolver() public view {
     string memory uri = _jbveTokenUriResolver.tokenURI(
       0,
