@@ -389,7 +389,7 @@ contract JBVeNft is IJBVeNft, veERC721, Ownable, ReentrancyGuard, JBOperatable {
       _extendLock(_data.tokenId, _data.updatedDuration, _newEndDate);
       newTokenIds[_i] = _data.tokenId;
 
-      emit ExtendLock(_data.tokenId, _data.tokenId, _data.updatedDuration, _lock.end, msg.sender);
+      emit ExtendLock(_data.tokenId, _data.tokenId, _data.updatedDuration, _newEndDate, msg.sender);
     }
   }
 
