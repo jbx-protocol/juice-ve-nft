@@ -73,6 +73,7 @@ contract JBVeNftDeployer is IJBVeNftDeployer, JBOperatable {
     );
 
     emit DeployVeNft(
+      address(veNft),
       _projectId,
       _name,
       _symbol,

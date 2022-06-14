@@ -9,6 +9,7 @@ import './IJBVeNft.sol';
 
 interface IJBVeNftDeployer {
   event DeployVeNft(
+    address jbVeNft,
     uint256 indexed projectId,
     string name,
     string symbol,
