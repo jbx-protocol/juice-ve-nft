@@ -219,8 +219,10 @@ contract JBVeNft is IJBVeNft, veERC721, Ownable, ReentrancyGuard, JBOperatable {
 
     // Make sure no durationOption is longer than the max time
     uint256 _maxTime = uint256(uint128(MAXTIME));
-    for (uint256 _i; _i < _lockDurationOptions.length; _i++)
-      if (_lockDurationOptions[_i] > _maxTime) revert EXCEEDS_MAX_LOCK_DURATION();
+    for (uint256 _i; _i < _lockDurationOptions.length;) {
+       if (_lockDurationOptions[_i] > _maxTime) revert EXCEEDS_MAX_LOCK_DURATION();
+       unchecked { ++_i; }
+    }
 
     _transferOwnership(_owner);
   }
@@ -319,7 +321,7 @@ contract JBVeNft is IJBVeNft, veERC721, Ownable, ReentrancyGuard, JBOperatable {
     @param _unlockData An array of banny tokens to be burnt in exchange of the locked tokens.
   */
   function unlock(JBUnlockData[] calldata _unlockData) external override nonReentrant {
-    for (uint256 _i; _i < _unlockData.length; _i++) {
+    for (uint256 _i; _i < _unlockData.length;) {
       // Verify that the sender has permission to unlock this tokenId
       _requirePermission(ownerOf(_unlockData[_i].tokenId), projectId, JBStakingOperations.UNLOCK);
 
@@ -341,6 +343,7 @@ contract JBVeNft is IJBVeNft, veERC721, Ownable, ReentrancyGuard, JBOperatable {
 
       // Emit event.
       emit Unlock(_unlockData[_i].tokenId, _unlockData[_i].beneficiary, _amount, msg.sender);
+      unchecked { ++_i; }
     }
   }
 
@@ -363,7 +366,7 @@ contract JBVeNft is IJBVeNft, veERC721, Ownable, ReentrancyGuard, JBOperatable {
   {
     newTokenIds = new uint256[](_lockExtensionData.length);
 
-    for (uint256 _i; _i < _lockExtensionData.length; _i++) {
+    for (uint256 _i; _i < _lockExtensionData.length;) {
       // Get a reference to the extension being iterated.
       JBLockExtensionData memory _data = _lockExtensionData[_i];
 
@@ -390,6 +393,7 @@ contract JBVeNft is IJBVeNft, veERC721, Ownable, ReentrancyGuard, JBOperatable {
       newTokenIds[_i] = _data.tokenId;
 
       emit ExtendLock(_data.tokenId, _data.tokenId, _data.updatedDuration, _newEndDate, msg.sender);
+      unchecked { ++_i; }
     }
   }
 
@@ -407,7 +411,7 @@ contract JBVeNft is IJBVeNft, veERC721, Ownable, ReentrancyGuard, JBOperatable {
     override
     nonReentrant
   {
-    for (uint256 _i; _i < _allowPublicExtensionData.length; _i++) {
+    for (uint256 _i; _i < _allowPublicExtensionData.length;) {
       // Get a reference to the extension being iterated.
       JBAllowPublicExtensionData memory _data = _allowPublicExtensionData[_i];
 
@@ -426,6 +430,7 @@ contract JBVeNft is IJBVeNft, veERC721, Ownable, ReentrancyGuard, JBOperatable {
       locked[_data.tokenId].allowPublicExtension = _data.allowPublicExtension;
 
       emit SetAllowPublicExtension(_data.tokenId, _data.allowPublicExtension, msg.sender);
+      unchecked { ++_i; }
     }
   }
 
@@ -439,7 +444,7 @@ contract JBVeNft is IJBVeNft, veERC721, Ownable, ReentrancyGuard, JBOperatable {
     @param _redeemData An array of NFTs to redeem.
   */
   function redeem(JBRedeemData[] calldata _redeemData) external override nonReentrant {
-    for (uint256 _i; _i < _redeemData.length; _i++) {
+    for (uint256 _i; _i < _redeemData.length;) {
       // Get a reference to the redeemItem being iterated.
       JBRedeemData memory _data = _redeemData[_i];
       // Get a reference to the owner of the position.
@@ -449,9 +454,6 @@ contract JBVeNft is IJBVeNft, veERC721, Ownable, ReentrancyGuard, JBOperatable {
 
       // Get the specs for the token ID.
       LockedBalance memory _lock = locked[_data.tokenId];
-
-      // The lock must have expired.
-      if (block.timestamp <= _lock.end) revert LOCK_PERIOD_NOT_OVER();
 
       // Burn the token.
       _burn(_data.tokenId);
@@ -478,6 +480,7 @@ contract JBVeNft is IJBVeNft, veERC721, Ownable, ReentrancyGuard, JBOperatable {
         _data.memo,
         msg.sender
       );
+      unchecked { ++_i; }
     }
   }
 
@@ -505,8 +508,10 @@ contract JBVeNft is IJBVeNft, veERC721, Ownable, ReentrancyGuard, JBOperatable {
     @return A flag.
   */
   function _isLockDurationAcceptable(uint256 _duration) private view returns (bool) {
-    for (uint256 _i; _i < _lockDurationOptions.length; _i++)
+    for (uint256 _i; _i < _lockDurationOptions.length;) {
       if (_lockDurationOptions[_i] == _duration) return true;
+      unchecked { ++_i; }
+    }
     return false;
   }
 }

@@ -210,8 +210,12 @@ contract JBVeTokenUriResolver is IJBVeTokenUriResolver, Ownable {
     pure
     returns (uint256)
   {
-    for (uint256 _i = 0; _i < _lockDurationOptions.length; _i++)
+    for (uint256 _i = 0; _i < _lockDurationOptions.length; ) {
       if (_lockDurationOptions[_i] == _duration) return _i + 1;
+      unchecked {
+        ++_i;
+      }
+    }
     revert JBErrors.INVALID_LOCK_DURATION();
   }
 }
