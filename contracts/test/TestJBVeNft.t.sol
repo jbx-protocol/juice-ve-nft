@@ -597,7 +597,10 @@ contract JBVeNftTests is TestBaseWorkflow {
     );
     (, uint256 _duration, uint256 _lockedUntil, , ) = _jbveBanny.getSpecs(_tokenId);
     assertEq(_duration, 1 weeks);
-    vm.warp(_lockedUntil - (1 weeks / 2));
+
+    // Warp to a timestamp between the current time and the unlock date
+    vm.warp((block.timestamp + _lockedUntil) / 2);
+
     uint256 votingPowerBeforeExtending = _jbveBanny.tokenVotingPowerAt(1, block.number);
 
     JBLockExtensionData[] memory extends = new JBLockExtensionData[](1);
