@@ -130,13 +130,14 @@ abstract contract veERC721 is ERC721Enumerable, IVotes {
 
       // Should never happen, but just in case
       if (_count == 0) {
+        unchecked { ++_i; }
         continue;
       }
 
       // Use binary search to find the element
       uint256 _min = 0;
       uint256 _max = _count - 1;
-      for (uint256 i = 0; i < 128; ) {
+      for (uint256 _j = 0; _j < 128; ) {
         if (_min >= _max) {
           break;
         }
@@ -146,7 +147,7 @@ abstract contract veERC721 is ERC721Enumerable, IVotes {
         } else {
           _max = _mid - 1;
         }
-        unchecked { ++i; }
+        unchecked { ++_j; }
       }
 
       // Check if `_account` owned the token at `_block`, if so calculate the voting power
