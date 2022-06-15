@@ -582,6 +582,37 @@ contract JBVeNftTests is TestBaseWorkflow {
   }
 
   /**
+    @dev Voting power is correct on extension Test.
+  */
+  function testVotingPowerGetsCalculatedCorrectlyOnExtension() public {
+    mintAndApproveIJBTokens();
+    vm.startPrank(_projectOwner);
+    uint256 _tokenId = _jbveBanny.lock(
+      _projectOwner,
+      10 ether,
+      1 weeks,
+      _projectOwner,
+      true,
+      false
+    );
+    (, uint256 _duration, uint256 _lockedUntil, , ) = _jbveBanny.getSpecs(_tokenId);
+    assertEq(_duration, 1 weeks);
+    vm.warp(_lockedUntil - (1 weeks / 2));
+    uint256 votingPowerBeforeExtending = _jbveBanny.tokenVotingPowerAt(1, block.number);
+
+    JBLockExtensionData[] memory extends = new JBLockExtensionData[](1);
+    extends[0] = JBLockExtensionData(1, 4 weeks);
+    _tokenId = _jbveBanny.extendLock(extends)[0];
+    // uint vote = _jbveBanny.tokenVotingPowerAt(_tokenId, block.number);
+    // The unlock date gets rounded to the week, so it may not be exact
+    uint256 unlockDate = ((block.timestamp + 4 weeks) / 1 weeks) * 1 weeks;
+    // The exact amount of seconds until the 1 week lock expires
+    uint256 fourWeekLockExactSeconds = (unlockDate - block.timestamp);
+    uint256 expectedVotingPower = (10 ether / MAXTIME) * fourWeekLockExactSeconds;
+    assertEq(_jbveBanny.tokenVotingPowerAt(_tokenId, block.number), expectedVotingPower);
+  }
+
+  /**
     @dev Voting power disable Test.
   */
   function testVotingPowerGetsDisabledOnTransfer() public {
