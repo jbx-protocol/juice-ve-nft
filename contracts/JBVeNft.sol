@@ -274,7 +274,9 @@ contract JBVeNft is IJBVeNft, veERC721, Ownable, ReentrancyGuard, JBOperatable {
 
     // Increment the number of ve positions that have been minted.
     // Has to start at 1, since 0 is the id for non-token global checkpoints
-    tokenId = ++count;
+    unchecked{
+      tokenId = ++count;
+    }
 
     // Calculate the time when this lock will end (in seconds).
     uint256 _lockedUntil = block.timestamp + _duration;
@@ -326,7 +328,7 @@ contract JBVeNft is IJBVeNft, veERC721, Ownable, ReentrancyGuard, JBOperatable {
       _requirePermission(ownerOf(_unlockData[_i].tokenId), projectId, JBStakingOperations.UNLOCK);
 
       // Get the specs for the token ID.
-      LockedBalance memory _lock = locked[_unlockData[_i].tokenId];
+      LockedBalance storage _lock = locked[_unlockData[_i].tokenId];
       uint256 _amount = uint128(_lock.amount);
 
       // The lock must have expired.
@@ -368,27 +370,25 @@ contract JBVeNft is IJBVeNft, veERC721, Ownable, ReentrancyGuard, JBOperatable {
 
     for (uint256 _i; _i < _lockExtensionData.length;) {
       // Get a reference to the extension being iterated.
-      JBLockExtensionData memory _data = _lockExtensionData[_i];
+      JBLockExtensionData calldata _data = _lockExtensionData[_i];
 
       // Duration must match.
       if (!_isLockDurationAcceptable(_data.updatedDuration))
         revert JBErrors.INVALID_LOCK_DURATION();
 
-      // Get the current owner
-      address _ownerOf = ownerOf(_data.tokenId);
-
       // Get the specs for the token ID.
-      LockedBalance memory _lock = locked[_data.tokenId];
+      LockedBalance storage _lock = locked[_data.tokenId];
 
+      // If the operation isn't allowed publicly, check if the msg.sender is either the position owner or is an operator.
       if (!_lock.allowPublicExtension)
-        // If the operation isn't allowed publicly, check if the msg.sender is either the position owner or is an operator.
-        _requirePermission(_ownerOf, projectId, JBStakingOperations.EXTEND_LOCK);
+        _requirePermission(ownerOf(_data.tokenId), projectId, JBStakingOperations.EXTEND_LOCK);
 
       // Calculate the new unlock date
       uint256 _newEndDate = (block.timestamp + _data.updatedDuration);
       if (_newEndDate < _lock.end) revert INVALID_LOCK_EXTENSION();
 
       // TODO: Add back in the changing tokenId, temporarily removed to improve gas usage
+      // TODO: Completely removing this would save more gas, do we want to change the TokenIDs on extend?
       _extendLock(_data.tokenId, _data.updatedDuration, _newEndDate);
       newTokenIds[_i] = _data.tokenId;
 
@@ -413,7 +413,7 @@ contract JBVeNft is IJBVeNft, veERC721, Ownable, ReentrancyGuard, JBOperatable {
   {
     for (uint256 _i; _i < _allowPublicExtensionData.length;) {
       // Get a reference to the extension being iterated.
-      JBAllowPublicExtensionData memory _data = _allowPublicExtensionData[_i];
+      JBAllowPublicExtensionData calldata _data = _allowPublicExtensionData[_i];
 
       if (!_data.allowPublicExtension) {
         revert INVALID_PUBLIC_EXTENSION_FLAG_VALUE();
@@ -446,14 +446,14 @@ contract JBVeNft is IJBVeNft, veERC721, Ownable, ReentrancyGuard, JBOperatable {
   function redeem(JBRedeemData[] calldata _redeemData) external override nonReentrant {
     for (uint256 _i; _i < _redeemData.length;) {
       // Get a reference to the redeemItem being iterated.
-      JBRedeemData memory _data = _redeemData[_i];
+      JBRedeemData calldata _data = _redeemData[_i];
       // Get a reference to the owner of the position.
       address _owner = ownerOf(_data.tokenId);
       // Check if the msg.sender is either the position owner or is an operator.
       _requirePermission(_owner, projectId, JBStakingOperations.REDEEM);
 
-      // Get the specs for the token ID.
-      LockedBalance memory _lock = locked[_data.tokenId];
+      // Get the amount of tokens locked
+      uint256 _lockAmount = uint256(uint128(locked[_data.tokenId].amount));
 
       // Burn the token.
       _burn(_data.tokenId);
@@ -462,7 +462,7 @@ contract JBVeNft is IJBVeNft, veERC721, Ownable, ReentrancyGuard, JBOperatable {
       uint256 _reclaimedAmount = _data.terminal.redeemTokensOf(
         address(this),
         projectId,
-        uint256(uint128(_lock.amount)),
+        _lockAmount,
         _data.token,
         _data.minReturnedTokens,
         _data.beneficiary,
@@ -475,7 +475,7 @@ contract JBVeNft is IJBVeNft, veERC721, Ownable, ReentrancyGuard, JBOperatable {
         _data.tokenId,
         _owner,
         _data.beneficiary,
-        uint256(uint128(_lock.amount)),
+        _lockAmount,
         _reclaimedAmount,
         _data.memo,
         msg.sender

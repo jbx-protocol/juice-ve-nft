@@ -642,7 +642,7 @@ abstract contract veERC721 is ERC721Enumerable, IVotes {
     // To lower gas usage we check if this token has already been owned by the user at some point
     bool _alreadyRegistered;
     if (!_forceRegister) {
-      for (uint256 _i; _i < _receivedVotingPower[msg.sender].length;) {
+      for (uint256 _i; _i < _receivedVotingPower[_account].length;) {
         uint256 _currentTokenId = _receivedVotingPower[_account][_i];
         if (_tokenId == _currentTokenId) {
           _alreadyRegistered = true;
@@ -664,7 +664,7 @@ abstract contract veERC721 is ERC721Enumerable, IVotes {
       uint256 _historicVotingPowerLength = _historicVotingPower[_tokenId].length;
       if (_historicVotingPowerLength > 0) {
         // Get the latest change in voting power assignment for this token
-        HistoricVotingPower memory _latestVotingPower = _historicVotingPower[_tokenId][
+        HistoricVotingPower storage _latestVotingPower = _historicVotingPower[_tokenId][
           _historicVotingPowerLength - 1
         ];
         // Prevents multiple activations of the same token in 1 block
