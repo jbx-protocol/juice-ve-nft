@@ -671,7 +671,7 @@ abstract contract veERC721 is ERC721Enumerable, IVotes {
         if (_latestVotingPower.receivedAtBlock >= block.number) {
           revert VOTING_POWER_ALREADY_ENABLED();
         }
-        // Check if the current activated user is the
+        // Check if the current activated user is the same user
         if (_latestVotingPower.account == _account) {
           _alreadyActivated = true;
         }
