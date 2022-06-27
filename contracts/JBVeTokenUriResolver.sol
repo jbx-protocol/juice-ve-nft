@@ -202,7 +202,7 @@ contract JBVeTokenUriResolver is IJBVeTokenUriResolver, Ownable {
      @notice Returns the token duration multiplier needed to index into the righteous veBanny mediallion background.
 
      @param _duration Time in seconds corresponding with one of five acceptable staking durations. 
-     The Staking durations below were gleaned from the JBveBanny.sol contract line 55-59.
+     The Staking durations below were gleaned from the JBVeNft.sol contract line 55-59.
      Returns the duration multiplier used to index into the proper veBanny mediallion on IPFS.
   */
   function _getTokenStakeMultiplier(uint256 _duration, uint256[] memory _lockDurationOptions)
@@ -210,8 +210,12 @@ contract JBVeTokenUriResolver is IJBVeTokenUriResolver, Ownable {
     pure
     returns (uint256)
   {
-    for (uint256 _i = 0; _i < _lockDurationOptions.length; _i++)
+    for (uint256 _i = 0; _i < _lockDurationOptions.length; ) {
       if (_lockDurationOptions[_i] == _duration) return _i + 1;
+      unchecked {
+        ++_i;
+      }
+    }
     revert JBErrors.INVALID_LOCK_DURATION();
   }
 }

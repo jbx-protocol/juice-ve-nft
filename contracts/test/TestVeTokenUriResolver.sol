@@ -4,11 +4,11 @@ pragma solidity 0.8.6;
 import './helpers/TestBaseWorkflow.t.sol';
 import '../interfaces/IJBVeTokenUriResolver.sol';
 
-contract JBveTokenUriResolverTests is TestBaseWorkflow {
+contract JBVeTokenUriResolverTests is TestBaseWorkflow {
   //*********************************************************************//
   // --------------------- private stored properties ------------------- //
   //*********************************************************************//
-  JBveBanny private _jbveBanny;
+  JBVeNft private _jbveBanny;
   JBVeTokenUriResolver private _jbveTokenUriResolver;
   JBTokenStore private _jbTokenStore;
   JBController private _jbController;
@@ -34,36 +34,20 @@ contract JBveTokenUriResolverTests is TestBaseWorkflow {
     _lockDurationOptions[1] = 2160000;
     _lockDurationOptions[2] = 8640000;
 
-    // JBveBanny
-    _jbveBanny = new JBveBanny(
+    // JBVeNft
+    _jbveBanny = new JBVeNft(
       _projectId,
       'Banny',
       'Banny',
       IJBVeTokenUriResolver(address(_jbveTokenUriResolver)),
       IJBTokenStore(address(_jbTokenStore)),
       IJBOperatorStore(address(_jbOperatorStore)),
-      _lockDurationOptions
+      _lockDurationOptions,
+      projectOwner()
     );
   }
 
-  function testConstructor() public {
-    // assertion checks for constructor code
-    assertEq(address(_jbTokenStore.tokenOf(_projectId)), address(_jbveBanny.token()));
-    assertEq(address(_jbveTokenUriResolver), address(_jbveBanny.uriResolver()));
-    assertEq(_projectId, _jbveBanny.projectId());
-    assertEq(_lockDurationOptions[0], _jbveBanny.lockDurationOptions()[0]);
-  }
-
-  function mintIJBTokens() public returns (IJBToken) {
-    IJBToken _token = _jbTokenStore.tokenOf(_projectId);
-    _projectOwner = projectOwner();
-    vm.startPrank(_projectOwner);
-    _jbController.mintTokensOf(_projectId, 100 ether, _projectOwner, 'Test Memo', true, true);
-    _token.approve(_projectId, address(_jbveBanny), 10 ether);
-    return _token;
-  }
-
-  function testJBveTokenUriResolver() public view {
+  function testJBVeTokenUriResolver() public view {
     string memory uri = _jbveTokenUriResolver.tokenURI(
       0,
       1000000000000000000000, // 1000 Tokens

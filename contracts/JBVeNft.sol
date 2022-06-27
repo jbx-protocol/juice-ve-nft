@@ -3,14 +3,10 @@ pragma solidity 0.8.6;
 
 import '@openzeppelin/contracts/access/Ownable.sol';
 import '@openzeppelin/contracts/security/ReentrancyGuard.sol';
-import '@jbx-protocol/contracts-v2/contracts/interfaces/IJBTokenStore.sol';
 import '@jbx-protocol/contracts-v2/contracts/abstract/JBOperatable.sol';
 
 import './veERC721.sol';
-import './structs/JBAllowPublicExtensionData.sol';
-import './structs/JBLockExtensionData.sol';
-import './structs/JBUnlockData.sol';
-import './structs/JBRedeemData.sol';
+import './interfaces/IJBVeNft.sol';
 import './interfaces/IJBVeTokenUriResolver.sol';
 import './libraries/JBStakingOperations.sol';
 import './libraries/JBErrors.sol';
@@ -27,7 +23,7 @@ import './libraries/JBErrors.sol';
   Ownable - for access control.
   ReentrancyGuard - for protection against external calls.
 */
-contract JBveBanny is veERC721, Ownable, ReentrancyGuard, JBOperatable {
+contract JBVeNft is IJBVeNft, veERC721, Ownable, ReentrancyGuard, JBOperatable {
   //*********************************************************************//
   // --------------------------- custom errors ------------------------- //
   //*********************************************************************//
@@ -92,25 +88,25 @@ contract JBveBanny is veERC721, Ownable, ReentrancyGuard, JBOperatable {
     @notice 
     JBProject id.
   */
-  uint256 public immutable projectId;
+  uint256 public immutable override projectId;
 
   /** 
     @notice 
     The JBTokenStore where unclaimed tokens are accounted for.
   */
-  IJBTokenStore public immutable tokenStore;
+  IJBTokenStore public immutable override tokenStore;
 
   /** 
     @notice 
     Token URI Resolver Instance
   */
-  IJBVeTokenUriResolver public uriResolver;
+  IJBVeTokenUriResolver public override uriResolver;
 
   /** 
     @notice 
     Banny id counter
   */
-  uint256 public count;
+  uint256 public override count;
 
   //*********************************************************************//
   // ------------------------- external views -------------------------- //
@@ -122,7 +118,7 @@ contract JBveBanny is veERC721, Ownable, ReentrancyGuard, JBOperatable {
 
     @return An array of lock duration options, in seconds.
   */
-  function lockDurationOptions() external view returns (uint256[] memory) {
+  function lockDurationOptions() external view override returns (uint256[] memory) {
     return _lockDurationOptions;
   }
 
@@ -130,7 +126,7 @@ contract JBveBanny is veERC721, Ownable, ReentrancyGuard, JBOperatable {
     @notice
     provides the metadata for the storefront
   */
-  function contractURI() public view returns (string memory) {
+  function contractURI() public view override returns (string memory) {
     return uriResolver.contractURI();
   }
 
@@ -143,6 +139,9 @@ contract JBveBanny is veERC721, Ownable, ReentrancyGuard, JBOperatable {
     @return dynamic uri based on the svg logic for that particular banny
   */
   function tokenURI(uint256 _tokenId) public view override returns (string memory) {
+    // If there isn't a token resolver, return an empty string.
+    if (uriResolver == IJBVeTokenUriResolver(address(0))) return '';
+
     (uint256 _amount, uint256 _duration, uint256 _lockedUntil, , ) = getSpecs(_tokenId);
     return uriResolver.tokenURI(_tokenId, _amount, _duration, _lockedUntil, _lockDurationOptions);
   }
@@ -152,6 +151,40 @@ contract JBveBanny is veERC721, Ownable, ReentrancyGuard, JBOperatable {
   */
   function supportsInterface(bytes4 _interfaceId) public view virtual override returns (bool) {
     return super.supportsInterface(_interfaceId);
+  }
+
+  /**
+    @notice
+    Unpacks the packed specs of each banny based on token id.
+
+    @param _tokenId Banny Id.
+
+    @return amount Locked token count.
+    @return duration Locked duration.
+    @return lockedUntil Locked until this timestamp.
+    @return useJbToken If the locked tokens are JBTokens. 
+    @return allowPublicExtension If the locked position can be extended by anyone. 
+  */
+  function getSpecs(uint256 _tokenId)
+    public
+    view
+    override
+    returns (
+      uint256 amount,
+      uint256 duration,
+      uint256 lockedUntil,
+      bool useJbToken,
+      bool allowPublicExtension
+    )
+  {
+    LockedBalance memory _lock = locked[_tokenId];
+    if (_lock.end == 0) revert NON_EXISTENT_TOKEN();
+
+    amount = uint256(uint128(_lock.amount));
+    lockedUntil = _lock.end;
+    useJbToken = _lock.useJbToken;
+    allowPublicExtension = _lock.allowPublicExtension;
+    duration = _lock.duration;
   }
 
   //*********************************************************************//
@@ -164,7 +197,9 @@ contract JBveBanny is veERC721, Ownable, ReentrancyGuard, JBOperatable {
     @param _symbol Nft symbol.
     @param _uriResolver Token uri resolver instance.
     @param _tokenStore The JBTokenStore where unclaimed tokens are accounted for.
+    @param _operatorStore A contract storing operator assignments.
     @param __lockDurationOptions The lock options, in seconds, for lock durations.
+    @param _owner The address that'll own this contract.
   */
   constructor(
     uint256 _projectId,
@@ -173,7 +208,8 @@ contract JBveBanny is veERC721, Ownable, ReentrancyGuard, JBOperatable {
     IJBVeTokenUriResolver _uriResolver,
     IJBTokenStore _tokenStore,
     IJBOperatorStore _operatorStore,
-    uint256[] memory __lockDurationOptions
+    uint256[] memory __lockDurationOptions,
+    address _owner
   ) JBOperatable(_operatorStore) veERC721(_name, _symbol) {
     token = address(_tokenStore.tokenOf(_projectId));
     projectId = _projectId;
@@ -183,8 +219,12 @@ contract JBveBanny is veERC721, Ownable, ReentrancyGuard, JBOperatable {
 
     // Make sure no durationOption is longer than the max time
     uint256 _maxTime = uint256(uint128(MAXTIME));
-    for (uint256 _i; _i < _lockDurationOptions.length; _i++)
-      if (_lockDurationOptions[_i] > _maxTime) revert EXCEEDS_MAX_LOCK_DURATION();
+    for (uint256 _i; _i < _lockDurationOptions.length;) {
+       if (_lockDurationOptions[_i] > _maxTime) revert EXCEEDS_MAX_LOCK_DURATION();
+       unchecked { ++_i; }
+    }
+
+    _transferOwnership(_owner);
   }
 
   //*********************************************************************//
@@ -216,6 +256,7 @@ contract JBveBanny is veERC721, Ownable, ReentrancyGuard, JBOperatable {
     bool _allowPublicExtension
   )
     external
+    override
     nonReentrant
     requirePermission(_account, projectId, JBStakingOperations.LOCK)
     returns (uint256 tokenId)
@@ -233,7 +274,9 @@ contract JBveBanny is veERC721, Ownable, ReentrancyGuard, JBOperatable {
 
     // Increment the number of ve positions that have been minted.
     // Has to start at 1, since 0 is the id for non-token global checkpoints
-    tokenId = ++count;
+    unchecked{
+      tokenId = ++count;
+    }
 
     // Calculate the time when this lock will end (in seconds).
     uint256 _lockedUntil = block.timestamp + _duration;
@@ -279,13 +322,13 @@ contract JBveBanny is veERC721, Ownable, ReentrancyGuard, JBOperatable {
 
     @param _unlockData An array of banny tokens to be burnt in exchange of the locked tokens.
   */
-  function unlock(JBUnlockData[] calldata _unlockData) external nonReentrant {
-    for (uint256 _i; _i < _unlockData.length; _i++) {
+  function unlock(JBUnlockData[] calldata _unlockData) external override nonReentrant {
+    for (uint256 _i; _i < _unlockData.length;) {
       // Verify that the sender has permission to unlock this tokenId
       _requirePermission(ownerOf(_unlockData[_i].tokenId), projectId, JBStakingOperations.UNLOCK);
 
       // Get the specs for the token ID.
-      LockedBalance memory _lock = locked[_unlockData[_i].tokenId];
+      LockedBalance storage _lock = locked[_unlockData[_i].tokenId];
       uint256 _amount = uint128(_lock.amount);
 
       // The lock must have expired.
@@ -302,6 +345,7 @@ contract JBveBanny is veERC721, Ownable, ReentrancyGuard, JBOperatable {
 
       // Emit event.
       emit Unlock(_unlockData[_i].tokenId, _unlockData[_i].beneficiary, _amount, msg.sender);
+      unchecked { ++_i; }
     }
   }
 
@@ -318,38 +362,38 @@ contract JBveBanny is veERC721, Ownable, ReentrancyGuard, JBOperatable {
   */
   function extendLock(JBLockExtensionData[] calldata _lockExtensionData)
     external
+    override
     nonReentrant
     returns (uint256[] memory newTokenIds)
   {
     newTokenIds = new uint256[](_lockExtensionData.length);
 
-    for (uint256 _i; _i < _lockExtensionData.length; _i++) {
+    for (uint256 _i; _i < _lockExtensionData.length;) {
       // Get a reference to the extension being iterated.
-      JBLockExtensionData memory _data = _lockExtensionData[_i];
+      JBLockExtensionData calldata _data = _lockExtensionData[_i];
 
       // Duration must match.
       if (!_isLockDurationAcceptable(_data.updatedDuration))
         revert JBErrors.INVALID_LOCK_DURATION();
 
-      // Get the current owner
-      address _ownerOf = ownerOf(_data.tokenId);
-
       // Get the specs for the token ID.
-      LockedBalance memory _lock = locked[_data.tokenId];
+      LockedBalance storage _lock = locked[_data.tokenId];
 
+      // If the operation isn't allowed publicly, check if the msg.sender is either the position owner or is an operator.
       if (!_lock.allowPublicExtension)
-        // If the operation isn't allowed publicly, check if the msg.sender is either the position owner or is an operator.
-        _requirePermission(_ownerOf, projectId, JBStakingOperations.EXTEND_LOCK);
+        _requirePermission(ownerOf(_data.tokenId), projectId, JBStakingOperations.EXTEND_LOCK);
 
       // Calculate the new unlock date
       uint256 _newEndDate = (block.timestamp + _data.updatedDuration);
       if (_newEndDate < _lock.end) revert INVALID_LOCK_EXTENSION();
 
       // TODO: Add back in the changing tokenId, temporarily removed to improve gas usage
+      // TODO: Completely removing this would save more gas, do we want to change the TokenIDs on extend?
       _extendLock(_data.tokenId, _data.updatedDuration, _newEndDate);
       newTokenIds[_i] = _data.tokenId;
 
-      emit ExtendLock(_data.tokenId, _data.tokenId, _data.updatedDuration, _lock.end, msg.sender);
+      emit ExtendLock(_data.tokenId, _data.tokenId, _data.updatedDuration, _newEndDate, msg.sender);
+      unchecked { ++_i; }
     }
   }
 
@@ -364,11 +408,12 @@ contract JBveBanny is veERC721, Ownable, ReentrancyGuard, JBOperatable {
   */
   function setAllowPublicExtension(JBAllowPublicExtensionData[] calldata _allowPublicExtensionData)
     external
+    override
     nonReentrant
   {
-    for (uint256 _i; _i < _allowPublicExtensionData.length; _i++) {
+    for (uint256 _i; _i < _allowPublicExtensionData.length;) {
       // Get a reference to the extension being iterated.
-      JBAllowPublicExtensionData memory _data = _allowPublicExtensionData[_i];
+      JBAllowPublicExtensionData calldata _data = _allowPublicExtensionData[_i];
 
       if (!_data.allowPublicExtension) {
         revert INVALID_PUBLIC_EXTENSION_FLAG_VALUE();
@@ -385,6 +430,7 @@ contract JBveBanny is veERC721, Ownable, ReentrancyGuard, JBOperatable {
       locked[_data.tokenId].allowPublicExtension = _data.allowPublicExtension;
 
       emit SetAllowPublicExtension(_data.tokenId, _data.allowPublicExtension, msg.sender);
+      unchecked { ++_i; }
     }
   }
 
@@ -397,20 +443,17 @@ contract JBveBanny is veERC721, Ownable, ReentrancyGuard, JBOperatable {
 
     @param _redeemData An array of NFTs to redeem.
   */
-  function redeem(JBRedeemData[] calldata _redeemData) external nonReentrant {
-    for (uint256 _i; _i < _redeemData.length; _i++) {
+  function redeem(JBRedeemData[] calldata _redeemData) external override nonReentrant {
+    for (uint256 _i; _i < _redeemData.length;) {
       // Get a reference to the redeemItem being iterated.
-      JBRedeemData memory _data = _redeemData[_i];
+      JBRedeemData calldata _data = _redeemData[_i];
       // Get a reference to the owner of the position.
       address _owner = ownerOf(_data.tokenId);
       // Check if the msg.sender is either the position owner or is an operator.
       _requirePermission(_owner, projectId, JBStakingOperations.REDEEM);
 
-      // Get the specs for the token ID.
-      LockedBalance memory _lock = locked[_data.tokenId];
-
-      // The lock must have expired.
-      if (block.timestamp <= _lock.end) revert LOCK_PERIOD_NOT_OVER();
+      // Get the amount of tokens locked
+      uint256 _lockAmount = uint256(uint128(locked[_data.tokenId].amount));
 
       // Burn the token.
       _burn(_data.tokenId);
@@ -419,7 +462,7 @@ contract JBveBanny is veERC721, Ownable, ReentrancyGuard, JBOperatable {
       uint256 _reclaimedAmount = _data.terminal.redeemTokensOf(
         address(this),
         projectId,
-        uint256(uint128(_lock.amount)),
+        _lockAmount,
         _data.token,
         _data.minReturnedTokens,
         _data.beneficiary,
@@ -432,11 +475,12 @@ contract JBveBanny is veERC721, Ownable, ReentrancyGuard, JBOperatable {
         _data.tokenId,
         _owner,
         _data.beneficiary,
-        uint256(uint128(_lock.amount)),
+        _lockAmount,
         _reclaimedAmount,
         _data.memo,
         msg.sender
       );
+      unchecked { ++_i; }
     }
   }
 
@@ -446,42 +490,9 @@ contract JBveBanny is veERC721, Ownable, ReentrancyGuard, JBOperatable {
 
      @param _resolver The new URI resolver.
   */
-  function setUriResolver(IJBVeTokenUriResolver _resolver) external onlyOwner {
+  function setUriResolver(IJBVeTokenUriResolver _resolver) external override onlyOwner {
     uriResolver = _resolver;
     emit SetUriResolver(_resolver, msg.sender);
-  }
-
-  /**
-    @notice
-    Unpacks the packed specs of each banny based on token id.
-
-    @param _tokenId Banny Id.
-
-    @return amount Locked token count.
-    @return duration Locked duration.
-    @return lockedUntil Locked until this timestamp.
-    @return useJbToken If the locked tokens are JBTokens. 
-    @return allowPublicExtension If the locked position can be extended by anyone. 
-  */
-  function getSpecs(uint256 _tokenId)
-    public
-    view
-    returns (
-      uint256 amount,
-      uint256 duration,
-      uint256 lockedUntil,
-      bool useJbToken,
-      bool allowPublicExtension
-    )
-  {
-    LockedBalance memory _lock = locked[_tokenId];
-    if (_lock.end == 0) revert NON_EXISTENT_TOKEN();
-
-    amount = uint256(uint128(_lock.amount));
-    lockedUntil = _lock.end;
-    useJbToken = _lock.useJbToken;
-    allowPublicExtension = _lock.allowPublicExtension;
-    duration = _lock.duration;
   }
 
   //*********************************************************************//
@@ -497,8 +508,10 @@ contract JBveBanny is veERC721, Ownable, ReentrancyGuard, JBOperatable {
     @return A flag.
   */
   function _isLockDurationAcceptable(uint256 _duration) private view returns (bool) {
-    for (uint256 _i; _i < _lockDurationOptions.length; _i++)
+    for (uint256 _i; _i < _lockDurationOptions.length;) {
       if (_lockDurationOptions[_i] == _duration) return true;
+      unchecked { ++_i; }
+    }
     return false;
   }
 }
