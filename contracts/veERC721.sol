@@ -265,7 +265,7 @@ abstract contract veERC721 is ERC721Enumerable, IVotes {
     if (_from != address(0)) {
       // This is a transfer, disable voting power (if active)
       uint256 _historyLength = _historicVotingPower[_tokenId].length;
-      if (_historyLength > 0) {
+      if (_historyLength != 0) {
         // Get the latest assignment of the voting power
         HistoricVotingPower memory _latestVotingPower = _historicVotingPower[_tokenId][
           _historyLength - 1
@@ -329,7 +329,7 @@ abstract contract veERC721 is ERC721Enumerable, IVotes {
     }
 
     Point memory last_point = Point({bias: 0, slope: 0, ts: block.timestamp, blk: block.number});
-    if (_epoch > 0) {
+    if (_epoch != 0) {
       last_point = pointHistory[_epoch];
     }
     uint256 last_checkpoint = last_point.ts;
@@ -662,7 +662,7 @@ abstract contract veERC721 is ERC721Enumerable, IVotes {
     bool _alreadyActivated;
     if (!_forceHistoryAddition) {
       uint256 _historicVotingPowerLength = _historicVotingPower[_tokenId].length;
-      if (_historicVotingPowerLength > 0) {
+      if (_historicVotingPowerLength != 0) {
         // Get the latest change in voting power assignment for this token
         HistoricVotingPower storage _latestVotingPower = _historicVotingPower[_tokenId][
           _historicVotingPowerLength - 1
