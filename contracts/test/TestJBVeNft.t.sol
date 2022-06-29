@@ -216,6 +216,39 @@ contract JBVeNftTests is TestBaseWorkflow {
     vm.stopPrank();
   }
 
+  function testPublicExtensionScenario() public {
+    mintAndApproveIJBTokens();
+    vm.startPrank(_projectOwner);
+    uint256 _tokenId = _jbveBanny.lock(
+      _projectOwner,
+      10 ether,
+      1 weeks,
+      _projectOwner,
+      true,
+      true
+    );
+    (, , uint256 _lockedUntil, , ) = _jbveBanny.getSpecs(_tokenId);
+    vm.warp(block.timestamp + 30);
+    vm.roll(block.number + 2);
+    uint256 votingPowerBeforeExtending = _jbveBanny.tokenVotingPowerAt(1, block.number);
+    address _user = address(0xf00ba6);
+    uint256[] memory _permissionIndexes = new uint256[](1);
+    _permissionIndexes[0] = JBStakingOperations.SET_PUBLIC_EXTENSION_FLAG;
+    jbOperatorStore().setOperator(
+    JBOperatorData(address(_user), _projectId, _permissionIndexes)
+      );
+    vm.stopPrank();
+    vm.startPrank(_user);
+    JBLockExtensionData[] memory extends = new JBLockExtensionData[](1);
+    extends[0] = JBLockExtensionData(1, 4 weeks);
+    _tokenId = _jbveBanny.extendLock(extends)[0];
+    uint256 votingPowerAfterExtending = _jbveBanny.tokenVotingPowerAt(1, block.number);
+    assertGt(votingPowerAfterExtending, votingPowerBeforeExtending);
+    (, uint256 _duration, , , ) = _jbveBanny.getSpecs(_tokenId);
+    assertEq(_duration, 4 weeks);
+    vm.stopPrank();
+  }
+
   /**
     @dev Redeem Test.
   */
