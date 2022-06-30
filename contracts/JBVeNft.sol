@@ -190,7 +190,6 @@ contract JBVeNft is IJBVeNft, veERC721, Ownable, ReentrancyGuard, JBOperatable {
   //*********************************************************************//
   // ---------------------------- constructor -------------------------- //
   //*********************************************************************//
-
   /**
     @param _projectId The ID of the project.
     @param _name Nft name.
@@ -265,7 +264,7 @@ contract JBVeNft is IJBVeNft, veERC721, Ownable, ReentrancyGuard, JBOperatable {
       // If a token wasn't set when this contract was deployed but is set now, set it.
       if (token == address(0) && tokenStore.tokenOf(projectId) != IJBToken(address(0))) {
         token = address(tokenStore.tokenOf(projectId));
-        // The project's token must not have changed since this token was originally set.
+       // The project's token must not have changed since this token was originally set.
       } else if (address(tokenStore.tokenOf(projectId)) != token) revert TOKEN_MISMATCH();
     }
 
@@ -296,7 +295,6 @@ contract JBVeNft is IJBVeNft, veERC721, Ownable, ReentrancyGuard, JBOperatable {
 
     // Enable the voting power if the user is minting for themselves
     // otherwise the `_beneficiary` has to enable it manually afterwards
-    // TODO: make optional to allow the user to save some gas?
     if (msg.sender == _beneficiary) {
       _activateVotingPower(tokenId, _beneficiary, true, true);
     }

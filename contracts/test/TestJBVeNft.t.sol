@@ -139,12 +139,40 @@ contract JBVeNftTests is TestBaseWorkflow {
   }
 
   /**
-    @dev Unlock Test.
+    @dev Unlock Test for JB Tokens.
   */
-  function testUnlockingTokens() public {
+  function testUnlockingJbTokens() public {
     IJBToken _jbToken = mintAndApproveIJBTokens();
     vm.startPrank(_projectOwner);
     _jbveBanny.lock(_projectOwner, 10 ether, 1 weeks, _projectOwner, true, false);
+    (, , uint256 _lockedUntil, , ) = _jbveBanny.getSpecs(1);
+    vm.warp(_lockedUntil + 2);
+    _jbveBanny.approve(address(_jbveBanny), 1);
+    JBUnlockData[] memory unlocks = new JBUnlockData[](1);
+    unlocks[0] = JBUnlockData(1, _projectOwner);
+    _jbveBanny.unlock(unlocks);
+    assertTrue(_jbveBanny.tokenVotingPowerAt(1, block.number) == 0);
+    (int128 _amount, uint256 _end, , , ) = _jbveBanny.locked(1);
+    assertEq(_amount, 0);
+    assertEq(_end, 0);
+    assertEq(_jbToken.balanceOf(address(_jbveBanny), _projectId), 0);
+    vm.stopPrank();
+  }
+
+  /**
+    @dev Unlock Test for NON JB Tokens.
+  */
+  function testUnlockingNonJbTokens() public {
+    IJBToken _jbToken = _jbTokenStore.tokenOf(_projectId);
+    _projectOwner = projectOwner();
+    vm.startPrank(_projectOwner);
+    _jbController.mintTokensOf(_projectId, 100 ether, _projectOwner, 'Test Memo', false, true);
+    uint256[] memory _permissionIndexes = new uint256[](1);
+    _permissionIndexes[0] = JBOperations.TRANSFER;
+    jbOperatorStore().setOperator(
+      JBOperatorData(address(_jbveBanny), _projectId, _permissionIndexes)
+    );
+    _jbveBanny.lock(_projectOwner, 10 ether, 1 weeks, _projectOwner, false, false);
     (, , uint256 _lockedUntil, , ) = _jbveBanny.getSpecs(1);
     vm.warp(_lockedUntil + 2);
     _jbveBanny.approve(address(_jbveBanny), 1);
@@ -184,6 +212,39 @@ contract JBVeNftTests is TestBaseWorkflow {
     uint256 votingPowerAfterExtending = _jbveBanny.tokenVotingPowerAt(1, block.number);
     assertGt(votingPowerAfterExtending, votingPowerBeforeExtending);
     (, _duration, , , ) = _jbveBanny.getSpecs(_tokenId);
+    assertEq(_duration, 4 weeks);
+    vm.stopPrank();
+  }
+
+  function testPublicExtensionScenario() public {
+    mintAndApproveIJBTokens();
+    vm.startPrank(_projectOwner);
+    uint256 _tokenId = _jbveBanny.lock(
+      _projectOwner,
+      10 ether,
+      1 weeks,
+      _projectOwner,
+      true,
+      true
+    );
+    (, , uint256 _lockedUntil, , ) = _jbveBanny.getSpecs(_tokenId);
+    vm.warp(block.timestamp + 30);
+    vm.roll(block.number + 2);
+    uint256 votingPowerBeforeExtending = _jbveBanny.tokenVotingPowerAt(1, block.number);
+    address _user = address(0xf00ba6);
+    uint256[] memory _permissionIndexes = new uint256[](1);
+    _permissionIndexes[0] = JBStakingOperations.SET_PUBLIC_EXTENSION_FLAG;
+    jbOperatorStore().setOperator(
+    JBOperatorData(address(_user), _projectId, _permissionIndexes)
+      );
+    vm.stopPrank();
+    vm.startPrank(_user);
+    JBLockExtensionData[] memory extends = new JBLockExtensionData[](1);
+    extends[0] = JBLockExtensionData(1, 4 weeks);
+    _tokenId = _jbveBanny.extendLock(extends)[0];
+    uint256 votingPowerAfterExtending = _jbveBanny.tokenVotingPowerAt(1, block.number);
+    assertGt(votingPowerAfterExtending, votingPowerBeforeExtending);
+    (, uint256 _duration, , , ) = _jbveBanny.getSpecs(_tokenId);
     assertEq(_duration, 4 weeks);
     vm.stopPrank();
   }
@@ -253,6 +314,24 @@ contract JBVeNftTests is TestBaseWorkflow {
       jbTerminalTokenBalanceAfterRedeem,
       jbTerminalTokenBalanceBeforeRedeem + ((10 ether * overflow) / totalSupply)
     );
+    vm.stopPrank();
+  }
+
+  /**
+    @dev Token Mismatch scenario while locking.
+  */
+  function testTokenMisMatchScenarioWhileLocking() public {
+    _projectOwner = projectOwner();
+    vm.startPrank(_projectOwner);
+    JBToken _newToken = new JBToken('NewToken', 'NT');
+    _newToken.transferOwnership(_projectId, address(_jbTokenStore));
+    _jbController.changeTokenOf(_projectId, IJBToken(address(_newToken)), _projectOwner);
+    assertEq(address(_jbTokenStore.tokenOf(_projectId)), address(_newToken));
+    vm.stopPrank();
+    mintAndApproveIJBTokens();
+    vm.startPrank(_projectOwner);
+    vm.expectRevert(abi.encodeWithSignature('TOKEN_MISMATCH()'));
+    _jbveBanny.lock(_projectOwner, 10 ether, 86400, _projectOwner, true, false);
     vm.stopPrank();
   }
 
