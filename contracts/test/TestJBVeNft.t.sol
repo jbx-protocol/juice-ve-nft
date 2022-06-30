@@ -318,6 +318,24 @@ contract JBVeNftTests is TestBaseWorkflow {
   }
 
   /**
+    @dev Token Mismatch scenario while locking.
+  */
+  function testTokenMisMatchScenarioWhileLocking() public {
+    _projectOwner = projectOwner();
+    vm.startPrank(_projectOwner);
+    JBToken _newToken = new JBToken('NewToken', 'NT');
+    _newToken.transferOwnership(_projectId, address(_jbTokenStore));
+    _jbController.changeTokenOf(_projectId, IJBToken(address(_newToken)), _projectOwner);
+    assertEq(address(_jbTokenStore.tokenOf(_projectId)), address(_newToken));
+    vm.stopPrank();
+    mintAndApproveIJBTokens();
+    vm.startPrank(_projectOwner);
+    vm.expectRevert(abi.encodeWithSignature('TOKEN_MISMATCH()'));
+    _jbveBanny.lock(_projectOwner, 10 ether, 86400, _projectOwner, true, false);
+    vm.stopPrank();
+  }
+
+  /**
     @dev Invalid Lock Duration Test.
   */
   function testScenarioWithInvalidLockDuration() public {
