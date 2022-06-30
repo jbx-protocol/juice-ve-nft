@@ -264,8 +264,8 @@ contract JBVeNft is IJBVeNft, veERC721, Ownable, ReentrancyGuard, JBOperatable {
       // If a token wasn't set when this contract was deployed but is set now, set it.
       if (token == address(0) && tokenStore.tokenOf(projectId) != IJBToken(address(0))) {
         token = address(tokenStore.tokenOf(projectId));
-        // There is no method to update the token address so we don't need to check for mismatch
-      }
+       // The project's token must not have changed since this token was originally set.
+      } else if (address(tokenStore.tokenOf(projectId)) != token) revert TOKEN_MISMATCH();
     }
 
     // Duration must match.
