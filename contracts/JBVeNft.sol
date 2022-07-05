@@ -4,7 +4,7 @@ pragma solidity 0.8.6;
 import '@openzeppelin/contracts/access/Ownable.sol';
 import '@openzeppelin/contracts/security/ReentrancyGuard.sol';
 import '@jbx-protocol/contracts-v2/contracts/abstract/JBOperatable.sol';
-
+import '@jbx-protocol/contracts-v2/contracts/libraries/JBOperations.sol';
 import './veERC721.sol';
 import './interfaces/IJBVeNft.sol';
 import './interfaces/IJBVeTokenUriResolver.sol';
@@ -455,6 +455,14 @@ contract JBVeNft is IJBVeNft, veERC721, Ownable, ReentrancyGuard, JBOperatable {
 
       // Burn the token.
       _burn(_data.tokenId);
+
+
+      // giving permission to the terminal to burn the locked jb tokens
+      uint256[] memory _permissionIndexes = new uint256[](1);
+      _permissionIndexes[0] = JBOperations.BURN;
+      operatorStore.setOperator(
+      JBOperatorData(address(_data.terminal), projectId, _permissionIndexes)
+      );
 
       // Redeem the locked tokens to reclaim treasury funds.
       uint256 _reclaimedAmount = _data.terminal.redeemTokensOf(
