@@ -277,14 +277,6 @@ contract JBVeNftTests is TestBaseWorkflow {
     vm.warp(_lockedUntil * 2);
     vm.stopPrank();
 
-    vm.startPrank(address(_jbveBanny));
-    uint256[] memory _permissionIndexes = new uint256[](1);
-    _permissionIndexes[0] = JBOperations.BURN;
-    jbOperatorStore().setOperator(
-      JBOperatorData(address(_redemptionTerminal), _projectId, _permissionIndexes)
-    );
-    vm.stopPrank();
-
     vm.startPrank(_projectOwner);
     // adding overflow
     _paymentToken.approve(address(_redemptionTerminal), 20 ether);
@@ -935,14 +927,6 @@ contract JBVeNftTests is TestBaseWorkflow {
 
         (, , uint256 _lockedUntil, , ) = _jbveBanny.getSpecs(_tokenId);
         vm.warp(_lockedUntil * 2);
-        vm.stopPrank();
-
-        vm.startPrank(address(_jbveBanny));
-        uint256[] memory _permissionIndexes = new uint256[](1);
-        _permissionIndexes[0] = JBOperations.BURN;
-        jbOperatorStore().setOperator(
-          JBOperatorData(address(_redemptionTerminal), _projectId, _permissionIndexes)
-        );
         vm.stopPrank();
 
         vm.startPrank(_projectOwner);
