@@ -456,14 +456,6 @@ contract JBVeNft is IJBVeNft, veERC721, Ownable, ReentrancyGuard, JBOperatable {
       // Burn the token.
       _burn(_data.tokenId);
 
-
-      // giving permission to the terminal to burn the locked jb tokens
-      uint256[] memory _permissionIndexes = new uint256[](1);
-      _permissionIndexes[0] = JBOperations.BURN;
-      operatorStore.setOperator(
-      JBOperatorData(address(_data.terminal), projectId, _permissionIndexes)
-      );
-
       // Redeem the locked tokens to reclaim treasury funds.
       uint256 _reclaimedAmount = _data.terminal.redeemTokensOf(
         address(this),
