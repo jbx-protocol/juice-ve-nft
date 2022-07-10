@@ -28,6 +28,7 @@ import '@jbx-protocol/contracts-v2/contracts/structs/JBFundingCycleMetadata.sol'
 import '@jbx-protocol/contracts-v2/contracts/structs/JBGroupedSplits.sol';
 import '@jbx-protocol/contracts-v2/contracts/structs/JBFundAccessConstraints.sol';
 import '@jbx-protocol/contracts-v2/contracts/structs/JBOperatorData.sol';
+import '@jbx-protocol/contracts-v2/contracts/structs/JBGlobalFundingCycleMetadata.sol';
 
 import '@jbx-protocol/contracts-v2/contracts/interfaces/IJBPaymentTerminal.sol';
 import '@jbx-protocol/contracts-v2/contracts/interfaces/IJBProjects.sol';
@@ -247,6 +248,7 @@ abstract contract TestBaseWorkflow is Test {
     });
 
     _metadata = JBFundingCycleMetadata({
+      global: JBGlobalFundingCycleMetadata({allowSetTerminals: false, allowSetController: false}),
       reservedRate: _reservedRate,
       redemptionRate: 10000,
       ballotRedemptionRate: 0,
@@ -258,13 +260,11 @@ abstract contract TestBaseWorkflow is Test {
       allowChangeToken: true,
       allowTerminalMigration: false,
       allowControllerMigration: false,
-      allowSetTerminals: false,
-      allowSetController: false,
       holdFees: false,
       useTotalOverflowForRedemptions: true,
       useDataSourceForPay: false,
       useDataSourceForRedeem: false,
-      dataSource: IJBFundingCycleDataSource(address(0))
+      dataSource: address(0)
     });
 
     _projectId = _jbController.launchProjectFor(
