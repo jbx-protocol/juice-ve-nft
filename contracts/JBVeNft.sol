@@ -4,7 +4,6 @@ pragma solidity 0.8.6;
 import '@openzeppelin/contracts/access/Ownable.sol';
 import '@openzeppelin/contracts/security/ReentrancyGuard.sol';
 import '@jbx-protocol/contracts-v2/contracts/abstract/JBOperatable.sol';
-import '@jbx-protocol/contracts-v2/contracts/libraries/JBOperations.sol';
 import './veERC721.sol';
 import './interfaces/IJBVeNft.sol';
 import './interfaces/IJBVeTokenUriResolver.sol';
