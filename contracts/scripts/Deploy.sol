@@ -20,7 +20,7 @@ contract DeployRinkeby is Test {
     JBVeNftDeployer jbVeNftDeployer;
 
     
-    IJBTokenStore tokenStore = IJBTokenStore(0xa2C08C071514c46671d675553453755bEf8E95bB);
+    IJBTokenStore tokenStore = IJBTokenStore(0x220468762c6cE4C05E8fda5cc68Ffaf0CC0B2A85);
     IJBOperatorStore operatorStore = IJBOperatorStore(0xEDB2db4b82A4D4956C3B4aA474F7ddf3Ac73c5AB);
     IJBProjects projects = IJBProjects(0x2d8e361f8F1B5daF33fDb2C99971b33503E60EEE);
 
@@ -63,7 +63,7 @@ contract DeployMainnet is Test {
     JBVeNftDeployer jbVeNftDeployer;
 
     
-    IJBTokenStore tokenStore = IJBTokenStore(0x9c54a10a35bF8cC8bF4AE52198c782c5681c9470);
+    IJBTokenStore tokenStore = IJBTokenStore(0xCBB8e16d998161AdB20465830107ca298995f371);
     IJBOperatorStore operatorStore = IJBOperatorStore(0x6F3C5afCa0c9eDf3926eF2dDF17c8ae6391afEfb);
     IJBProjects projects = IJBProjects(0xD8B4359143eda5B2d763E127Ed27c77addBc47d3);
 
