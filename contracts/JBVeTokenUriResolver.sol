@@ -32,18 +32,19 @@ contract JBVeTokenUriResolver is IJBVeTokenUriResolver, Ownable {
 
   /** 
     @notice Computes the metadata url.
-
+    @param _tokenId Token ID.
     @param _amount Lock Amount.
     @param _duration Lock time in seconds.
+    @param _lockedUntil Lock end time.
     @param _lockDurationOptions The options that the duration can be.
 
     @return The metadata url.
   */
   function tokenURI(
-    uint256,
+    uint256 _tokenId,
     uint256 _amount,
     uint256 _duration,
-    uint256,
+    uint256 _lockedUntil,
     uint256[] memory _lockDurationOptions
   ) external view override returns (string memory) {
     if (_amount <= 0) revert JBErrors.INSUFFICIENT_BALANCE();
