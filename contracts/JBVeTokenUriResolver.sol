@@ -47,6 +47,9 @@ contract JBVeTokenUriResolver is IJBVeTokenUriResolver, Ownable {
     uint256 _lockedUntil,
     uint256[] memory _lockDurationOptions
   ) external view override returns (string memory) {
+    _tokenId;
+    _lockedUntil;
+
     if (_amount <= 0) revert JBErrors.INSUFFICIENT_BALANCE();
 
     if (_duration <= 0) revert JBErrors.INVALID_LOCK_DURATION();
