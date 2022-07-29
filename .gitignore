@@ -10,7 +10,7 @@ out
 # Keep related abi
 out/*
 !out/JBVeNft.sol/*
-!out/JBVeDeployer.sol/*
+!out/JBVeNftDeployer.sol/*
 
 # Keep the latest deployment only
 broadcast/*/*
