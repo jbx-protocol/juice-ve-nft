@@ -7,7 +7,7 @@
     "type": "git",
     "url": "https://github.com/jbx-protocol/jbx-staking/"
   },
-  "version": "0.0.0",
+  "version": "0.0.1",
   "license": "MIT",
   "devDependencies": {
     "@nomiclabs/hardhat-ethers": "^2.0.2",
