@@ -1,49 +1,71 @@
-# jbx-staking
+# VE NFT
 
-## Develop
+Issue an NFT that represents a locked position of juicebox project tokens (unclaimed or as ERC20s).
 
-To deploy the contracts to a local blockchain, run the following:
+# Install Foundry
 
-```bash
-yarn chain --network hardhat
-```
+To get set up:
 
-To run tests:
+1. Install [Foundry](https://github.com/gakonst/foundry).
 
 ```bash
-yarn test
+curl -L https://foundry.paradigm.xyz | sh
 ```
 
-### Coverage
-
-To check current test coverage:
+2. Install external lib(s)
 
 ```bash
-node --require esm ./node_modules/.bin/hardhat coverage --network hardhat
+git submodule update --init && yarn install
 ```
 
-A few notes:
-* Hardhat doesn't support [esm](https://nodejs.org/api/esm.html) yet, hence running manually with node.
-* We are currently using a forked version of [solidity-coverage](https://www.npmjs.com/package/solidity-coverage) that includes optimizer settings. Ideally we will move to the maintained version after this is fixed on their end.
-
-## Deploy
-
-Juicebox uses the [Hardhat Deploy](https://github.com/wighawag/hardhat-deploy) plugin to deploy contracts to a given network. But before using it, you must create a `./mnemonic.txt` file containing the mnemonic phrase of the wallet used to deploy. You can generate a new mnemonic using [this tool](https://github.com/itinance/mnemonics). Generate a mnemonic at your own risk.
-
-Then, to execute the `./deploy/deploy.js` script, run the following:
+then run
 
 ```bash
-npx hardhat deploy --network $network
+forge update
 ```
 
-Contract artifacts will be outputted to `./deployments/$network/**` and should be checked in to the repo.
+If git modules are failing to clone, not installing, etc (ie overall submodule misbehaving), use `git submodule update --init --recursive --force`
 
-## Verification
-
-To verify the contracts on [Etherscan](https://etherscan.io), make sure you have an `ETHERSCAN_API_KEY` set in your `./.env` file. Then run the following:
+3. Run tests:
 
 ```bash
-npx hardhat --network $network etherscan-verify
+forge test
 ```
 
-This will verify all of the deployed contracts in `./deployments`.
+4. Update Foundry periodically:
+
+```bash
+foundryup
+```
+
+## Content
+
+This repo is organised as follow:
+
+- contracts/Allocator: contains an IJBSplitsAllocator implementation template (Allocator.sol)
+
+- contracts/DatasourceDelegate: contains an IJBFundingCycleDataSource, IJBPayDelegate and IJBRedemptionDelegate implementation templates (DataSourceDelegate.sol).
+
+- contracts/Terminal: contains an IJBPaymentTerminal and IJBRedemptionTerminal implementation template.
+
+# Deploy & verify
+
+#### Setup
+
+Configure the .env variables, and add a mnemonic.txt file with the mnemonic of the deployer wallet. The sender address in the .env must correspond to the mnemonic account.
+
+## Rinkeby
+
+```bash
+yarn deploy-rinkeby
+```
+
+## Mainnet
+
+```bash
+yarn deploy-mainnet
+```
+
+The deployments are stored in ./broadcast
+
+See the [Foundry Book for available options](https://book.getfoundry.sh/reference/forge/forge-create.html).
