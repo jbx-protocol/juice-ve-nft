@@ -1,5 +1,5 @@
 {
-  "name": "@jbx-protocol/jbx-staking",
+  "name": "@jbx-protocol/ve-nft",
   "bugs": {
     "url": "https://github.com/jbx-protocol/jbx-staking/issues"
   },
@@ -7,7 +7,7 @@
     "type": "git",
     "url": "https://github.com/jbx-protocol/jbx-staking/"
   },
-  "version": "0.0.3",
+  "version": "0.0.0",
   "license": "MIT",
   "devDependencies": {
     "@nomiclabs/hardhat-ethers": "^2.0.2",
