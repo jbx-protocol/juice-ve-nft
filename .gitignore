@@ -1,20 +1,17 @@
-node_modules
 .env
-
-# Hardhat files
+node_modules
 cache
-artifacts
-deployments/localhost/**
-out/
-
-# Mac OSX
-.DS_Store
-
-# Code coverage reports
-coverage/
-coverage.json
-
+mnemonic.txt
+pk.txt
 *.txt
+.DS_Store 
+out
 
-# VSCode
-workspace.code-workspace
+# Keep related abi
+out/*
+!out/JBVeNft.sol/*
+!out/JBVeDeployer.sol/*
+
+# Keep the latest deployment only
+broadcast/*/*
+!broadcast/*/run-latest.json

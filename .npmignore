@@ -2,9 +2,10 @@
 *
 
 # Allowlisted deployment networks.
-!/deployments/rinkeby/**
-!/deployments/mainnet/**
+!/broadcast/**
+!/out/**
 
-# Contract abstract classes and interfaces.
-!/contracts/abstract/**
-!/contracts/interfaces/**
+# Allow everything in /contracts ...
+!/contracts/**
+
+/foundry.toml
