@@ -7,7 +7,7 @@
     "type": "git",
     "url": "https://github.com/jbx-protocol/juice-ve-nft/"
   },
-  "version": "0.0.6",
+  "version": "0.0.7",
   "license": "MIT",
   "devDependencies": {
     "@jbx-protocol/contracts-v2": "^8.0.1",
