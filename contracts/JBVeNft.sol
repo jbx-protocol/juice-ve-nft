@@ -176,7 +176,7 @@ contract JBVeNft is IJBVeNft, veERC721, Ownable, ReentrancyGuard, JBOperatable {
       bool allowPublicExtension
     )
   {
-    LockedBalance memory _lock = locked[_tokenId];
+    LockedBalance storage _lock = locked[_tokenId];
     if (_lock.end == 0) revert NON_EXISTENT_TOKEN();
 
     amount = uint256(uint128(_lock.amount));
